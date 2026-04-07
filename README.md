@@ -1,4 +1,5 @@
 SecuPyme
+
 Plataforma web diseñada para que las PYMES colombianas puedan gestionar incidentes de ciberseguridad de forma simple, rápida y centralizada.
 Descripción
 SecuPyme permite a las empresas:
