@@ -12,7 +12,7 @@ Visualizar métricas en un dashboard tipo SOC
 El objetivo es mejorar la respuesta ante incidentes y la toma de decisiones en pequeñas y medianas empresas.
 
 Tecnologías utilizadas:
-Flask
-SQLAlchemy
-SQLite
-Bootstrap
+Flask,
+SQLAlchemy,
+SQLite,
+Bootstrap.
