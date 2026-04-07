@@ -6,13 +6,13 @@ Descripción
 
 SecuPyme permite a las empresas:
 
-Registrar incidentes de seguridad (phishing, malware, accesos no autorizados)
+-Registrar incidentes de seguridad (phishing, malware, accesos no autorizados)
 
-Clasificarlos por severidad y estado
+-Clasificarlos por severidad y estado
 
-Hacer seguimiento de cada incidente
+-Hacer seguimiento de cada incidente
 
-Visualizar métricas en un dashboard tipo SOC
+-Visualizar métricas en un dashboard tipo SOC
 
 El objetivo es mejorar la respuesta ante incidentes y la toma de decisiones en pequeñas y medianas empresas.
 
