@@ -31,10 +31,11 @@ SecuPyme permite a las PYMES reportar incidentes de seguridad, recibir asistenci
 3. Crea un archivo `.env` con las siguientes variables:
 
 PORT=3000
-MONGODB_URI=tu_connection_string
-JWT_SECRET=tu_secret
-EMAIL_USER=tu_correo@gmail.com
-EMAIL_PASS=tu_contraseña_de_aplicacion
+
+MONGODB_URI = Tu connection string
+JWT_SECRET = Tu secret
+EMAIL_USER= Tu correo
+EMAIL_PASS= Tu contraseña de aplicacion
 
 4. Corre el servidor con `node src/index.js`
 5. Abre `http://localhost:3000`
