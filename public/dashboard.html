@@ -8,21 +8,7 @@
 </head>
 <body>
   <div class="app-container">
-    <nav class="sidebar">
-      <div class="sidebar-logo">
-        <h1>SECUPYME</h1>
-      </div>
-      <ul class="sidebar-menu">
-        <li class="active"><a href="/dashboard.html">DASHBOARD</a></li>
-        <li><a href="/reportes.html">REPORTES</a></li>
-        <li><a href="/autoevaluacion.html">AUTOEVALUACIÓN</a></li>
-        <li><a href="#" onclick="cerrarSesion()">CERRAR SESIÓN</a></li>
-      </ul>
-      <div class="sidebar-user">
-        <p id="nombreUsuario"></p>
-        <span id="rolUsuario"></span>
-      </div>
-    </nav>
+    <div id="sidebar-container"></div>
 
     <main class="main-content">
       <div class="page-header">
@@ -63,15 +49,12 @@
     </main>
   </div>
 
+  <script src="sidebar.js"></script>
   <script>
     const token = localStorage.getItem('token');
-    const rol = localStorage.getItem('rol');
-    const nombre = localStorage.getItem('nombre');
-
     if (!token) window.location.href = '/';
 
-    document.getElementById('nombreUsuario').textContent = nombre;
-    document.getElementById('rolUsuario').textContent = rol.toUpperCase();
+    cargarSidebar('dashboard');
 
     async function cargarDatos() {
       const response = await fetch('/api/reportes', {
@@ -83,11 +66,6 @@
       document.getElementById('reportesAbiertos').textContent = reportes.filter(r => r.estado === 'abierto').length;
       document.getElementById('reportesEnProceso').textContent = reportes.filter(r => r.estado === 'en proceso').length;
       document.getElementById('reportesResueltos').textContent = reportes.filter(r => r.estado === 'resuelto').length;
-    }
-
-    function cerrarSesion() {
-      localStorage.clear();
-      window.location.href = '/';
     }
 
     cargarDatos();

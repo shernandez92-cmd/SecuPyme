@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Secupyme — Historial</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app-container">
+    <div id="sidebar-container"></div>
+
+    <main class="main-content">
+      <div class="page-header">
+        <h2>HISTORIAL DE SEGURIDAD</h2>
+        <p>Evolución del nivel de seguridad de tu empresa</p>
+      </div>
+
+      <div class="stats-grid" style="grid-template-columns: repeat(3, 1fr);">
+        <div class="stat-card">
+          <div class="stat-icon">📋</div>
+          <div class="stat-info">
+            <h3 id="totalEvaluaciones">0</h3>
+            <p>EVALUACIONES TOTALES</p>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">📈</div>
+          <div class="stat-info">
+            <h3 id="mejorPuntaje">0</h3>
+            <p>MEJOR PUNTAJE</p>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">🎯</div>
+          <div class="stat-info">
+            <h3 id="ultimoNivel">—</h3>
+            <p>ÚLTIMO NIVEL</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-card" style="margin-top: 24px;">
+        <h3>EVALUACIONES ANTERIORES</h3>
+        <table class="tabla-reportes">
+          <thead>
+            <tr>
+              <th>FECHA</th>
+              <th>PUNTAJE</th>
+              <th>NIVEL DE RIESGO</th>
+              <th>RECOMENDACIONES</th>
+            </tr>
+          </thead>
+          <tbody id="tablaHistorial"></tbody>
+        </table>
+      </div>
+    </main>
+  </div>
+
+  <script src="sidebar.js"></script>
+  <script>
+    const token = localStorage.getItem('token');
+    if (!token) window.location.href = '/';
+
+    cargarSidebar('historial');
+
+    async function cargarHistorial() {
+      const response = await fetch('/api/autoevaluaciones', {
+        headers: { 'authorization': token }
+      });
+      const evaluaciones = await response.json();
+
+      document.getElementById('totalEvaluaciones').textContent = evaluaciones.length;
+
+      if (evaluaciones.length > 0) {
+        const mejorPuntaje = Math.max(...evaluaciones.map(e => e.puntaje));
+        document.getElementById('mejorPuntaje').textContent = `${mejorPuntaje}/20`;
+
+        const ultima = evaluaciones[evaluaciones.length - 1];
+        const nivelEl = document.getElementById('ultimoNivel');
+        nivelEl.textContent = ultima.nivelRiesgo.toUpperCase();
+        nivelEl.style.color = ultima.nivelRiesgo === 'alto' ? '#ef4444' : ultima.nivelRiesgo === 'medio' ? '#f59e0b' : '#10b981';
+      }
+
+      const tbody = document.getElementById('tablaHistorial');
+      tbody.innerHTML = '';
+
+      evaluaciones.reverse().forEach(e => {
+        const fecha = new Date(e.fecha).toLocaleDateString('es-CO');
+        const badgeClass = e.nivelRiesgo === 'alto' ? 'badge-abierto' : e.nivelRiesgo === 'medio' ? 'badge-proceso' : 'badge-resuelto';
+        tbody.innerHTML += `
+          <tr>
+            <td>${fecha}</td>
+            <td style="font-family: 'Share Tech Mono', monospace; color: var(--acento);">${e.puntaje}/20</td>
+            <td><span class="badge ${badgeClass}">${e.nivelRiesgo.toUpperCase()}</span></td>
+            <td style="color: var(--texto-suave); font-size: 12px;">${e.recomendaciones.length} recomendaciones</td>
+          </tr>
+        `;
+      });
+    }
+
+    cargarHistorial();
+  </script>
+</body>
+</html>

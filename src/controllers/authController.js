@@ -57,5 +57,12 @@ const login = async (req, res) => {
     res.status(500).json({ mensaje: 'Error en el servidor', error });
   }
 };
-
-module.exports = { registro, login };
+const obtenerUsuarios = async (req, res) => {
+  try {
+    const usuarios = await Usuario.find().select('-contraseña');
+    res.json(usuarios);
+  } catch (error) {
+    res.status(500).json({ mensaje: 'Error en el servidor', error });
+  }
+};
+module.exports = { registro, login, obtenerUsuarios };

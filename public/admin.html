@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Secupyme — Panel Admin</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app-container">
+    <div id="sidebar-container"></div>
+
+    <main class="main-content">
+      <div class="page-header">
+        <h2>PANEL DE ADMINISTRACIÓN</h2>
+        <p>Gestión de usuarios y empresas</p>
+      </div>
+
+      <div class="form-card">
+        <h3>USUARIOS REGISTRADOS</h3>
+        <table class="tabla-reportes">
+          <thead>
+            <tr>
+              <th>NOMBRE</th>
+              <th>EMAIL</th>
+              <th>EMPRESA</th>
+              <th>ROL</th>
+              <th>FECHA REGISTRO</th>
+            </tr>
+          </thead>
+          <tbody id="tablaUsuarios"></tbody>
+        </table>
+      </div>
+    </main>
+  </div>
+
+  <script src="sidebar.js"></script>
+  <script>
+    const token = localStorage.getItem('token');
+    const rol = localStorage.getItem('rol');
+
+    if (!token) window.location.href = '/';
+    if (rol !== 'admin') window.location.href = '/dashboard.html';
+
+    cargarSidebar('admin');
+
+    async function cargarUsuarios() {
+      const response = await fetch('/api/auth/usuarios', {
+        headers: { 'authorization': token }
+      });
+      const usuarios = await response.json();
+      const tbody = document.getElementById('tablaUsuarios');
+      tbody.innerHTML = '';
+
+      usuarios.forEach(u => {
+        const fecha = new Date(u.fechaRegistro).toLocaleDateString('es-CO');
+        const badgeRol = u.rol === 'admin' ? 'badge-resuelto' : 'badge-proceso';
+        tbody.innerHTML += `
+          <tr>
+            <td>${u.nombre}</td>
+            <td>${u.email}</td>
+            <td>${u.empresa}</td>
+            <td><span class="badge ${badgeRol}">${u.rol.toUpperCase()}</span></td>
+            <td>${fecha}</td>
+          </tr>
+        `;
+      });
+    }
+
+    cargarUsuarios();
+  </script>
+</body>
+</html>

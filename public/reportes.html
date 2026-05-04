@@ -8,22 +8,7 @@
 </head>
 <body>
   <div class="app-container">
-    <nav class="sidebar">
-      <div class="sidebar-logo">
-        <h1>SECUPYME</h1>
-        <p>PROTECCIÓN DIGITAL</p>
-      </div>
-      <ul class="sidebar-menu">
-        <li><a href="/dashboard.html">DASHBOARD</a></li>
-        <li class="active"><a href="/reportes.html">REPORTES</a></li>
-        <li><a href="/autoevaluacion.html">AUTOEVALUACIÓN</a></li>
-        <li><a href="#" onclick="cerrarSesion()">CERRAR SESIÓN</a></li>
-      </ul>
-      <div class="sidebar-user">
-        <p id="nombreUsuario"></p>
-        <span id="rolUsuario"></span>
-      </div>
-    </nav>
+    <div id="sidebar-container"></div>
 
     <main class="main-content">
       <div class="page-header">
@@ -53,7 +38,6 @@
           <label>DESCRIPCIÓN DEL INCIDENTE</label>
           <textarea id="descripcion" placeholder="Describe detalladamente lo que ocurrió..."></textarea>
         </div>
-
         <div style="display: flex; gap: 12px; margin-top: 16px; align-items: center;">
           <button class="btn-primary" style="width: auto; padding: 12px 32px;" onclick="crearReporte()">ENVIAR REPORTE</button>
           <button class="btn-secondary" id="btnEvaluacion" style="display:none;" onclick="mostrarEvaluacion()">+ AGREGAR AUTOEVALUACIÓN</button>
@@ -72,7 +56,6 @@
             <button class="toggle-btn" onclick="seleccionar(this, 'contraseñasSeguras', false)">NO</button>
           </div>
         </div>
-
         <div class="pregunta-item">
           <p>¿Al iniciar sesión piden una segunda confirmación como un código al celular?</p>
           <div class="toggle-group">
@@ -80,7 +63,6 @@
             <button class="toggle-btn" onclick="seleccionar(this, 'dobleAutenticacion', false)">NO</button>
           </div>
         </div>
-
         <div class="pregunta-item">
           <p>¿Los equipos y sistemas de la empresa están actualizados?</p>
           <div class="toggle-group">
@@ -88,7 +70,6 @@
             <button class="toggle-btn" onclick="seleccionar(this, 'equiposActualizados', false)">NO</button>
           </div>
         </div>
-
         <div class="pregunta-item">
           <p>¿Todo el software que usan tiene licencias vigentes y legales?</p>
           <div class="toggle-group">
@@ -96,7 +77,6 @@
             <button class="toggle-btn" onclick="seleccionar(this, 'softwareLicenciado', false)">NO</button>
           </div>
         </div>
-
         <div class="pregunta-item">
           <p>¿Hacen copias de seguridad de la información importante regularmente?</p>
           <div class="toggle-group">
@@ -104,7 +84,6 @@
             <button class="toggle-btn" onclick="seleccionar(this, 'copiasSeguridad', false)">NO</button>
           </div>
         </div>
-
         <div class="pregunta-item">
           <p>¿Las copias de seguridad están guardadas en un lugar externo o en la nube?</p>
           <div class="toggle-group">
@@ -112,7 +91,6 @@
             <button class="toggle-btn" onclick="seleccionar(this, 'copiasEnLugarSeguro', false)">NO</button>
           </div>
         </div>
-
         <div class="pregunta-item">
           <p>¿Los empleados han recibido capacitación en seguridad informática?</p>
           <div class="toggle-group">
@@ -120,7 +98,6 @@
             <button class="toggle-btn" onclick="seleccionar(this, 'capacitacionEmpleados', false)">NO</button>
           </div>
         </div>
-
         <div class="pregunta-item">
           <p>¿Sus empleados saben reconocer correos falsos que intentan robar información?</p>
           <div class="toggle-group">
@@ -128,7 +105,6 @@
             <button class="toggle-btn" onclick="seleccionar(this, 'identificaPhishing', false)">NO</button>
           </div>
         </div>
-
         <div class="pregunta-item">
           <p>¿Tienen algún programa que proteja su red de accesos no autorizados?</p>
           <div class="toggle-group">
@@ -136,7 +112,6 @@
             <button class="toggle-btn" onclick="seleccionar(this, 'firewallActivo', false)">NO</button>
           </div>
         </div>
-
         <div class="pregunta-item">
           <p>¿Su red WiFi tiene contraseña segura y no es de acceso público?</p>
           <div class="toggle-group">
@@ -173,15 +148,12 @@
     </main>
   </div>
 
+  <script src="sidebar.js"></script>
   <script>
     const token = localStorage.getItem('token');
-    const rol = localStorage.getItem('rol');
-    const nombre = localStorage.getItem('nombre');
-
     if (!token) window.location.href = '/';
 
-    document.getElementById('nombreUsuario').textContent = nombre;
-    document.getElementById('rolUsuario').textContent = rol.toUpperCase();
+    cargarSidebar('reportes');
 
     const respuestas = {};
 
@@ -239,7 +211,6 @@
       });
 
       const data = await response.json();
-
       const resultado = document.getElementById('resultado');
       resultado.className = 'resultado-card ' + data.nivelRiesgo;
       resultado.style.display = 'block';
@@ -280,11 +251,6 @@
           </tr>
         `;
       });
-    }
-
-    function cerrarSesion() {
-      localStorage.clear();
-      window.location.href = '/';
     }
 
     cargarReportes();
