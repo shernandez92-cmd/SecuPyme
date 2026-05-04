@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Secupyme — Detalle de Reporte</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app-container">
+    <nav class="sidebar">
+      <div class="sidebar-logo">
+        <h1>SECUPYME</h1>
+        <p>PROTECCIÓN DIGITAL</p>
+      </div>
+      <ul class="sidebar-menu">
+        <li><a href="/dashboard.html">DASHBOARD</a></li>
+        <li class="active"><a href="/reportes.html">REPORTES</a></li>
+        <li><a href="/autoevaluacion.html">AUTOEVALUACIÓN</a></li>
+        <li><a href="#" onclick="cerrarSesion()">CERRAR SESIÓN</a></li>
+      </ul>
+      <div class="sidebar-user">
+        <p id="nombreUsuario"></p>
+        <span id="rolUsuario"></span>
+      </div>
+    </nav>
+
+    <main class="main-content">
+      <div class="page-header">
+        <a href="/reportes.html" style="color: var(--texto-suave); font-family: 'Share Tech Mono', monospace; font-size: 11px; letter-spacing: 2px; text-decoration: none;">← VOLVER</a>
+        <h2 style="margin-top: 12px;">DETALLE DE REPORTE</h2>
+        <p id="fechaReporte"></p>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+
+        <div class="form-card">
+          <h3>INFORMACIÓN DEL REPORTE</h3>
+          <div style="margin-bottom: 20px;">
+            <p style="font-size: 11px; letter-spacing: 2px; color: var(--texto-suave); margin-bottom: 6px;">EMPRESA</p>
+            <p id="empresa" style="font-family: 'Share Tech Mono', monospace; color: var(--acento);"></p>
+          </div>
+          <div style="margin-bottom: 20px;">
+            <p style="font-size: 11px; letter-spacing: 2px; color: var(--texto-suave); margin-bottom: 6px;">REPORTADO POR</p>
+            <p id="reportadoPor" style="font-family: 'Share Tech Mono', monospace; color: var(--texto);"></p>
+          </div>
+          <div style="margin-bottom: 20px;">
+            <p style="font-size: 11px; letter-spacing: 2px; color: var(--texto-suave); margin-bottom: 6px;">EMAIL</p>
+            <p id="emailUsuario" style="font-family: 'Share Tech Mono', monospace; color: var(--texto);"></p>
+          </div>
+          <div style="margin-bottom: 20px;">
+            <p style="font-size: 11px; letter-spacing: 2px; color: var(--texto-suave); margin-bottom: 6px;">TIPO DE VULNERABILIDAD</p>
+            <p id="tipoVulnerabilidad" style="font-family: 'Share Tech Mono', monospace; color: var(--acento);"></p>
+          </div>
+          <div>
+            <p style="font-size: 11px; letter-spacing: 2px; color: var(--texto-suave); margin-bottom: 6px;">DESCRIPCIÓN COMPLETA</p>
+            <p id="descripcion" style="font-size: 14px; color: var(--texto); line-height: 1.6;"></p>
+          </div>
+        </div>
+
+        <div id="panelAdmin">
+          <div class="form-card" style="margin-bottom: 24px;">
+            <h3>ESTADO Y PRIORIDAD</h3>
+            <div class="form-group">
+              <label>ESTADO</label>
+              <select id="estado">
+                <option value="abierto">ABIERTO</option>
+                <option value="en proceso">EN PROCESO</option>
+                <option value="resuelto">RESUELTO</option>
+              </select>
+            </div>
+            <div class="form-group" style="margin-top: 16px;">
+              <label>PRIORIDAD</label>
+              <select id="prioridad">
+                <option value="alta">ALTA</option>
+                <option value="media">MEDIA</option>
+                <option value="baja">BAJA</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-card">
+            <h3>NOTAS Y PASOS A SEGUIR</h3>
+            <div class="form-group">
+              <label>NOTAS PARA EL CLIENTE</label>
+              <textarea id="notasAdmin" placeholder="Escribe los pasos a seguir y recomendaciones para esta empresa..." style="min-height: 150px;"></textarea>
+            </div>
+            <button class="btn-primary" style="width: auto; padding: 12px 32px; margin-top: 16px;" onclick="actualizarReporte()">GUARDAR CAMBIOS</button>
+            <p id="mensajeExito" style="display:none; color: #10b981; font-family: 'Share Tech Mono', monospace; font-size: 12px; margin-top: 12px; letter-spacing: 2px;">CAMBIOS GUARDADOS — CLIENTE NOTIFICADO</p>
+          </div>
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <script>
+    const token = localStorage.getItem('token');
+    const rol = localStorage.getItem('rol');
+    const nombre = localStorage.getItem('nombre');
+
+    if (!token) window.location.href = '/';
+
+    document.getElementById('nombreUsuario').textContent = nombre;
+    document.getElementById('rolUsuario').textContent = rol.toUpperCase();
+
+    if (rol !== 'admin') {
+      document.getElementById('panelAdmin').style.display = 'none';
+    }
+
+    const params = new URLSearchParams(window.location.search);
+    const reporteId = params.get('id');
+
+    async function cargarReporte() {
+      const response = await fetch(`/api/reportes/${reporteId}`, {
+        headers: { 'authorization': token }
+      });
+      const r = await response.json();
+
+      document.getElementById('empresa').textContent = r.empresa;
+      document.getElementById('reportadoPor').textContent = r.usuario.nombre;
+      document.getElementById('emailUsuario').textContent = r.usuario.email;
+      document.getElementById('tipoVulnerabilidad').textContent = r.tipoVulnerabilidad.toUpperCase();
+      document.getElementById('descripcion').textContent = r.descripcion;
+      document.getElementById('fechaReporte').textContent = new Date(r.fecha).toLocaleDateString('es-CO');
+      document.getElementById('estado').value = r.estado;
+      document.getElementById('prioridad').value = r.prioridad;
+      document.getElementById('notasAdmin').value = r.notasAdmin;
+    }
+
+    async function actualizarReporte() {
+      const estado = document.getElementById('estado').value;
+      const prioridad = document.getElementById('prioridad').value;
+      const notasAdmin = document.getElementById('notasAdmin').value;
+
+      const response = await fetch(`/api/reportes/${reporteId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'authorization': token
+        },
+        body: JSON.stringify({ estado, prioridad, notasAdmin })
+      });
+
+      if (response.ok) {
+        document.getElementById('mensajeExito').style.display = 'block';
+        setTimeout(() => {
+          document.getElementById('mensajeExito').style.display = 'none';
+        }, 3000);
+      }
+    }
+
+    function cerrarSesion() {
+      localStorage.clear();
+      window.location.href = '/';
+    }
+
+    cargarReporte();
+  </script>
+</body>
+</html>

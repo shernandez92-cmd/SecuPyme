@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Secupyme — Reportes</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app-container">
+    <nav class="sidebar">
+      <div class="sidebar-logo">
+        <h1>SECUPYME</h1>
+        <p>PROTECCIÓN DIGITAL</p>
+      </div>
+      <ul class="sidebar-menu">
+        <li><a href="/dashboard.html">DASHBOARD</a></li>
+        <li class="active"><a href="/reportes.html">REPORTES</a></li>
+        <li><a href="/autoevaluacion.html">AUTOEVALUACIÓN</a></li>
+        <li><a href="#" onclick="cerrarSesion()">CERRAR SESIÓN</a></li>
+      </ul>
+      <div class="sidebar-user">
+        <p id="nombreUsuario"></p>
+        <span id="rolUsuario"></span>
+      </div>
+    </nav>
+
+    <main class="main-content">
+      <div class="page-header">
+        <h2>REPORTES DE SEGURIDAD</h2>
+        <p>Gestión de incidentes</p>
+      </div>
+
+      <div class="form-card">
+        <h3>NUEVO REPORTE</h3>
+        <div class="form-row">
+          <div class="form-group">
+            <label>EMPRESA</label>
+            <input type="text" id="empresa" placeholder="Nombre de la empresa">
+          </div>
+          <div class="form-group">
+            <label>TIPO DE VULNERABILIDAD</label>
+            <select id="tipoVulnerabilidad">
+              <option value="phishing">Correo falso (Phishing)</option>
+              <option value="malware">Programa malicioso (Malware)</option>
+              <option value="acceso no autorizado">Acceso no autorizado</option>
+              <option value="fuga de datos">Fuga de datos</option>
+              <option value="otro">Otro</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group" style="margin-top: 16px;">
+          <label>DESCRIPCIÓN DEL INCIDENTE</label>
+          <textarea id="descripcion" placeholder="Describe detalladamente lo que ocurrió..."></textarea>
+        </div>
+
+        <div style="display: flex; gap: 12px; margin-top: 16px; align-items: center;">
+          <button class="btn-primary" style="width: auto; padding: 12px 32px;" onclick="crearReporte()">ENVIAR REPORTE</button>
+          <button class="btn-secondary" id="btnEvaluacion" style="display:none;" onclick="mostrarEvaluacion()">+ AGREGAR AUTOEVALUACIÓN</button>
+        </div>
+        <p id="mensajeExito" style="display:none; color: #10b981; font-family: 'Share Tech Mono', monospace; font-size: 12px; margin-top: 12px; letter-spacing: 2px;">REPORTE ENVIADO EXITOSAMENTE</p>
+      </div>
+
+      <div class="form-card" id="seccionEvaluacion" style="display:none;">
+        <h3>AUTOEVALUACIÓN DE SEGURIDAD</h3>
+        <p style="color: var(--texto-suave); font-size: 13px; margin-bottom: 24px; letter-spacing: 1px;">Responde estas preguntas para ayudar a nuestro equipo a entender mejor tu situación.</p>
+
+        <div class="pregunta-item">
+          <p>¿Su empresa usa contraseñas seguras en todos los sistemas?</p>
+          <div class="toggle-group">
+            <button class="toggle-btn" onclick="seleccionar(this, 'contraseñasSeguras', true)">SÍ</button>
+            <button class="toggle-btn" onclick="seleccionar(this, 'contraseñasSeguras', false)">NO</button>
+          </div>
+        </div>
+
+        <div class="pregunta-item">
+          <p>¿Al iniciar sesión piden una segunda confirmación como un código al celular?</p>
+          <div class="toggle-group">
+            <button class="toggle-btn" onclick="seleccionar(this, 'dobleAutenticacion', true)">SÍ</button>
+            <button class="toggle-btn" onclick="seleccionar(this, 'dobleAutenticacion', false)">NO</button>
+          </div>
+        </div>
+
+        <div class="pregunta-item">
+          <p>¿Los equipos y sistemas de la empresa están actualizados?</p>
+          <div class="toggle-group">
+            <button class="toggle-btn" onclick="seleccionar(this, 'equiposActualizados', true)">SÍ</button>
+            <button class="toggle-btn" onclick="seleccionar(this, 'equiposActualizados', false)">NO</button>
+          </div>
+        </div>
+
+        <div class="pregunta-item">
+          <p>¿Todo el software que usan tiene licencias vigentes y legales?</p>
+          <div class="toggle-group">
+            <button class="toggle-btn" onclick="seleccionar(this, 'softwareLicenciado', true)">SÍ</button>
+            <button class="toggle-btn" onclick="seleccionar(this, 'softwareLicenciado', false)">NO</button>
+          </div>
+        </div>
+
+        <div class="pregunta-item">
+          <p>¿Hacen copias de seguridad de la información importante regularmente?</p>
+          <div class="toggle-group">
+            <button class="toggle-btn" onclick="seleccionar(this, 'copiasSeguridad', true)">SÍ</button>
+            <button class="toggle-btn" onclick="seleccionar(this, 'copiasSeguridad', false)">NO</button>
+          </div>
+        </div>
+
+        <div class="pregunta-item">
+          <p>¿Las copias de seguridad están guardadas en un lugar externo o en la nube?</p>
+          <div class="toggle-group">
+            <button class="toggle-btn" onclick="seleccionar(this, 'copiasEnLugarSeguro', true)">SÍ</button>
+            <button class="toggle-btn" onclick="seleccionar(this, 'copiasEnLugarSeguro', false)">NO</button>
+          </div>
+        </div>
+
+        <div class="pregunta-item">
+          <p>¿Los empleados han recibido capacitación en seguridad informática?</p>
+          <div class="toggle-group">
+            <button class="toggle-btn" onclick="seleccionar(this, 'capacitacionEmpleados', true)">SÍ</button>
+            <button class="toggle-btn" onclick="seleccionar(this, 'capacitacionEmpleados', false)">NO</button>
+          </div>
+        </div>
+
+        <div class="pregunta-item">
+          <p>¿Sus empleados saben reconocer correos falsos que intentan robar información?</p>
+          <div class="toggle-group">
+            <button class="toggle-btn" onclick="seleccionar(this, 'identificaPhishing', true)">SÍ</button>
+            <button class="toggle-btn" onclick="seleccionar(this, 'identificaPhishing', false)">NO</button>
+          </div>
+        </div>
+
+        <div class="pregunta-item">
+          <p>¿Tienen algún programa que proteja su red de accesos no autorizados?</p>
+          <div class="toggle-group">
+            <button class="toggle-btn" onclick="seleccionar(this, 'firewallActivo', true)">SÍ</button>
+            <button class="toggle-btn" onclick="seleccionar(this, 'firewallActivo', false)">NO</button>
+          </div>
+        </div>
+
+        <div class="pregunta-item">
+          <p>¿Su red WiFi tiene contraseña segura y no es de acceso público?</p>
+          <div class="toggle-group">
+            <button class="toggle-btn" onclick="seleccionar(this, 'redProtegida', true)">SÍ</button>
+            <button class="toggle-btn" onclick="seleccionar(this, 'redProtegida', false)">NO</button>
+          </div>
+        </div>
+
+        <button class="btn-primary" style="width: auto; padding: 12px 32px; margin-top: 32px;" onclick="enviarEvaluacion()">EVALUAR SEGURIDAD</button>
+
+        <div class="resultado-card" id="resultado">
+          <div class="resultado-nivel" id="nivelTexto"></div>
+          <div class="resultado-puntaje" id="puntajeTexto"></div>
+          <h3 style="font-family: 'Share Tech Mono', monospace; font-size: 12px; color: var(--texto-suave); letter-spacing: 3px; margin-bottom: 16px;">RECOMENDACIONES</h3>
+          <ul class="recomendaciones-lista" id="recomendacionesLista"></ul>
+        </div>
+      </div>
+
+      <div class="form-card">
+        <h3>HISTORIAL DE REPORTES</h3>
+        <table class="tabla-reportes">
+          <thead>
+            <tr>
+              <th>EMPRESA</th>
+              <th>TIPO</th>
+              <th>DESCRIPCIÓN</th>
+              <th>ESTADO</th>
+              <th>FECHA</th>
+            </tr>
+          </thead>
+          <tbody id="tablaBody"></tbody>
+        </table>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    const token = localStorage.getItem('token');
+    const rol = localStorage.getItem('rol');
+    const nombre = localStorage.getItem('nombre');
+
+    if (!token) window.location.href = '/';
+
+    document.getElementById('nombreUsuario').textContent = nombre;
+    document.getElementById('rolUsuario').textContent = rol.toUpperCase();
+
+    const respuestas = {};
+
+    async function crearReporte() {
+      const empresa = document.getElementById('empresa').value;
+      const tipoVulnerabilidad = document.getElementById('tipoVulnerabilidad').value;
+      const descripcion = document.getElementById('descripcion').value;
+
+      const response = await fetch('/api/reportes', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'authorization': token
+        },
+        body: JSON.stringify({ empresa, tipoVulnerabilidad, descripcion })
+      });
+
+      if (response.ok) {
+        document.getElementById('mensajeExito').style.display = 'block';
+        document.getElementById('btnEvaluacion').style.display = 'block';
+        cargarReportes();
+        setTimeout(() => {
+          document.getElementById('mensajeExito').style.display = 'none';
+        }, 3000);
+      }
+    }
+
+    function mostrarEvaluacion() {
+      document.getElementById('seccionEvaluacion').style.display = 'block';
+      document.getElementById('seccionEvaluacion').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function seleccionar(btn, campo, valor) {
+      const grupo = btn.parentElement;
+      grupo.querySelectorAll('.toggle-btn').forEach(b => {
+        b.classList.remove('selected-si', 'selected-no');
+      });
+      btn.classList.add(valor ? 'selected-si' : 'selected-no');
+      respuestas[campo] = valor;
+    }
+
+    async function enviarEvaluacion() {
+      if (Object.keys(respuestas).length < 10) {
+        alert('Por favor responde todas las preguntas');
+        return;
+      }
+
+      const response = await fetch('/api/autoevaluaciones', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'authorization': token
+        },
+        body: JSON.stringify({ respuestas })
+      });
+
+      const data = await response.json();
+
+      const resultado = document.getElementById('resultado');
+      resultado.className = 'resultado-card ' + data.nivelRiesgo;
+      resultado.style.display = 'block';
+
+      const nivelTexto = document.getElementById('nivelTexto');
+      nivelTexto.textContent = 'RIESGO ' + data.nivelRiesgo.toUpperCase();
+      nivelTexto.className = 'resultado-nivel ' + data.nivelRiesgo;
+
+      document.getElementById('puntajeTexto').textContent = `PUNTAJE: ${data.puntaje} / 20`;
+
+      const lista = document.getElementById('recomendacionesLista');
+      lista.innerHTML = '';
+      data.recomendaciones.forEach(r => {
+        lista.innerHTML += `<li>${r}</li>`;
+      });
+
+      resultado.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    async function cargarReportes() {
+      const response = await fetch('/api/reportes', {
+        headers: { 'authorization': token }
+      });
+      const reportes = await response.json();
+      const tbody = document.getElementById('tablaBody');
+      tbody.innerHTML = '';
+
+      reportes.forEach(r => {
+        const fecha = new Date(r.fecha).toLocaleDateString('es-CO');
+        const badgeClass = r.estado === 'abierto' ? 'badge-abierto' : r.estado === 'en proceso' ? 'badge-proceso' : 'badge-resuelto';
+        tbody.innerHTML += `
+          <tr style="cursor: pointer;" onclick="window.location.href='/reporte-detalle.html?id=${r._id}'">
+            <td>${r.empresa}</td>
+            <td>${r.tipoVulnerabilidad}</td>
+            <td>${r.descripcion.substring(0, 50)}...</td>
+            <td><span class="badge ${badgeClass}">${r.estado.toUpperCase()}</span></td>
+            <td>${fecha}</td>
+          </tr>
+        `;
+      });
+    }
+
+    function cerrarSesion() {
+      localStorage.clear();
+      window.location.href = '/';
+    }
+
+    cargarReportes();
+  </script>
+</body>
+</html>

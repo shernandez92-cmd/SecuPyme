@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Secupyme — Dashboard</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app-container">
+    <nav class="sidebar">
+      <div class="sidebar-logo">
+        <h1>SECUPYME</h1>
+      </div>
+      <ul class="sidebar-menu">
+        <li class="active"><a href="/dashboard.html">DASHBOARD</a></li>
+        <li><a href="/reportes.html">REPORTES</a></li>
+        <li><a href="/autoevaluacion.html">AUTOEVALUACIÓN</a></li>
+        <li><a href="#" onclick="cerrarSesion()">CERRAR SESIÓN</a></li>
+      </ul>
+      <div class="sidebar-user">
+        <p id="nombreUsuario"></p>
+        <span id="rolUsuario"></span>
+      </div>
+    </nav>
+
+    <main class="main-content">
+      <div class="page-header">
+        <h2>PANEL DE CONTROL</h2>
+        <p>Resumen de seguridad</p>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon">⚠</div>
+          <div class="stat-info">
+            <h3 id="totalReportes">0</h3>
+            <p>REPORTES TOTALES</p>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">🔴</div>
+          <div class="stat-info">
+            <h3 id="reportesAbiertos">0</h3>
+            <p>ABIERTOS</p>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">🟡</div>
+          <div class="stat-info">
+            <h3 id="reportesEnProceso">0</h3>
+            <p>EN PROCESO</p>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">🟢</div>
+          <div class="stat-info">
+            <h3 id="reportesResueltos">0</h3>
+            <p>RESUELTOS</p>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    const token = localStorage.getItem('token');
+    const rol = localStorage.getItem('rol');
+    const nombre = localStorage.getItem('nombre');
+
+    if (!token) window.location.href = '/';
+
+    document.getElementById('nombreUsuario').textContent = nombre;
+    document.getElementById('rolUsuario').textContent = rol.toUpperCase();
+
+    async function cargarDatos() {
+      const response = await fetch('/api/reportes', {
+        headers: { 'authorization': token }
+      });
+      const reportes = await response.json();
+
+      document.getElementById('totalReportes').textContent = reportes.length;
+      document.getElementById('reportesAbiertos').textContent = reportes.filter(r => r.estado === 'abierto').length;
+      document.getElementById('reportesEnProceso').textContent = reportes.filter(r => r.estado === 'en proceso').length;
+      document.getElementById('reportesResueltos').textContent = reportes.filter(r => r.estado === 'resuelto').length;
+    }
+
+    function cerrarSesion() {
+      localStorage.clear();
+      window.location.href = '/';
+    }
+
+    cargarDatos();
+  </script>
+</body>
+</html>

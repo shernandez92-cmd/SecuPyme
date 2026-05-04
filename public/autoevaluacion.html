@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Secupyme — Autoevaluación</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app-container">
+    <nav class="sidebar">
+      <div class="sidebar-logo">
+        <h1>SECUPYME</h1>
+        <p>PROTECCIÓN DIGITAL</p>
+      </div>
+      <ul class="sidebar-menu">
+        <li><a href="/dashboard.html">DASHBOARD</a></li>
+        <li><a href="/reportes.html">REPORTES</a></li>
+        <li class="active"><a href="/autoevaluacion.html">AUTOEVALUACIÓN</a></li>
+        <li><a href="#" onclick="cerrarSesion()">CERRAR SESIÓN</a></li>
+      </ul>
+      <div class="sidebar-user">
+        <p id="nombreUsuario"></p>
+        <span id="rolUsuario"></span>
+      </div>
+    </nav>
+
+    <main class="main-content">
+      <div class="page-header">
+        <h2>AUTOEVALUACIÓN DE SEGURIDAD</h2>
+        <p>Diagnóstico del estado de seguridad de su empresa</p>
+      </div>
+
+      <div class="form-card">
+        <h3>CUESTIONARIO</h3>
+
+        <div class="pregunta-item">
+          <p>¿Su empresa usa contraseñas seguras en todos los sistemas?</p>
+          <div class="toggle-group">
+            <button class="toggle-btn" onclick="seleccionar(this, 'contraseñasSeguras', true)">SÍ</button>
+            <button class="toggle-btn" onclick="seleccionar(this, 'contraseñasSeguras', false)">NO</button>
+          </div>
+        </div>
+
+        <div class="pregunta-item">
+          <p>¿Al iniciar sesión piden una segunda confirmación como un código al celular?</p>
+          <div class="toggle-group">
+            <button class="toggle-btn" onclick="seleccionar(this, 'dobleAutenticacion', true)">SÍ</button>
+            <button class="toggle-btn" onclick="seleccionar(this, 'dobleAutenticacion', false)">NO</button>
+          </div>
+        </div>
+
+        <div class="pregunta-item">
+          <p>¿Los equipos y sistemas de la empresa están actualizados?</p>
+          <div class="toggle-group">
+            <button class="toggle-btn" onclick="seleccionar(this, 'equiposActualizados', true)">SÍ</button>
+            <button class="toggle-btn" onclick="seleccionar(this, 'equiposActualizados', false)">NO</button>
+          </div>
+        </div>
+
+        <div class="pregunta-item">
+          <p>¿Todo el software que usan tiene licencias vigentes y legales?</p>
+          <div class="toggle-group">
+            <button class="toggle-btn" onclick="seleccionar(this, 'softwareLicenciado', true)">SÍ</button>
+            <button class="toggle-btn" onclick="seleccionar(this, 'softwareLicenciado', false)">NO</button>
+          </div>
+        </div>
+
+        <div class="pregunta-item">
+          <p>¿Hacen copias de seguridad de la información importante regularmente?</p>
+          <div class="toggle-group">
+            <button class="toggle-btn" onclick="seleccionar(this, 'copiasSeguridad', true)">SÍ</button>
+            <button class="toggle-btn" onclick="seleccionar(this, 'copiasSeguridad', false)">NO</button>
+          </div>
+        </div>
+
+        <div class="pregunta-item">
+          <p>¿Las copias de seguridad están guardadas en un lugar externo o en la nube?</p>
+          <div class="toggle-group">
+            <button class="toggle-btn" onclick="seleccionar(this, 'copiasEnLugarSeguro', true)">SÍ</button>
+            <button class="toggle-btn" onclick="seleccionar(this, 'copiasEnLugarSeguro', false)">NO</button>
+          </div>
+        </div>
+
+        <div class="pregunta-item">
+          <p>¿Los empleados han recibido capacitación en seguridad informática?</p>
+          <div class="toggle-group">
+            <button class="toggle-btn" onclick="seleccionar(this, 'capacitacionEmpleados', true)">SÍ</button>
+            <button class="toggle-btn" onclick="seleccionar(this, 'capacitacionEmpleados', false)">NO</button>
+          </div>
+        </div>
+
+        <div class="pregunta-item">
+          <p>¿Sus empleados saben reconocer correos falsos que intentan robar información?</p>
+          <div class="toggle-group">
+            <button class="toggle-btn" onclick="seleccionar(this, 'identificaPhishing', true)">SÍ</button>
+            <button class="toggle-btn" onclick="seleccionar(this, 'identificaPhishing', false)">NO</button>
+          </div>
+        </div>
+
+        <div class="pregunta-item">
+          <p>¿Tienen algún programa que proteja su red de accesos no autorizados?</p>
+          <div class="toggle-group">
+            <button class="toggle-btn" onclick="seleccionar(this, 'firewallActivo', true)">SÍ</button>
+            <button class="toggle-btn" onclick="seleccionar(this, 'firewallActivo', false)">NO</button>
+          </div>
+        </div>
+
+        <div class="pregunta-item">
+          <p>¿Su red WiFi tiene contraseña segura y no es de acceso público?</p>
+          <div class="toggle-group">
+            <button class="toggle-btn" onclick="seleccionar(this, 'redProtegida', true)">SÍ</button>
+            <button class="toggle-btn" onclick="seleccionar(this, 'redProtegida', false)">NO</button>
+          </div>
+        </div>
+
+        <button class="btn-primary" style="width: auto; padding: 12px 32px; margin-top: 32px;" onclick="enviarEvaluacion()">EVALUAR SEGURIDAD</button>
+      </div>
+
+      <div class="resultado-card" id="resultado">
+        <div class="resultado-nivel" id="nivelTexto"></div>
+        <div class="resultado-puntaje" id="puntajeTexto"></div>
+        <h3 style="font-family: 'Share Tech Mono', monospace; font-size: 12px; color: var(--texto-suave); letter-spacing: 3px; margin-bottom: 16px;">RECOMENDACIONES</h3>
+        <ul class="recomendaciones-lista" id="recomendacionesLista"></ul>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    const token = localStorage.getItem('token');
+    const rol = localStorage.getItem('rol');
+    const nombre = localStorage.getItem('nombre');
+
+    if (!token) window.location.href = '/';
+
+    document.getElementById('nombreUsuario').textContent = nombre;
+    document.getElementById('rolUsuario').textContent = rol.toUpperCase();
+
+    const respuestas = {};
+
+    function seleccionar(btn, campo, valor) {
+      const grupo = btn.parentElement;
+      grupo.querySelectorAll('.toggle-btn').forEach(b => {
+        b.classList.remove('selected-si', 'selected-no');
+      });
+      btn.classList.add(valor ? 'selected-si' : 'selected-no');
+      respuestas[campo] = valor;
+    }
+
+    async function enviarEvaluacion() {
+      if (Object.keys(respuestas).length < 10) {
+        alert('Por favor responde todas las preguntas');
+        return;
+      }
+
+      const response = await fetch('/api/autoevaluaciones', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'authorization': token
+        },
+        body: JSON.stringify({ respuestas })
+      });
+
+      const data = await response.json();
+
+      const resultado = document.getElementById('resultado');
+      resultado.className = 'resultado-card ' + data.nivelRiesgo;
+      resultado.style.display = 'block';
+
+      const nivelTexto = document.getElementById('nivelTexto');
+      nivelTexto.textContent = 'RIESGO ' + data.nivelRiesgo.toUpperCase();
+      nivelTexto.className = 'resultado-nivel ' + data.nivelRiesgo;
+
+      document.getElementById('puntajeTexto').textContent = `PUNTAJE: ${data.puntaje} / 20`;
+
+      const lista = document.getElementById('recomendacionesLista');
+      lista.innerHTML = '';
+      data.recomendaciones.forEach(r => {
+        lista.innerHTML += `<li>${r}</li>`;
+      });
+
+      resultado.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function cerrarSesion() {
+      localStorage.clear();
+      window.location.href = '/';
+    }
+  </script>
+</body>
+</html>
