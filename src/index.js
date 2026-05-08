@@ -27,3 +27,8 @@ mongoose.connect(process.env.MONGODB_URI)
   .catch((error) => {
     console.log('Error de conexión:', error);
   });
+const mensajeRoutes = require('./routes/mensajeRoutes');
+app.use('/api/mensajes', mensajeRoutes);
+
+const chatRoutes = require('./routes/chatRoutes');
+app.use('/api/chat', chatRoutes);

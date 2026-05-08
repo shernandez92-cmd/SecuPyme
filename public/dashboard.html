@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Secupyme — Dashboard</title>
   <link rel="stylesheet" href="styles.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
   <div class="app-container">
@@ -17,6 +18,10 @@
       </div>
 
       <div class="stats-grid">
+<div class="form-card">
+  <h3>REPORTES POR TIPO DE VULNERABILIDAD</h3>
+  <canvas id="graficaReportes" style="max-height: 300px;"></canvas>
+</div>
         <div class="stat-card">
           <div class="stat-icon">⚠</div>
           <div class="stat-info">
@@ -67,6 +72,41 @@
       document.getElementById('reportesEnProceso').textContent = reportes.filter(r => r.estado === 'en proceso').length;
       document.getElementById('reportesResueltos').textContent = reportes.filter(r => r.estado === 'resuelto').length;
     }
+async function cargarGrafica() {
+  const response = await fetch('/api/reportes', {
+    headers: { 'authorization': token }
+  });
+  const reportes = await response.json();
+
+  const tipos = ['phishing', 'malware', 'acceso no autorizado', 'fuga de datos', 'otro'];
+  const conteos = tipos.map(t => reportes.filter(r => r.tipoVulnerabilidad === t).length);
+
+  new Chart(document.getElementById('graficaReportes'), {
+    type: 'bar',
+    data: {
+      labels: ['Phishing', 'Malware', 'Acceso no autorizado', 'Fuga de datos', 'Otro'],
+      datasets: [{
+        label: 'Reportes',
+        data: conteos,
+        backgroundColor: 'rgba(168, 85, 247, 0.3)',
+        borderColor: 'rgba(168, 85, 247, 1)',
+        borderWidth: 1
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { labels: { color: '#e2d9f3', font: { family: 'Share Tech Mono' } } }
+      },
+      scales: {
+        x: { ticks: { color: '#9d86c8' }, grid: { color: 'rgba(255,255,255,0.05)' } },
+        y: { ticks: { color: '#9d86c8', stepSize: 1 }, grid: { color: 'rgba(255,255,255,0.05)' } }
+      }
+    }
+  });
+}
+
+cargarGrafica();
 
     cargarDatos();
   </script>

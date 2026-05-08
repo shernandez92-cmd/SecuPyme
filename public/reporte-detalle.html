@@ -8,22 +8,7 @@
 </head>
 <body>
   <div class="app-container">
-    <nav class="sidebar">
-      <div class="sidebar-logo">
-        <h1>SECUPYME</h1>
-        <p>PROTECCIÓN DIGITAL</p>
-      </div>
-      <ul class="sidebar-menu">
-        <li><a href="/dashboard.html">DASHBOARD</a></li>
-        <li class="active"><a href="/reportes.html">REPORTES</a></li>
-        <li><a href="/autoevaluacion.html">AUTOEVALUACIÓN</a></li>
-        <li><a href="#" onclick="cerrarSesion()">CERRAR SESIÓN</a></li>
-      </ul>
-      <div class="sidebar-user">
-        <p id="nombreUsuario"></p>
-        <span id="rolUsuario"></span>
-      </div>
-    </nav>
+    <div id="sidebar-container"></div>
 
     <main class="main-content">
       <div class="page-header">
@@ -33,7 +18,6 @@
       </div>
 
       <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
-
         <div class="form-card">
           <h3>INFORMACIÓN DEL REPORTE</h3>
           <div style="margin-bottom: 20px;">
@@ -78,31 +62,38 @@
               </select>
             </div>
           </div>
-
           <div class="form-card">
             <h3>NOTAS Y PASOS A SEGUIR</h3>
             <div class="form-group">
               <label>NOTAS PARA EL CLIENTE</label>
-              <textarea id="notasAdmin" placeholder="Escribe los pasos a seguir y recomendaciones para esta empresa..." style="min-height: 150px;"></textarea>
+              <textarea id="notasAdmin" placeholder="Escribe los pasos a seguir..." style="min-height: 150px;"></textarea>
             </div>
             <button class="btn-primary" style="width: auto; padding: 12px 32px; margin-top: 16px;" onclick="actualizarReporte()">GUARDAR CAMBIOS</button>
             <p id="mensajeExito" style="display:none; color: #10b981; font-family: 'Share Tech Mono', monospace; font-size: 12px; margin-top: 12px; letter-spacing: 2px;">CAMBIOS GUARDADOS — CLIENTE NOTIFICADO</p>
           </div>
         </div>
-
       </div>
+
+      <div class="form-card" style="margin-top: 24px;">
+        <h3>CHAT</h3>
+        <div id="mensajes" style="min-height: 200px; max-height: 300px; overflow-y: auto; margin-bottom: 16px; padding: 16px; background: rgba(5,5,8,0.9); border: 1px solid var(--borde); border-radius: 2px;"></div>
+        <div style="display: flex; gap: 12px;">
+          <input type="text" id="textoMensaje" placeholder="Escribe un mensaje..." style="flex: 1;">
+          <button class="btn-primary" style="width: auto; padding: 12px 24px;" onclick="enviarMensaje()">ENVIAR</button>
+        </div>
+      </div>
+
     </main>
   </div>
 
+  <script src="sidebar.js"></script>
   <script>
     const token = localStorage.getItem('token');
     const rol = localStorage.getItem('rol');
-    const nombre = localStorage.getItem('nombre');
 
     if (!token) window.location.href = '/';
 
-    document.getElementById('nombreUsuario').textContent = nombre;
-    document.getElementById('rolUsuario').textContent = rol.toUpperCase();
+    cargarSidebar('reportes');
 
     if (rol !== 'admin') {
       document.getElementById('panelAdmin').style.display = 'none';
@@ -150,12 +141,49 @@
       }
     }
 
-    function cerrarSesion() {
-      localStorage.clear();
-      window.location.href = '/';
+    async function cargarMensajes() {
+      const response = await fetch(`/api/mensajes/${reporteId}`, {
+        headers: { 'authorization': token }
+      });
+      const mensajes = await response.json();
+      const contenedor = document.getElementById('mensajes');
+      contenedor.innerHTML = '';
+
+      mensajes.forEach(m => {
+        const esYo = m.usuario.rol === rol;
+        const fecha = new Date(m.fecha).toLocaleTimeString('es-CO');
+        contenedor.innerHTML += `
+          <div style="margin-bottom: 12px; text-align: ${esYo ? 'right' : 'left'};">
+            <span style="font-size: 10px; color: var(--texto-suave); letter-spacing: 1px;">${m.usuario.nombre} · ${fecha}</span>
+            <div style="display: inline-block; background: ${esYo ? 'rgba(124,58,237,0.2)' : 'rgba(255,255,255,0.05)'}; border: 1px solid ${esYo ? 'var(--morado-claro)' : 'var(--borde)'}; padding: 8px 14px; border-radius: 2px; margin-top: 4px; font-size: 13px; max-width: 80%;">
+              ${m.texto}
+            </div>
+          </div>
+        `;
+      });
+      contenedor.scrollTop = contenedor.scrollHeight;
+    }
+
+    async function enviarMensaje() {
+      const texto = document.getElementById('textoMensaje').value;
+      if (!texto) return;
+
+      await fetch(`/api/mensajes/${reporteId}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'authorization': token
+        },
+        body: JSON.stringify({ texto })
+      });
+
+      document.getElementById('textoMensaje').value = '';
+      cargarMensajes();
     }
 
     cargarReporte();
+    cargarMensajes();
+    setInterval(cargarMensajes, 5000);
   </script>
 </body>
 </html>

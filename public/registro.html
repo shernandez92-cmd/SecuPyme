@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Secupyme — Registro</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="login-container">
+    <div class="login-box">
+      <div class="login-logo">
+        <h1>SECUPYME</h1>
+        <p>CREAR CUENTA</p>
+      </div>
+      <div class="form-group">
+        <label>NOMBRE COMPLETO</label>
+        <input type="text" id="nombre" placeholder="Tu nombre">
+      </div>
+      <div class="form-group">
+        <label>CORREO ELECTRÓNICO</label>
+        <input type="email" id="email" placeholder="correo@empresa.com">
+      </div>
+      <div class="form-group">
+        <label>CONTRASEÑA</label>
+        <input type="password" id="password" placeholder="••••••••">
+      </div>
+      <div class="form-group">
+        <label>EMPRESA</label>
+        <input type="text" id="empresa" placeholder="Nombre de tu empresa">
+      </div>
+      <button class="btn-primary" onclick="registrar()">CREAR CUENTA</button>
+      <p style="text-align:center; margin-top: 16px; font-size: 12px; color: var(--texto-suave);">¿Ya tienes cuenta? <a href="/" style="color: var(--acento); text-decoration: none;">Inicia sesión</a></p>
+      <p class="error-msg" id="error">Error al registrarse</p>
+    </div>
+  </div>
+
+  <script>
+    async function registrar() {
+      const nombre = document.getElementById('nombre').value;
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      const empresa = document.getElementById('empresa').value;
+
+      const response = await fetch('/api/auth/registro', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nombre, email, contraseña: password, empresa, rol: 'cliente' })
+      });
+
+      if (response.ok) {
+        window.location.href = '/';
+      } else {
+        document.getElementById('error').style.display = 'block';
+      }
+    }
+  </script>
+</body>
+</html>

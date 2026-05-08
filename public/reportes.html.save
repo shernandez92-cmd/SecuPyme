@@ -1,0 +1,145 @@
+««««<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Secupyme — Reportes</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app-container">
+    <nav class="sidebar">
+      <div class="sidebar-logo">
+        <h1>SECUPYME</h1>
+        <p>PROTECCIÓN DIGITAL</p>
+      </div>
+      <ul class="sidebar-menu">
+        <li><a href="/dashboard.html">DASHBOARD</a></li>
+        <li class="active"><a href="/reportes.html">REPORTES</a></li>
+        <li><a href="/autoevaluacion.html">AUTOEVALUACIÓN</a></li>
+        <li><a href="#" onclick="cerrarSesion()">CERRAR SESIÓN</a></li>
+      </ul>
+      <div class="sidebar-user">
+        <p id="nombreUsuario"></p>
+        <span id="rolUsuario"></span>
+      </div>
+    </nav>
+
+    <main class="main-content">
+      <div class="page-header">
+        <h2>REPORTES DE SEGURIDAD</h2>
+        <p>Gestión de incidentes</p>
+      </div>
+
+      <div class="form-card">
+        <h3>NUEVO REPORTE</h3>
+        <div class="form-row">
+          <div class="form-group">
+            <label>EMPRESA</label>
+            <input type="text" id="empresa" placeholder="Nombre de la empresa">
+          </div>
+          <div class="form-group">
+            <label>TIPO DE VULNERABILIDAD</label>
+            <select id="tipoVulnerabilidad">
+              <option value="phishing">Correo falso (Phishing)</option>
+              <option value="malware">Programa malicioso (Malware)</option>
+              <option value="acceso no autorizado">Acceso no autorizado</option>
+              <option value="fuga de datos">Fuga de datos</option>
+              <option value="otro">Otro</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group" style="margin-top: 16px;">
+          <label>DESCRIPCIÓN DEL INCIDENTE</label>
+          <textarea id="descripcion" placeholder="Describe detalladamente lo que ocurrió..."></textarea>
+        </div>
+        <button class="btn-primary" style="width: auto; padding: 12px 32px; margin-top: 16px;" onclick="crearReporte()">ENVIAR REPORTE</button>
+        <p id="mensajeExito" style="display:none; color: #10b981; font-family: 'Share Tech Mono', monospace; font-size: 12px; margin-top: 12px; letter-spacing: 2px;">REPORTE ENVIADO EXITOSAMENTE</p>
+      </div>
+
+      <div class="form-card">
+        <h3>HISTORIAL DE REPORTES</h3>
+        <table class="tabla-reportes">
+          <thead>
+            <tr>
+              <th>EMPRESA</th>
+              <th>TIPO</th>
+              <th>DESCRIPCIÓN</th>
+              <th>ESTADO</th>
+              <th>FECHA</th>
+            </tr>
+          </thead>
+          <tbody id="tablaBody">
+          </tbody>
+        </table>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    const token = localStorage.getItem('token');
+    const rol = localStorage.getItem('rol');
+    const nombre = localStorage.getItem('nombre');
+
+    if (!token) window.location.href = '/';
+
+    document.getElementById('nombreUsuario').textContent = nombre;
+    document.getElementById('rolUsuario').textContent = rol.toUpperCase();
+
+    async function crearReporte() {
+      const empresa = document.getElementById('empresa').value;
+      const tipoVulnerabilidad = document.getElementById('tipoVulnerabilidad').value;
+      const descripcion = document.getElementById('descripcion').value;
+
+      const response = await fetch('/api/reportes', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'authorization': token
+        },
+        body: JSON.stringify({ empresa, tipoVulnerabilidad, descripcion })
+      });
+
+      if (response.ok) {
+        document.getElementById('mensajeExito').style.display = 'block';
+        document.getElementById('empresa').value = '';
+        document.getElementById('descripcion').value = '';
+        cargarReportes();
+        setTimeout(() => {
+          document.getElementById('mensajeExito').style.display = 'none';
+        }, 3000);
+      }
+    }
+
+    async function cargarReportes() {
+      const response = await fetch('/api/reportes', {
+        headers: { 'authorization': token }
+      });
+      const reportes = await response.json();
+      const tbody = document.getElementById('tablaBody');
+      tbody.innerHTML = '';
+
+      reportes.forEach(r => {
+        const fecha = new Date(r.fecha).toLocaleDateString('es-CO');
+        const badgeClass = r.estado === 'abierto' ? 'badge-abierto' : r.estado === 'en proceso' ? 'badge-proceso' : 'badge-resuelto';
+        tbody.innerHTML += `
+          <tr>
+            <td>${r.empresa}</td>
+            <td>${r.tipoVulnerabilidad}</td>
+            <td>${r.descripcion.substring(0, 50)}...</td>
+            <td><span class="badge ${badgeClass}">${r.estado.toUpperCase()}</span></td>
+            <td>${fecha}</td>
+          </tr>
+        `;
+      });
+    }
+
+    function cerrarSesion() {
+      localStorage.clear();
+      window.location.href = '/';
+    }
+
+    cargarReportes();
+  </script>
+</body>
+</html>
