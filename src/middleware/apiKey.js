@@ -10,3 +10,6 @@ const apiKeyAuth = async (req, res, next) => {
 };
 
 module.exports = apiKeyAuth;
+
+apiKey: { type: String, unique: true, sparse: true }
+

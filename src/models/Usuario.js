@@ -23,6 +23,11 @@ const usuarioSchema = new mongoose.Schema({
     type: String,
     required: true
   },
+plan: {
+  type: String,
+  enum: ['free', 'basico', 'premium'],
+  default: 'free'
+},
   fechaRegistro: {
     type: Date,
     default: Date.now
