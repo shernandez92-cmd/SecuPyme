@@ -6,9 +6,11 @@ function cargarSidebar(paginaActiva) {
   const menuAdmin = rol === 'admin' ? `
     <li class="${paginaActiva === 'admin' ? 'active' : ''}">
       <a href="/admin.html">PANEL ADMIN</a>
+    </li>
+    <li class="${paginaActiva === 'siem' ? 'active' : ''}">
+      <a href="/siem.html">SIEM</a>
     </li>` : '';
-${menuSiem}
-${menuMembresias}
+
   const sidebar = `
     <nav class="sidebar">
       <div class="sidebar-logo">
@@ -16,15 +18,6 @@ ${menuMembresias}
         <p>PROTECCIÓN DIGITAL</p>
       </div>
       <ul class="sidebar-menu">
-const menuSiem = rol === 'admin' ? `
-  <li class="${paginaActiva === 'siem' ? 'active' : ''}">
-    <a href="/siem.html">SIEM</a>
-  </li>` : '';
-
-const menuMembresias = `
-  <li class="${paginaActiva === 'membresias' ? 'active' : ''}">
-    <a href="/membresias.html">MEMBRESÍAS</a>
-  </li>`;
         <li class="${paginaActiva === 'dashboard' ? 'active' : ''}">
           <a href="/dashboard.html">DASHBOARD</a>
         </li>
@@ -37,6 +30,9 @@ const menuMembresias = `
         <li class="${paginaActiva === 'autoevaluacion' ? 'active' : ''}">
           <a href="/autoevaluacion.html">AUTOEVALUACIÓN</a>
         </li>
+        <li class="${paginaActiva === 'membresias' ? 'active' : ''}">
+          <a href="/membresias.html">MEMBRESÍAS</a>
+        </li>
         ${menuAdmin}
         <li>
           <a href="#" onclick="cerrarSesion()">CERRAR SESIÓN</a>
@@ -48,9 +44,8 @@ const menuMembresias = `
       </div>
     </nav>
 
-    <!-- CHAT FLOTANTE -->
     <div id="chat-flotante" style="position: fixed; bottom: 24px; right: 24px; z-index: 1000;">
-      <div id="chat-ventana" style="display:none; width: 340px; height: 480px; background: #0d0618; border: 1px solid #4a1a8a; border-radius: 4px; display: none; flex-direction: column; box-shadow: 0 0 40px rgba(124,58,237,0.2);">
+      <div id="chat-ventana" style="display:none; width: 340px; height: 480px; background: #0d0618; border: 1px solid #4a1a8a; border-radius: 4px; flex-direction: column; box-shadow: 0 0 40px rgba(124,58,237,0.2);">
         <div style="padding: 16px; border-bottom: 1px solid #1a0a2e; display: flex; justify-content: space-between; align-items: center;">
           <span style="font-family: 'Share Tech Mono', monospace; font-size: 12px; color: #a855f7; letter-spacing: 2px;">SOPORTE SECUPYME</span>
           <button onclick="toggleChat()" style="background: none; border: none; color: #6b5a8a; cursor: pointer; font-size: 16px;">✕</button>
