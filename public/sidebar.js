@@ -7,7 +7,8 @@ function cargarSidebar(paginaActiva) {
     <li class="${paginaActiva === 'admin' ? 'active' : ''}">
       <a href="/admin.html">PANEL ADMIN</a>
     </li>` : '';
-
+${menuSiem}
+${menuMembresias}
   const sidebar = `
     <nav class="sidebar">
       <div class="sidebar-logo">
@@ -15,6 +16,15 @@ function cargarSidebar(paginaActiva) {
         <p>PROTECCIÓN DIGITAL</p>
       </div>
       <ul class="sidebar-menu">
+const menuSiem = rol === 'admin' ? `
+  <li class="${paginaActiva === 'siem' ? 'active' : ''}">
+    <a href="/siem.html">SIEM</a>
+  </li>` : '';
+
+const menuMembresias = `
+  <li class="${paginaActiva === 'membresias' ? 'active' : ''}">
+    <a href="/membresias.html">MEMBRESÍAS</a>
+  </li>`;
         <li class="${paginaActiva === 'dashboard' ? 'active' : ''}">
           <a href="/dashboard.html">DASHBOARD</a>
         </li>

@@ -41,7 +41,7 @@
       </div>
 
       <div class="form-card" style="margin-top: 24px;">
-        <h3>EVALUACIONES ANTERIORES</h3>
+        <h3>EVALUACIONES ANTERIORES <a href="#" onclick="descargarPDF()" style="float: right; font-family: 'Share Tech Mono', monospace; font-size: 11px; color: var(--acento); letter-spacing: 2px; text-decoration: none;">↓ EXPORTAR PDF</a></h3>
         <table class="tabla-reportes">
           <thead>
             <tr>
@@ -61,7 +61,6 @@
   <script>
     const token = localStorage.getItem('token');
     if (!token) window.location.href = '/';
-
     cargarSidebar('historial');
 
     async function cargarHistorial() {
@@ -75,7 +74,6 @@
       if (evaluaciones.length > 0) {
         const mejorPuntaje = Math.max(...evaluaciones.map(e => e.puntaje));
         document.getElementById('mejorPuntaje').textContent = `${mejorPuntaje}/20`;
-
         const ultima = evaluaciones[evaluaciones.length - 1];
         const nivelEl = document.getElementById('ultimoNivel');
         nivelEl.textContent = ultima.nivelRiesgo.toUpperCase();
@@ -84,7 +82,6 @@
 
       const tbody = document.getElementById('tablaHistorial');
       tbody.innerHTML = '';
-
       evaluaciones.reverse().forEach(e => {
         const fecha = new Date(e.fecha).toLocaleDateString('es-CO');
         const badgeClass = e.nivelRiesgo === 'alto' ? 'badge-abierto' : e.nivelRiesgo === 'medio' ? 'badge-proceso' : 'badge-resuelto';
@@ -97,6 +94,10 @@
           </tr>
         `;
       });
+    }
+
+    function descargarPDF() {
+      window.open(`/api/pdf/autoevaluaciones?token=${token}`);
     }
 
     cargarHistorial();

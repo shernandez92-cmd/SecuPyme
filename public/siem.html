@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Secupyme — SIEM</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app-container">
+    <div id="sidebar-container"></div>
+
+    <main class="main-content">
+      <div class="page-header">
+        <h2>SIEM — EVENTOS DE SEGURIDAD</h2>
+        <p>Registro de actividad en tiempo real</p>
+      </div>
+
+      <div class="form-card">
+        <h3>ÚLTIMOS EVENTOS</h3>
+        <table class="tabla-reportes">
+          <thead>
+            <tr>
+              <th>TIPO</th>
+              <th>DESCRIPCIÓN</th>
+              <th>SEVERIDAD</th>
+              <th>IP</th>
+              <th>FECHA</th>
+            </tr>
+          </thead>
+          <tbody id="tablaEventos"></tbody>
+        </table>
+      </div>
+    </main>
+  </div>
+
+  <script src="sidebar.js"></script>
+  <script>
+    const token = localStorage.getItem('token');
+    const rol = localStorage.getItem('rol');
+    if (!token) window.location.href = '/';
+    if (rol !== 'admin') window.location.href = '/dashboard.html';
+
+    cargarSidebar('siem');
+
+    async function cargarEventos() {
+      const response = await fetch('/api/siem/events', {
+        headers: { 'authorization': token }
+      });
+      const eventos = await response.json();
+      const tbody = document.getElementById('tablaEventos');
+      tbody.innerHTML = '';
+
+      eventos.forEach(e => {
+        const fecha = new Date(e.timestamp).toLocaleString('es-CO');
+        const badgeClass = e.severity === 'high' ? 'badge-abierto' : e.severity === 'medium' ? 'badge-proceso' : 'badge-resuelto';
+        tbody.innerHTML += `
+          <tr>
+            <td style="font-family: 'Share Tech Mono', monospace; color: var(--acento); font-size: 11px;">${e.type.toUpperCase()}</td>
+            <td>${e.description}</td>
+            <td><span class="badge ${badgeClass}">${e.severity.toUpperCase()}</span></td>
+            <td style="font-family: 'Share Tech Mono', monospace; font-size: 11px; color: var(--texto-suave);">${e.ip || '—'}</td>
+            <td style="font-size: 11px; color: var(--texto-suave);">${fecha}</td>
+          </tr>
+        `;
+      });
+    }
+
+    cargarEventos();
+    setInterval(cargarEventos, 10000);
+  </script>
+</body>
+</html>

@@ -42,6 +42,12 @@
       const password = document.getElementById('password').value;
       const empresa = document.getElementById('empresa').value;
 
+      if (!nombre || !email || !password || !empresa) {
+        document.getElementById('error').style.display = 'block';
+        document.getElementById('error').textContent = 'Todos los campos son obligatorios';
+        return;
+      }
+
       const response = await fetch('/api/auth/registro', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -51,7 +57,9 @@
       if (response.ok) {
         window.location.href = '/';
       } else {
+        const data = await response.json();
         document.getElementById('error').style.display = 'block';
+        document.getElementById('error').textContent = data.mensaje || 'Error al registrarse';
       }
     }
   </script>

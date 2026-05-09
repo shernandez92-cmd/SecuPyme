@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Secupyme — Membresías</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app-container">
+    <div id="sidebar-container"></div>
+
+    <main class="main-content">
+      <div class="page-header">
+        <h2>MEMBRESÍAS</h2>
+        <p>Elige el plan que mejor se adapta a tu empresa</p>
+      </div>
+
+      <div class="stats-grid" style="grid-template-columns: repeat(3, 1fr); margin-top: 24px;">
+        <div class="stat-card" style="flex-direction: column; align-items: flex-start; gap: 12px;">
+          <h3 style="font-family: 'Share Tech Mono', monospace; color: var(--texto-suave); font-size: 14px;">FREE</h3>
+          <p style="font-family: 'Share Tech Mono', monospace; font-size: 32px; color: var(--acento);">$0</p>
+          <ul style="list-style: none; font-size: 12px; color: var(--texto-suave); line-height: 2;">
+            <li>✓ Hasta 3 reportes</li>
+            <li>✓ Autoevaluación básica</li>
+            <li>✗ Soporte prioritario</li>
+            <li>✗ API pública</li>
+          </ul>
+          <button class="btn-secondary" style="width: 100%; margin-top: 8px;" onclick="seleccionarPlan('free')">PLAN ACTUAL</button>
+        </div>
+
+        <div class="stat-card" style="flex-direction: column; align-items: flex-start; gap: 12px; border-color: var(--morado-claro);">
+          <h3 style="font-family: 'Share Tech Mono', monospace; color: var(--acento); font-size: 14px;">BÁSICO ⭐</h3>
+          <p style="font-family: 'Share Tech Mono', monospace; font-size: 32px; color: var(--acento);">$29.900</p>
+          <ul style="list-style: none; font-size: 12px; color: var(--texto-suave); line-height: 2;">
+            <li>✓ Hasta 20 reportes</li>
+            <li>✓ Autoevaluación completa</li>
+            <li>✓ Soporte por chat</li>
+            <li>✗ API pública</li>
+          </ul>
+          <button class="btn-primary" style="width: 100%; margin-top: 8px;" onclick="seleccionarPlan('basico')">SELECCIONAR</button>
+        </div>
+
+        <div class="stat-card" style="flex-direction: column; align-items: flex-start; gap: 12px;">
+          <h3 style="font-family: 'Share Tech Mono', monospace; color: var(--acento-brillante); font-size: 14px;">PREMIUM 🔒</h3>
+          <p style="font-family: 'Share Tech Mono', monospace; font-size: 32px; color: var(--acento);">$79.900</p>
+          <ul style="list-style: none; font-size: 12px; color: var(--texto-suave); line-height: 2;">
+            <li>✓ Reportes ilimitados</li>
+            <li>✓ Autoevaluación completa</li>
+            <li>✓ Soporte prioritario 24/7</li>
+            <li>✓ API pública</li>
+          </ul>
+          <button class="btn-primary" style="width: 100%; margin-top: 8px;" onclick="seleccionarPlan('premium')">SELECCIONAR</button>
+        </div>
+      </div>
+
+      <div id="mensajePlan" style="display:none; margin-top: 24px;" class="form-card">
+        <p id="textoPlan" style="font-family: 'Share Tech Mono', monospace; color: #10b981; font-size: 13px; letter-spacing: 2px;"></p>
+      </div>
+    </main>
+  </div>
+
+  <script src="sidebar.js"></script>
+  <script>
+    const token = localStorage.getItem('token');
+    if (!token) window.location.href = '/';
+    cargarSidebar('membresias');
+
+    function seleccionarPlan(plan) {
+      const mensajes = {
+        free: 'Ya estás en el plan FREE.',
+        basico: 'Para activar el plan BÁSICO contacta a soporte@secupyme.com',
+        premium: 'Para activar el plan PREMIUM contacta a soporte@secupyme.com'
+      };
+      document.getElementById('mensajePlan').style.display = 'block';
+      document.getElementById('textoPlan').textContent = mensajes[plan];
+    }
+  </script>
+</body>
+</html>
