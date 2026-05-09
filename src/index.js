@@ -40,3 +40,5 @@ mongoose.connect(process.env.MONGODB_URI)
   .catch((error) => {
     console.log('Error de conexión:', error);
   });
+const integracionRoutes = require('./routes/integracionRoutes');
+app.use('/api/integraciones', integracionRoutes);
