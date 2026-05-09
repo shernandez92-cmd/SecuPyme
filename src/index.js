@@ -25,7 +25,10 @@ app.use('/api/pdf', pdfRoutes);
 app.get('/', (req, res) => {
   res.json({ mensaje: 'Secupyme API funcionando' });
 });
-
+const siemRoutes = require('./routes/siemRoutes');
+const publicRoutes = require('./routes/publicRoutes');
+app.use('/api/siem', siemRoutes);
+app.use('/api/public', publicRoutes);
 mongoose.connect(process.env.MONGODB_URI)
   .then(() => {
     console.log('Conectado a MongoDB');

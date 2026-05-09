@@ -2,10 +2,12 @@ const SecurityEvent = require('../models/SecurityEvent');
 
 const registrarEvento = async (type, description, severity, userId, ip) => {
   try {
-    await new SecurityEvent({ type, description, severity, userId, ip }).save();
-  } catch (e) {}
+    const evento = await new SecurityEvent({ type, description, severity, userId, ip }).save();
+    console.log('Evento guardado:', type);
+  } catch (e) {
+    console.log('Error SIEM:', e.message);
+  }
 };
-
 const obtenerEventos = async (req, res) => {
   try {
     const eventos = await SecurityEvent.find()
