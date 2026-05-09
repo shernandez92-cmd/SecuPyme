@@ -167,6 +167,33 @@ body::before {
   box-shadow: 0 0 25px rgba(124, 58, 237, 0.4);
 }
 
+.btn-descargar-pdf {
+  background: transparent;
+  border: 1px solid var(--acento);
+  border-radius: 2px;
+  padding: 6px 12px;
+  color: var(--acento);
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+}
+
+.btn-descargar-pdf:hover {
+  background: var(--acento);
+  color: white;
+  box-shadow: 0 0 15px rgba(168, 85, 247, 0.4);
+  transform: scale(1.05);
+}
+
+.btn-descargar-pdf:active {
+  transform: scale(0.95);
+}
+
 .error-msg {
   color: #f87171;
   font-family: 'Share Tech Mono', monospace;

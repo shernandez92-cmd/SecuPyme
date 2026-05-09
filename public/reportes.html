@@ -132,6 +132,7 @@
 
       <div class="form-card">
         <h3>HISTORIAL DE REPORTES</h3>
+        <a href="#" onclick="descargarPDF()" style="float: right; font-family: 'Share Tech Mono', monospace; font-size: 11px; color: var(--acento); letter-spacing: 2px; text-decoration: none;">↓ EXPORTAR TODOS</a>
         <table class="tabla-reportes">
           <thead>
             <tr>
@@ -140,6 +141,7 @@
               <th>DESCRIPCIÓN</th>
               <th>ESTADO</th>
               <th>FECHA</th>
+              <th>DESCARGAR</th>
             </tr>
           </thead>
           <tbody id="tablaBody"></tbody>
@@ -150,6 +152,15 @@
 
   <script src="sidebar.js"></script>
   <script>
+    function descargarPDF() {
+      const token = localStorage.getItem('token');
+      window.open(`/api/pdf/reportes?token=${token}`);
+    }
+
+    function descargarReportePDF(reporteId, empresa) {
+      const token = localStorage.getItem('token');
+      window.open(`/api/pdf/reportes/${reporteId}?token=${token}`);
+    }
     const token = localStorage.getItem('token');
     if (!token) window.location.href = '/';
 
@@ -242,12 +253,13 @@
         const fecha = new Date(r.fecha).toLocaleDateString('es-CO');
         const badgeClass = r.estado === 'abierto' ? 'badge-abierto' : r.estado === 'en proceso' ? 'badge-proceso' : 'badge-resuelto';
         tbody.innerHTML += `
-          <tr style="cursor: pointer;" onclick="window.location.href='/reporte-detalle.html?id=${r._id}'">
+          <tr>
             <td>${r.empresa}</td>
             <td>${r.tipoVulnerabilidad}</td>
-            <td>${r.descripcion.substring(0, 50)}...</td>
+            <td><a href="/reporte-detalle.html?id=${r._id}" style="color: var(--acento); text-decoration: none; cursor: pointer;">${r.descripcion.substring(0, 50)}...</a></td>
             <td><span class="badge ${badgeClass}">${r.estado.toUpperCase()}</span></td>
             <td>${fecha}</td>
+            <td><button class="btn-descargar-pdf" onclick="descargarReportePDF('${r._id}', '${r.empresa}'); return false;" title="Descargar PDF">📥</button></td>
           </tr>
         `;
       });
