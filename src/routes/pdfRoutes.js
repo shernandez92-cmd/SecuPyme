@@ -1,26 +1,21 @@
 const express = require('express');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
-const { exportarReportes, exportarReporteIndividual } = require('../controllers/pdfController');
+const { exportarReportes, exportarReporteIndividual, exportarAutoevaluaciones } = require('../controllers/pdfController');
 
-// Middleware para verificar token desde query param
 const verificarTokenPDF = (req, res, next) => {
   const token = req.query.token;
-
-  if (!token) {
-    return res.status(401).json({ mensaje: 'Acceso denegado, token requerido' });
-  }
-
+  if (!token) return res.status(401).json({ mensaje: 'Token requerido' });
   try {
-    const verificado = jwt.verify(token, process.env.JWT_SECRET);
-    req.usuario = verificado;
+    req.usuario = jwt.verify(token, process.env.JWT_SECRET);
     next();
   } catch (error) {
-    res.status(401).json({ mensaje: 'Token inválido o expirado' });
+    res.status(401).json({ mensaje: 'Token inválido' });
   }
 };
 
 router.get('/reportes', verificarTokenPDF, exportarReportes);
 router.get('/reportes/:id', verificarTokenPDF, exportarReporteIndividual);
+router.get('/autoevaluaciones', verificarTokenPDF, exportarAutoevaluaciones);
 
 module.exports = router;

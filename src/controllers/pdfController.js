@@ -1,3 +1,4 @@
+
 const PDFDocument = require('pdfkit');
 const Reporte = require('../models/Reporte');
 
@@ -209,5 +210,47 @@ const exportarReportes = async (req, res) => {
     }
   }
 };
+const exportarAutoevaluaciones = async (req, res) => {
+  try {
+    const Autoevaluacion = require('../models/Autoevaluacion');
+    const evaluaciones = await Autoevaluacion.find({ usuario: req.usuario.id })
+      .populate('usuario', 'nombre empresa').lean();
 
-module.exports = { exportarReportes, exportarReporteIndividual };
+    const doc = new PDFDocument({ margin: 40, size: 'A4' });
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', 'attachment; filename=autoevaluaciones-secupyme.pdf');
+    doc.pipe(res);
+
+    crearDocumentoPDF(doc, 'SECUPYME', 'Historial de Autoevaluaciones de Seguridad');
+
+    if (evaluaciones.length === 0) {
+      doc.fontSize(12).fillColor(colors.textoSuave).text('No hay evaluaciones disponibles', { align: 'center' });
+    } else {
+      evaluaciones.forEach((e, i) => {
+        crearSeccion(doc, `EVALUACIÓN #${i + 1}`);
+        doc.fontSize(9).fillColor(colors.textoSuave).font('Helvetica');
+        doc.text(`Empresa: ${e.usuario.empresa}`);
+        doc.text(`Fecha: ${new Date(e.fecha).toLocaleDateString('es-CO')}`);
+        doc.text(`Puntaje: ${e.puntaje}/20`);
+
+        if (e.nivelRiesgo === 'alto') doc.fillColor(colors.rojo);
+        else if (e.nivelRiesgo === 'medio') doc.fillColor(colors.amarillo);
+        else doc.fillColor(colors.verde);
+        doc.text(`Nivel de riesgo: ${e.nivelRiesgo.toUpperCase()}`);
+
+        doc.fillColor(colors.textoSuave).moveDown(0.5);
+        doc.font('Helvetica-Bold').text('Recomendaciones:');
+        doc.font('Helvetica');
+        e.recomendaciones.forEach(r => doc.text(`  • ${r}`));
+        doc.moveDown(1.5);
+      });
+    }
+
+    doc.fontSize(8).fillColor(colors.textoSuave).text('Secupyme © 2026 - Documento Confidencial', { align: 'center' });
+    doc.end();
+  } catch (error) {
+    if (!res.headersSent) res.status(500).json({ mensaje: 'Error generando PDF', error: error.message });
+  }
+};
+
+module.exports = { exportarReportes, exportarReporteIndividual, exportarAutoevaluaciones };
