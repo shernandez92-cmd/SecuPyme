@@ -11,11 +11,14 @@ const transporter = nodemailer.createTransport({
 
 const crearReporte = async (req, res) => {
   try {
-    const { empresa, tipoVulnerabilidad, descripcion } = req.body;
+    const { tipoVulnerabilidad, descripcion } = req.body;
+    const usuario = await require('../models/Usuario').findById(req.usuario.id);
+    const empresa = usuario.empresa;
 
-    if (!empresa || !tipoVulnerabilidad || !descripcion) {
+    if (!tipoVulnerabilidad || !descripcion) {
       return res.status(400).json({ mensaje: 'Todos los campos son obligatorios' });
     }
+
     const reporte = new Reporte({
       usuario: req.usuario.id,
       empresa,

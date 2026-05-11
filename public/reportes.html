@@ -20,9 +20,17 @@
 
       <div class="form-card">
         <h3>NUEVO REPORTE</h3>
-        <div class="form-row">
+        <div class="form-group">
+  <label>TIPO DE VULNERABILIDAD</label>
+  <select id="tipoVulnerabilidad">
+    <option value="phishing">Correo falso (Phishing)</option>
+    <option value="malware">Programa malicioso (Malware)</option>
+    <option value="acceso no autorizado">Acceso no autorizado</option>
+    <option value="fuga de datos">Fuga de datos</option>
+    <option value="otro">Otro</option>
+  </select>
+</div>
           <div class="form-group">
-            <label>EMPRESA</label>
             <input type="text" id="empresa" placeholder="Nombre de la empresa">
           </div>
           <div class="form-group">
@@ -158,16 +166,14 @@
     const respuestas = {};
 
     async function crearReporte() {
-      const empresa = document.getElementById('empresa').value;
-      const tipoVulnerabilidad = document.getElementById('tipoVulnerabilidad').value;
-      const descripcion = document.getElementById('descripcion').value;
+  const tipoVulnerabilidad = document.getElementById('tipoVulnerabilidad').value;
+  const descripcion = document.getElementById('descripcion').value;
 
-      const response = await fetch('/api/reportes', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'authorization': token },
-        body: JSON.stringify({ empresa, tipoVulnerabilidad, descripcion })
-      });
-
+  const response = await fetch('/api/reportes', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'authorization': token },
+    body: JSON.stringify({ tipoVulnerabilidad, descripcion })
+  });
       if (response.ok) {
         const popup = document.getElementById('popup');
         popup.style.display = 'block';

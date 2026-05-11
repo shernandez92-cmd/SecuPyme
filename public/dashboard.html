@@ -22,6 +22,20 @@
     <div class="stat-icon">⚠</div>
     <div class="stat-info">
       <h3 id="totalReportes">0</h3>
+<div class="form-card" style="margin-top: 24px;">
+  <h3>REPORTES ÚLTIMAS 72 HORAS</h3>
+  <table class="tabla-reportes">
+    <thead>
+      <tr>
+        <th>EMPRESA</th>
+        <th>TIPO</th>
+        <th>ESTADO</th>
+        <th>FECHA</th>
+      </tr>
+    </thead>
+    <tbody id="tablaBody"></tbody>
+  </table>
+</div>
       <p>REPORTES TOTALES</p>
     </div>
   </div>
@@ -101,27 +115,33 @@
   <script>
     async function cargarUltimosReportes() {
   const response = await fetch('/api/reportes', {
-    headers: { 'authorization': token }
-  });
+async function cargarUltimosReportes() {
+  const response = await fetch('/api/reportes', { headers: { 'authorization': token } });
   const reportes = await response.json();
+  const hace72h = new Date(Date.now() - 72 * 60 * 60 * 1000);
+  const recientes = reportes.filter(r => new Date(r.fecha) > hace72h);
   const tbody = document.getElementById('tablaBody');
   tbody.innerHTML = '';
-  reportes.slice(0, 5).forEach(r => {
-    const fecha = new Date(r.fecha).toLocaleDateString('es-CO');
+
+  if (recientes.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color: var(--texto-suave); font-size: 12px; padding: 24px;">Sin reportes en las últimas 72 horas</td></tr>`;
+    return;
+  }
+
+  recientes.forEach(r => {
+    const fecha = new Date(r.fecha).toLocaleString('es-CO');
     const badgeClass = r.estado === 'abierto' ? 'badge-abierto' : r.estado === 'en proceso' ? 'badge-proceso' : 'badge-resuelto';
     tbody.innerHTML += `
       <tr style="cursor:pointer;" onclick="window.location.href='/reporte-detalle.html?id=${r._id}'">
         <td>${r.empresa}</td>
         <td>${r.tipoVulnerabilidad}</td>
         <td><span class="badge ${badgeClass}">${r.estado.toUpperCase()}</span></td>
-        <td>${fecha}</td>
+        <td style="font-size: 11px; color: var(--texto-suave);">${fecha}</td>
       </tr>
     `;
   });
 }
 cargarUltimosReportes();
-    const token = localStorage.getItem('token');
-    if (!token) window.location.href = '/';
 
     cargarSidebar('dashboard');
 

@@ -41,6 +41,16 @@
             <p id="descripcion" style="font-size: 14px; color: var(--texto); line-height: 1.6;"></p>
           </div>
         </div>
+<div style="margin-top: 20px;" id="shodanSeccion">
+  <p style="font-size: 11px; letter-spacing: 2px; color: var(--texto-suave); margin-bottom: 8px;">CONSULTA SHODAN</p>
+  <div style="display: flex; gap: 8px;">
+    <input type="text" id="ipShodan" placeholder="IP a consultar..." style="flex: 1;">
+    <button class="btn-primary" style="width: auto; padding: 10px 20px;" onclick="consultarShodan()">CONSULTAR</button>
+  </div>
+  <div id="resultadoShodan" style="margin-top: 12px; display: none; padding: 16px; background: rgba(5,5,8,0.9); border: 1px solid var(--borde); border-radius: 2px;">
+    <div id="shodanData" style="font-family: 'Share Tech Mono', monospace; font-size: 12px; color: var(--texto-suave); line-height: 2;"></div>
+  </div>
+</div>o
 
         <div id="panelAdmin">
           <div class="form-card" style="margin-bottom: 24px;">
@@ -69,6 +79,10 @@
               <textarea id="notasAdmin" placeholder="Escribe los pasos a seguir..." style="min-height: 150px;"></textarea>
             </div>
             <button class="btn-primary" style="width: auto; padding: 12px 32px; margin-top: 16px;" onclick="actualizarReporte()">GUARDAR CAMBIOS</button>
+<div style="display: flex; gap: 8px; margin-top: 12px;">
+  <button class="btn-secondary" style="padding: 10px 20px;" onclick="archivarReporte()">ARCHIVAR</button>
+  <button style="background: transparent; border: 1px solid #ef4444; color: #ef4444; font-family: 'Share Tech Mono', monospace; font-size: 11px; letter-spacing: 2px; padding: 10px 20px; cursor: pointer; border-radius: 1px;" onclick="eliminarReporte()">ELIMINAR</button>
+</div>
             <p id="mensajeExito" style="display:none; color: #10b981; font-family: 'Share Tech Mono', monospace; font-size: 12px; margin-top: 12px; letter-spacing: 2px;">CAMBIOS GUARDADOS — CLIENTE NOTIFICADO</p>
           </div>
         </div>
@@ -118,7 +132,44 @@
       document.getElementById('prioridad').value = r.prioridad;
       document.getElementById('notasAdmin').value = r.notasAdmin;
     }
+async function consultarShodan() {
+  const ip = document.getElementById('ipShodan').value;
+  if (!ip) return;
+  const response = await fetch(`/api/integraciones/shodan/${ip}`, {
+    headers: { 'authorization': token }
+  });
+  const data = await response.json();
+  if (data.mensaje) {
+    document.getElementById('shodanData').innerHTML = `<p style="color: #ef4444;">${data.mensaje}</p>`;
+  } else {
+    document.getElementById('shodanData').innerHTML = `
+      <p>IP: ${data.ip}</p>
+      <p>País: ${data.paises || '—'}</p>
+      <p>Organización: ${data.organizacion || '—'}</p>
+      <p>Sistema: ${data.sistema || '—'}</p>
+      <p>Puertos abiertos: ${data.puertos ? data.puertos.join(', ') : '—'}</p>
+      <p>Vulnerabilidades: ${data.vulnerabilidades.length > 0 ? data.vulnerabilidades.join(', ') : 'Ninguna detectada'}</p>
+    `;
+  }
+  document.getElementById('resultadoShodan').style.display = 'block';
+}
+async function eliminarReporte() {
+  if (!confirm('¿Eliminar este reporte? Esta acción no se puede deshacer.')) return;
+  await fetch(`/api/reportes/${reporteId}`, {
+    method: 'DELETE',
+    headers: { 'authorization': token }
+  });
+  window.location.href = '/reportes.html';
+}
 
+async function archivarReporte() {
+  if (!confirm('¿Archivar este reporte?')) return;
+  await fetch(`/api/reportes/${reporteId}/archivar`, {
+    method: 'PUT',
+    headers: { 'authorization': token }
+  });
+  window.location.href = '/reportes.html';
+}
     async function actualizarReporte() {
       const estado = document.getElementById('estado').value;
       const prioridad = document.getElementById('prioridad').value;
