@@ -86,5 +86,98 @@ VIRUSTOTAL_KEY=74439078ce9d9dfdc18d00e5b0ab64cdb470c3e71effb1ee2e59f11b10291eda
 - **Admin:** sebastian@secupyme.com / 123456
 - **Cliente:** demo@empresa.com / 123456
 
+## 🔒 Seguridad - Auditoría Completa (Mayo 2026)
+
+### Vulnerabilidades Críticas Corregidas
+Se realizó una auditoría de seguridad exhaustiva que identificó y corrigió **47 problemas**, incluyendo **10 vulnerabilidades críticas**:
+
+✅ **Autorización** - Validación en TODOS los endpoints protegidos  
+✅ **Validación de Entrada** - Prevención de XSS, SQL injection, path traversal  
+✅ **Autenticación** - Bearer tokens (NO query parameters), JWT mejorado  
+✅ **SSRF Prevention** - Validación de IPs, bloqueo de rangos privados  
+✅ **Headers de Seguridad** - Helmet.js, CORS, rate limiting  
+✅ **Errores Seguros** - Sin exposición de stack traces  
+✅ **Límites de Cuerpo** - Prevención de DoS (10MB max)  
+✅ **Fortaleza de Contraseña** - 8+ chars, mayúscula, minúscula, número, carácter especial  
+✅ **Manejo Global de Errores** - Centralized error handler  
+✅ **API Segura** - Validación exhaustiva en integraciones externas
+
+### Nuevas Características de Seguridad
+
+**Validadores Completos** (`src/utils/validators.js`):
+- Email validation (RFC-compliant)
+- Password strength enforcement
+- IP validation (con SSRF prevention)
+- MongoDB ObjectID validation
+- XSS prevention via HTML escaping
+- Filename sanitization
+- String length validation
+
+**Manejo Centralizado de Errores** (`src/utils/errorHandler.js`):
+- Respuestas seguras sin información sensible
+- Detección de tipos de error
+- Global error middleware
+- Async route wrapper
+
+**Gestión de Email Segura** (`src/utils/emailConfig.js`):
+- Transporte centralizado
+- Sanitización de entrada
+- Manejo de errores robusto
+
+### Mejoras de Seguridad por Sección
+
+**Authentication & Authorization**:
+- ✅ Validación de token en header Authorization (Bearer)
+- ✅ Verificación de pertenencia en TODOS los recursos
+- ✅ Roles enforcement (admin/user)
+- ✅ Validación de usuario activo
+- ✅ Contraseñas hasheadas con bcrypt (salt 10)
+
+**API Pública**:
+- ✅ Autenticación por API key (header x-api-key)
+- ✅ Solo usuarios pueden generar sus propias keys
+- ✅ Admins pueden generar keys para otros
+- ✅ Validación de parámetros requeridos
+
+**Integraciones Externas**:
+- ✅ Shodan: Validación de IP + bloqueo de rangos privados
+- ✅ VirusTotal: Validación de formato de hash (MD5/SHA1/SHA256)
+- ✅ Timeout de 10 segundos en llamadas externas
+- ✅ Validación de códigos HTTP
+- ✅ Rate limiting (1000 req/hora)
+
+**Reportes**:
+- ✅ Solo propietario o admin pueden ver/editar
+- ✅ Solo admin puede cambiar estado/prioridad
+- ✅ Validación de longitud de campos
+- ✅ Sanitización de entrada XSS
+- ✅ Notas de admin solo visibles por admin
+
+**Documentación de Seguridad**:
+- 📄 `SECURITY_FIXES_REPORT.md` - Reporte detallado de 47 fixes
+- 📄 `API_USAGE_GUIDE.md` - Guía de API con best practices
+
+### Rate Limiting
+| Endpoint | Límite |
+|----------|--------|
+| General API | 100 requests / 15 minutos |
+| Login | 5 intentos / 15 minutos |
+| Integraciones (Shodan/VT) | 1000 requests / 1 hora |
+| Todos | 10MB max body size |
+
+### Recomendaciones Futuras
+- [ ] Agregar `express-csurf` para CSRF adicional
+- [ ] Implementar rotation de refresh tokens
+- [ ] Audit logging para operaciones sensibles
+- [ ] Rate limiting por usuario
+- [ ] Políticas de rotación de API keys
+- [ ] Hardening de 2FA
+
+## 📖 Documentación de Seguridad
+
+Revisa estos archivos para más detalles:
+- **SECURITY_FIXES_REPORT.md** - Informe completo de auditoría (47 issues)
+- **API_USAGE_GUIDE.md** - Guía de uso API con ejemplos cURL, JS, Python
+
 ## Autor
 Sebastián Hernández — Análisis y Desarrollo de Software, SENA 2026
