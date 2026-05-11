@@ -6,6 +6,10 @@ const chatGeneralSchema = new mongoose.Schema({
     ref: 'Usuario',
     required: true
   },
+empresaId: {
+  type: mongoose.Schema.Types.ObjectId,
+  ref: 'Usuario'
+},
   texto: {
     type: String,
     required: true
