@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Secupyme — Dashboard</title>
   <link rel="stylesheet" href="styles.css">
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
   <div class="app-container">
@@ -18,89 +18,28 @@
       </div>
 
       <div class="stats-grid">
-  <div class="stat-card" style="cursor:pointer;" onclick="window.location.href='/reportes.html'">
-    <div class="stat-icon">⚠</div>
-    <div class="stat-info">
-      <h3 id="totalReportes">0</h3>
-<div class="form-card" style="margin-top: 24px;">
-  <h3>REPORTES ÚLTIMAS 72 HORAS</h3>
-  <table class="tabla-reportes">
-    <thead>
-      <tr>
-        <th>EMPRESA</th>
-        <th>TIPO</th>
-        <th>ESTADO</th>
-        <th>FECHA</th>
-      </tr>
-    </thead>
-    <tbody id="tablaBody"></tbody>
-  </table>
-</div>
-      <p>REPORTES TOTALES</p>
-    </div>
-  </div>
-  <div class="stat-card" style="cursor:pointer;" onclick="window.location.href='/reportes.html?estado=abierto'">
-    <div class="stat-icon">🔴</div>
-    <div class="stat-info">
-      <h3 id="reportesAbiertos">0</h3>
-      <p>ABIERTOS</p>
-    </div>
-  </div>
-  <div class="stat-card" style="cursor:pointer;" onclick="window.location.href='/reportes.html?estado=en+proceso'">
-    <div class="stat-icon">🟡</div>
-    <div class="stat-info">
-      <h3 id="reportesEnProceso">0</h3>
-      <p>EN PROCESO</p>
-    </div>
-  </div>
-  <div class="stat-card" style="cursor:pointer;" onclick="window.location.href='/reportes.html?estado=resuelto'">
-    <div class="stat-icon">🟢</div>
-    <div class="stat-info">
-      <h3 id="reportesResueltos">0</h3>
-      <p>RESUELTOS</p>
-    </div>
-  </div>
-</div>
-        <div class="form-card">
-  <h3>ÚLTIMOS REPORTES</h3>
-  <table class="tabla-reportes">
-    <thead>
-      <tr>
-        <th>EMPRESA</th>
-        <th>TIPO</th>
-        <th>ESTADO</th>
-        <th>FECHA</th>
-      </tr>
-    </thead>
-    <tbody id="tablaBody"></tbody>
-  </table>
-</div>
-<div class="form-card">
-  <h3>REPORTES POR TIPO DE VULNERABILIDAD</h3>
-  <canvas id="graficaReportes" style="max-height: 300px;"></canvas>
-</div>
-        <div class="stat-card">
+        <div class="stat-card" style="cursor:pointer;" onclick="window.location.href='/reportes.html'">
           <div class="stat-icon">⚠</div>
           <div class="stat-info">
             <h3 id="totalReportes">0</h3>
             <p>REPORTES TOTALES</p>
           </div>
         </div>
-        <div class="stat-card">
+        <div class="stat-card" style="cursor:pointer;" onclick="window.location.href='/reportes.html?estado=abierto'">
           <div class="stat-icon">🔴</div>
           <div class="stat-info">
             <h3 id="reportesAbiertos">0</h3>
             <p>ABIERTOS</p>
           </div>
         </div>
-        <div class="stat-card">
+        <div class="stat-card" style="cursor:pointer;" onclick="window.location.href='/reportes.html?estado=en+proceso'">
           <div class="stat-icon">🟡</div>
           <div class="stat-info">
             <h3 id="reportesEnProceso">0</h3>
             <p>EN PROCESO</p>
           </div>
         </div>
-        <div class="stat-card">
+        <div class="stat-card" style="cursor:pointer;" onclick="window.location.href='/reportes.html?estado=resuelto'">
           <div class="stat-icon">🟢</div>
           <div class="stat-info">
             <h3 id="reportesResueltos">0</h3>
@@ -108,47 +47,37 @@
           </div>
         </div>
       </div>
+
+      <div class="form-card" style="margin-top: 24px;">
+        <h3>REPORTES ÚLTIMAS 72 HORAS</h3>
+        <table class="tabla-reportes">
+          <thead>
+            <tr>
+              <th>EMPRESA</th>
+              <th>TIPO</th>
+              <th>ESTADO</th>
+              <th>FECHA</th>
+            </tr>
+          </thead>
+          <tbody id="tablaBody"></tbody>
+        </table>
+      </div>
+
+      <div class="form-card" style="margin-top: 24px;">
+        <h3>REPORTES POR TIPO DE VULNERABILIDAD</h3>
+        <canvas id="graficaReportes" style="max-height: 300px;"></canvas>
+      </div>
     </main>
   </div>
 
   <script src="sidebar.js"></script>
   <script>
-    async function cargarUltimosReportes() {
-  const response = await fetch('/api/reportes', {
-async function cargarUltimosReportes() {
-  const response = await fetch('/api/reportes', { headers: { 'authorization': token } });
-  const reportes = await response.json();
-  const hace72h = new Date(Date.now() - 72 * 60 * 60 * 1000);
-  const recientes = reportes.filter(r => new Date(r.fecha) > hace72h);
-  const tbody = document.getElementById('tablaBody');
-  tbody.innerHTML = '';
-
-  if (recientes.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color: var(--texto-suave); font-size: 12px; padding: 24px;">Sin reportes en las últimas 72 horas</td></tr>`;
-    return;
-  }
-
-  recientes.forEach(r => {
-    const fecha = new Date(r.fecha).toLocaleString('es-CO');
-    const badgeClass = r.estado === 'abierto' ? 'badge-abierto' : r.estado === 'en proceso' ? 'badge-proceso' : 'badge-resuelto';
-    tbody.innerHTML += `
-      <tr style="cursor:pointer;" onclick="window.location.href='/reporte-detalle.html?id=${r._id}'">
-        <td>${r.empresa}</td>
-        <td>${r.tipoVulnerabilidad}</td>
-        <td><span class="badge ${badgeClass}">${r.estado.toUpperCase()}</span></td>
-        <td style="font-size: 11px; color: var(--texto-suave);">${fecha}</td>
-      </tr>
-    `;
-  });
-}
-cargarUltimosReportes();
-
+    const token = localStorage.getItem('token');
+    if (!token) window.location.href = '/';
     cargarSidebar('dashboard');
 
     async function cargarDatos() {
-      const response = await fetch('/api/reportes', {
-        headers: { 'authorization': token }
-      });
+      const response = await fetch('/api/reportes', { headers: { 'authorization': token } });
       const reportes = await response.json();
 
       document.getElementById('totalReportes').textContent = reportes.length;
@@ -156,43 +85,69 @@ cargarUltimosReportes();
       document.getElementById('reportesEnProceso').textContent = reportes.filter(r => r.estado === 'en proceso').length;
       document.getElementById('reportesResueltos').textContent = reportes.filter(r => r.estado === 'resuelto').length;
     }
-async function cargarGrafica() {
-  const response = await fetch('/api/reportes', {
-    headers: { 'authorization': token }
-  });
-  const reportes = await response.json();
 
-  const tipos = ['phishing', 'malware', 'acceso no autorizado', 'fuga de datos', 'otro'];
-  const conteos = tipos.map(t => reportes.filter(r => r.tipoVulnerabilidad === t).length);
+    async function cargarUltimosReportes() {
+      const response = await fetch('/api/reportes', { headers: { 'authorization': token } });
+      const reportes = await response.json();
+      const hace72h = new Date(Date.now() - 72 * 60 * 60 * 1000);
+      const recientes = reportes.filter(r => new Date(r.fecha) > hace72h);
+      const tbody = document.getElementById('tablaBody');
+      tbody.innerHTML = '';
 
-  new Chart(document.getElementById('graficaReportes'), {
-    type: 'bar',
-    data: {
-      labels: ['Phishing', 'Malware', 'Acceso no autorizado', 'Fuga de datos', 'Otro'],
-      datasets: [{
-        label: 'Reportes',
-        data: conteos,
-        backgroundColor: 'rgba(168, 85, 247, 0.3)',
-        borderColor: 'rgba(168, 85, 247, 1)',
-        borderWidth: 1
-      }]
-    },
-    options: {
-      responsive: true,
-      plugins: {
-        legend: { labels: { color: '#e2d9f3', font: { family: 'Share Tech Mono' } } }
-      },
-      scales: {
-        x: { ticks: { color: '#9d86c8' }, grid: { color: 'rgba(255,255,255,0.05)' } },
-        y: { ticks: { color: '#9d86c8', stepSize: 1 }, grid: { color: 'rgba(255,255,255,0.05)' } }
+      if (recientes.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color: var(--texto-suave); font-size: 12px; padding: 24px;">Sin reportes en las últimas 72 horas</td></tr>`;
+        return;
       }
-    }
-  });
-}
 
-cargarGrafica();
+      recientes.forEach(r => {
+        const fecha = new Date(r.fecha).toLocaleString('es-CO');
+        const badgeClass = r.estado === 'abierto' ? 'badge-abierto' : r.estado === 'en proceso' ? 'badge-proceso' : 'badge-resuelto';
+        tbody.innerHTML += `
+          <tr style="cursor:pointer;" onclick="window.location.href='/reporte-detalle.html?id=${r._id}'">
+            <td>${r.empresa}</td>
+            <td>${r.tipoVulnerabilidad}</td>
+            <td><span class="badge ${badgeClass}">${r.estado.toUpperCase()}</span></td>
+            <td style="font-size: 11px; color: var(--texto-suave);">${fecha}</td>
+          </tr>
+        `;
+      });
+    }
+
+    async function cargarGrafica() {
+      const response = await fetch('/api/reportes', { headers: { 'authorization': token } });
+      const reportes = await response.json();
+      const tipos = ['phishing', 'malware', 'acceso no autorizado', 'fuga de datos', 'otro'];
+      const conteos = tipos.map(t => reportes.filter(r => r.tipoVulnerabilidad === t).length);
+
+      new Chart(document.getElementById('graficaReportes'), {
+        type: 'bar',
+        data: {
+          labels: ['Phishing', 'Malware', 'Acceso no autorizado', 'Fuga de datos', 'Otro'],
+          datasets: [{
+            label: 'Reportes',
+            data: conteos,
+            backgroundColor: 'rgba(168, 85, 247, 0.3)',
+            borderColor: 'rgba(168, 85, 247, 1)',
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: { labels: { color: '#e2d9f3', font: { family: 'Share Tech Mono' } } }
+          },
+          scales: {
+            x: { ticks: { color: '#9d86c8' }, grid: { color: 'rgba(255,255,255,0.05)' } },
+            y: { ticks: { color: '#9d86c8', stepSize: 1 }, grid: { color: 'rgba(255,255,255,0.05)' } }
+          }
+        }
+      });
+    }
 
     cargarDatos();
+    cargarUltimosReportes();
+    cargarGrafica();
   </script>
+  <script src="/inactividad.js"></script>
 </body>
 </html>

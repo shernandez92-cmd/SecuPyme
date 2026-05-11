@@ -51,7 +51,16 @@
     <div id="shodanData" style="font-family: 'Share Tech Mono', monospace; font-size: 12px; color: var(--texto-suave); line-height: 2;"></div>
   </div>
 </div>o
-
+<div style="margin-top: 20px;">
+  <p style="font-size: 11px; letter-spacing: 2px; color: var(--texto-suave); margin-bottom: 8px;">CONSULTA VIRUSTOTAL</p>
+  <div style="display: flex; gap: 8px;">
+    <input type="text" id="hashVT" placeholder="Hash MD5/SHA256 del archivo..." style="flex: 1;">
+    <button class="btn-primary" style="width: auto; padding: 10px 20px;" onclick="consultarVirusTotal()">CONSULTAR</button>
+  </div>
+  <div id="resultadoVT" style="margin-top: 12px; display: none; padding: 16px; background: rgba(5,5,8,0.9); border: 1px solid var(--borde); border-radius: 2px;">
+    <div id="vtData" style="font-family: 'Share Tech Mono', monospace; font-size: 12px; color: var(--texto-suave); line-height: 2;"></div>
+  </div>
+</div>
         <div id="panelAdmin">
           <div class="form-card" style="margin-bottom: 24px;">
             <h3>ESTADO Y PRIORIDAD</h3>
@@ -152,6 +161,28 @@ async function consultarShodan() {
     `;
   }
   document.getElementById('resultadoShodan').style.display = 'block';
+}
+async function consultarVirusTotal() {
+  const hash = document.getElementById('hashVT').value;
+  if (!hash) return;
+  const response = await fetch(`/api/integraciones/virustotal/${hash}`, {
+    headers: { 'authorization': token }
+  });
+  const data = await response.json();
+  if (data.mensaje) {
+    document.getElementById('vtData').innerHTML = `<p style="color: #ef4444;">${data.mensaje}</p>`;
+  } else {
+    const nivelColor = data.malicioso > 0 ? '#ef4444' : '#10b981';
+    document.getElementById('vtData').innerHTML = `
+      <p>Archivo: ${data.nombre}</p>
+      <p style="color: ${nivelColor};">Detecciones maliciosas: ${data.malicioso}</p>
+      <p style="color: #f59e0b;">Sospechoso: ${data.sospechoso}</p>
+      <p style="color: #10b981;">Limpio: ${data.limpio}</p>
+      <p>Tipo: ${data.tipo || '—'}</p>
+      <p>Tamaño: ${data.tamaño ? (data.tamaño / 1024).toFixed(2) + ' KB' : '—'}</p>
+    `;
+  }
+  document.getElementById('resultadoVT').style.display = 'block';
 }
 async function eliminarReporte() {
   if (!confirm('¿Eliminar este reporte? Esta acción no se puede deshacer.')) return;

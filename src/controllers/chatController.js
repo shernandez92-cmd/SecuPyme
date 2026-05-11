@@ -54,5 +54,18 @@ const obtenerReportesUsuario = async (req, res) => {
     res.status(500).json({ mensaje: 'Error en el servidor', error });
   }
 };
+const borrarChat = async (req, res) => {
+  try {
+    const rol = req.usuario.rol;
+    if (rol === 'admin') {
+      await ChatGeneral.deleteMany({});
+    } else {
+      await ChatGeneral.deleteMany({ usuario: req.usuario.id });
+    }
+    res.json({ mensaje: 'Chat borrado' });
+  } catch (error) {
+    res.status(500).json({ mensaje: 'Error', error });
+  }
+};
+module.exports = { enviarMensaje, obtenerMensajes, obtenerReportesUsuario, borrarChat };
 
-module.exports = { enviarMensaje, obtenerMensajes, obtenerReportesUsuario };
