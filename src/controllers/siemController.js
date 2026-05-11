@@ -2,18 +2,24 @@ const SecurityEvent = require('../models/SecurityEvent');
 
 const registrarEvento = async (type, description, severity, userId, ip) => {
   try {
-    const evento = await new SecurityEvent({ type, description, severity, userId, ip }).save();
-    console.log('Evento guardado:', type);
+    await new SecurityEvent({ type, description, severity, userId, ip }).save();
+    console.log(`[SIEM] ${severity.toUpperCase()} — ${type}: ${description}`);
   } catch (e) {
     console.log('Error SIEM:', e.message);
   }
 };
+
 const obtenerEventos = async (req, res) => {
   try {
-    const eventos = await SecurityEvent.find()
+    const { tipo, severidad } = req.query;
+    let filtro = {};
+    if (tipo) filtro.type = tipo;
+    if (severidad) filtro.severity = severidad;
+
+    const eventos = await SecurityEvent.find(filtro)
       .populate('userId', 'nombre email empresa')
       .sort({ timestamp: -1 })
-      .limit(100);
+      .limit(200);
     res.json(eventos);
   } catch (error) {
     res.status(500).json({ mensaje: 'Error', error });
