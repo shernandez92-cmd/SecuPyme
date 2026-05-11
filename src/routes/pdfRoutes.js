@@ -1,27 +1,21 @@
 const express = require('express');
 const router = express.Router();
-const { verificarToken } = require('../middleware/auth');
-const { 
-  exportarReportes, 
-  exportarReporteIndividual, 
-  exportarAutoevaluaciones 
-} = require('../controllers/pdfController');
+const jwt = require('jsonwebtoken');
+const { exportarReportes, exportarReporteIndividual, exportarAutoevaluaciones } = require('../controllers/pdfController');
 
-/**
- * Export reports to PDF
- * Requires: Authorization header with Bearer token
- * Security: Tokens should NEVER be in query parameters (they get logged)
- */
-router.get('/reportes', verificarToken, exportarReportes);
+const verificarTokenPDF = (req, res, next) => {
+  const token = req.query.token;
+  if (!token) return res.status(401).json({ mensaje: 'Token requerido' });
+  try {
+    req.usuario = jwt.verify(token, process.env.JWT_SECRET);
+    next();
+  } catch (error) {
+    res.status(401).json({ mensaje: 'Token inválido' });
+  }
+};
 
-/**
- * Export individual report to PDF
- */
-router.get('/reportes/:id', verificarToken, exportarReporteIndividual);
-
-/**
- * Export autoevaluaciones to PDF
- */
-router.get('/autoevaluaciones', verificarToken, exportarAutoevaluaciones);
+router.get('/reportes', verificarTokenPDF, exportarReportes);
+router.get('/reportes/:id', verificarTokenPDF, exportarReporteIndividual);
+router.get('/autoevaluaciones', verificarTokenPDF, exportarAutoevaluaciones);
 
 module.exports = router;

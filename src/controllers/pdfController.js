@@ -1,7 +1,6 @@
+
 const PDFDocument = require('pdfkit');
 const Reporte = require('../models/Reporte');
-const { sendErrorResponse, asyncHandler } = require('../utils/errorHandler');
-const validators = require('../utils/validators');
 
 // Color scheme matching the app
 const colors = {
@@ -17,14 +16,6 @@ const colors = {
   verde: '#00ff41',
   rojo: '#ff4444',
   amarillo: '#ffbb44',
-};
-
-/**
- * Sanitize filename to prevent directory traversal
- */
-const sanitizeFilename = (filename) => {
-  // Remove special characters except hyphens and underscores
-  return filename.replace(/[^a-zA-Z0-9_-]/g, '').substring(0, 100);
 };
 
 // Función para crear el documento PDF base con tema oscuro
@@ -49,49 +40,27 @@ const crearSeccion = (doc, titulo) => {
   doc.moveDown(0.3);
 };
 
-/**
- * Export individual report to PDF
- */
-const exportarReporteIndividual = asyncHandler(async (req, res) => {
-  const rol = req.usuario.rol;
-  const usuarioId = req.usuario.id || req.usuario._id;
-  const reporteId = req.params.id;
-
-  // Validate ID format
-  if (!validators.isValidMongoID(reporteId)) {
-    return sendErrorResponse(res, 400, 'ID de reporte inválido', 'INVALID_ID');
-  }
-
+const exportarReporteIndividual = async (req, res) => {
   try {
+    const rol = req.usuario.rol;
+    const usuarioId = req.usuario.id || req.usuario._id;
+    const reporteId = req.params.id;
+
     const reporte = await Reporte.findById(reporteId).lean();
     
     if (!reporte) {
-      return sendErrorResponse(res, 404, 'Reporte no encontrado', 'NOT_FOUND');
+      return res.status(404).json({ mensaje: 'Reporte no encontrado' });
     }
 
-    // Authorization check
-    const isOwner = reporte.usuario.toString() === usuarioId.toString();
-    if (rol !== 'admin' && !isOwner) {
-      return sendErrorResponse(res, 403, 'No tienes permiso para descargar este reporte', 'UNAUTHORIZED');
+    if (rol !== 'admin' && reporte.usuario.toString() !== usuarioId.toString()) {
+      return res.status(403).json({ mensaje: 'No tienes permiso para descargar este reporte' });
     }
 
     const doc = new PDFDocument({ margin: 40, size: 'A4', bufferPages: false });
-    
-    // Sanitize filename
-    const safeFilename = sanitizeFilename(reporte.empresa) || 'reporte';
-    const timestamp = Date.now();
     res.setHeader('Content-Type', 'application/pdf');
-    res.setHeader('Content-Disposition', `attachment; filename=reporte-${safeFilename}-${timestamp}.pdf`);
+    res.setHeader('Content-Disposition', `attachment; filename=reporte-${reporte.empresa.replace(/\s+/g, '-')}-${Date.now()}.pdf`);
     
     doc.pipe(res);
-
-    // Error handler for document
-    doc.on('error', (err) => {
-      console.error('PDF generation error:', err);
-      if (!res.headersSent) {
-        sendErrorResponse(res, 500, 'Error generando PDF', 'PDF_ERROR');
-      }
-    });
 
     // Encabezado
     crearDocumentoPDF(doc, 'SECUPYME', 'Reporte Individual de Seguridad');
@@ -102,10 +71,10 @@ const exportarReporteIndividual = asyncHandler(async (req, res) => {
     doc.fontSize(9).fillColor(colors.textoSuave);
     const dataItems = [
       { label: 'EMPRESA', value: reporte.empresa, highlight: true },
-      { label: 'TIPO', value: (reporte.tipoVulnerabilidad || 'N/A').toUpperCase(), highlight: false },
-      { label: 'ESTADO', value: reporte.estado || 'N/A', badge: true },
-      { label: 'PRIORIDAD', value: (reporte.prioridad || 'N/A').toUpperCase(), highlight: false },
-      { label: 'FECHA', value: new Date(reporte.fecha || Date.now()).toLocaleDateString('es-CO'), highlight: false }
+      { label: 'TIPO', value: reporte.tipoVulnerabilidad.toUpperCase(), highlight: false },
+      { label: 'ESTADO', value: reporte.estado, badge: true },
+      { label: 'PRIORIDAD', value: reporte.prioridad.toUpperCase(), highlight: false },
+      { label: 'FECHA', value: new Date(reporte.fecha).toLocaleDateString('es-CO'), highlight: false }
     ];
 
     dataItems.forEach((item) => {
@@ -132,15 +101,15 @@ const exportarReporteIndividual = asyncHandler(async (req, res) => {
     doc.moveDown(0.5);
     
     // Descripción del incidente
-    criarSeccion(doc, 'DESCRIPCIÓN');
+    crearSeccion(doc, 'DESCRIPCIÓN');
     doc.fontSize(10).fillColor(colors.texto).font('Helvetica');
-    doc.text((reporte.descripcion || 'N/A').substring(0, 500), { width: 495, align: 'left' });
+    doc.text(reporte.descripcion.substring(0, 500), { width: 495, align: 'left' });
     
     doc.moveDown(1);
     
-    // Notas del admin si existen (solo para admin)
-    if (rol === 'admin' && reporte.notasAdmin && reporte.notasAdmin.trim()) {
-      criarSeccion(doc, 'NOTAS Y RECOMENDACIONES');
+    // Notas del admin si existen
+    if (reporte.notasAdmin && reporte.notasAdmin.trim()) {
+      crearSeccion(doc, 'NOTAS Y RECOMENDACIONES');
       doc.fontSize(9).fillColor(colors.texto).font('Helvetica');
       doc.text(reporte.notasAdmin.substring(0, 300), { width: 495, align: 'left' });
     }
@@ -155,51 +124,33 @@ const exportarReporteIndividual = asyncHandler(async (req, res) => {
 
     doc.end();
   } catch (error) {
-    console.error('Error en exportarReporteIndividual:', error.message);
+    console.error('Error en exportarReporteIndividual:', error);
     if (!res.headersSent) {
-      sendErrorResponse(res, 500, 'Error generando PDF', 'PDF_ERROR');
+      res.status(500).json({ mensaje: 'Error generando PDF', error: error.message });
     }
   }
-});
+};
 
-/**
- * Export all reports to PDF
- */
-const exportarReportes = asyncHandler(async (req, res) => {
-  const rol = req.usuario.rol;
-  const usuarioId = req.usuario.id || req.usuario._id;
-  
+const exportarReportes = async (req, res) => {
   try {
+    const rol = req.usuario.rol;
+    const usuarioId = req.usuario.id || req.usuario._id;
     let reportes;
 
     if (rol === 'admin') {
-      reportes = await Reporte.find()
-        .select('empresa tipoVulnerabilidad estado descripcion fecha prioridad')
-        .sort({ fecha: -1 })
-        .lean();
+      reportes = await Reporte.find().select('empresa tipoVulnerabilidad estado descripcion fecha prioridad').sort({ fecha: -1 }).lean();
     } else {
-      reportes = await Reporte.find({ usuario: usuarioId })
-        .select('empresa tipoVulnerabilidad estado descripcion fecha prioridad')
-        .sort({ fecha: -1 })
-        .lean();
+      reportes = await Reporte.find({ usuario: usuarioId }).select('empresa tipoVulnerabilidad estado descripcion fecha prioridad').sort({ fecha: -1 }).lean();
     }
 
     const doc = new PDFDocument({ margin: 40, size: 'A4', bufferPages: false });
     res.setHeader('Content-Type', 'application/pdf');
-    res.setHeader('Content-Disposition', `attachment; filename=reportes-secupyme-${Date.now()}.pdf`);
+    res.setHeader('Content-Disposition', 'attachment; filename=reportes-secupyme-' + Date.now() + '.pdf');
 
     doc.pipe(res);
 
-    // Error handler
-    doc.on('error', (err) => {
-      console.error('PDF generation error:', err);
-      if (!res.headersSent) {
-        sendErrorResponse(res, 500, 'Error generando PDF', 'PDF_ERROR');
-      }
-    });
-
     // Encabezado
-    criarDocumentoPDF(doc, 'SECUPYME', 'Reporte Consolidado de Incidentes');
+    crearDocumentoPDF(doc, 'SECUPYME', 'Reporte Consolidado de Incidentes');
     
     // Información general
     doc.fontSize(9).fillColor(colors.textoSuave).font('Helvetica');
@@ -225,12 +176,12 @@ const exportarReportes = asyncHandler(async (req, res) => {
       doc.strokeColor(colors.moradoClaro).lineWidth(1).moveTo(50, doc.y).lineTo(510, doc.y).stroke();
       doc.moveDown(1);
       
-      // Filas (limit to 50 per PDF)
-      reportes.slice(0, 50).forEach((r) => {
-        const empresa = (r.empresa || 'N/A').substring(0, 14);
-        const tipo = (r.tipoVulnerabilidad || 'N/A').substring(0, 12);
-        const desc = ((r.descripcion || 'N/A').substring(0, 20) + '...');
-        const fecha = new Date(r.fecha || Date.now()).toLocaleDateString('es-CO');
+      // Filas
+      reportes.slice(0, 20).forEach((r) => {
+        const empresa = r.empresa.substring(0, 14);
+        const tipo = r.tipoVulnerabilidad.substring(0, 12);
+        const desc = r.descripcion.substring(0, 20) + '...';
+        const fecha = new Date(r.fecha).toLocaleDateString('es-CO');
         
         doc.fontSize(8).font('Helvetica').fillColor(colors.texto);
         doc.text(empresa, colX[0], doc.y, { width: colWidths[0] });
@@ -240,7 +191,7 @@ const exportarReportes = asyncHandler(async (req, res) => {
         if (r.estado === 'abierto') doc.fillColor(colors.rojo);
         else if (r.estado === 'en proceso') doc.fillColor(colors.amarillo);
         else doc.fillColor(colors.verde);
-        doc.text((r.estado || 'N/A').substring(0, 8), colX[3], doc.y - 10, { width: colWidths[3] });
+        doc.text(r.estado.substring(0, 8), colX[3], doc.y - 10, { width: colWidths[3] });
         
         doc.fillColor(colors.textoSuave).text(fecha, colX[4], doc.y - 10, { width: colWidths[4] });
         doc.moveDown(0.9);
@@ -253,61 +204,44 @@ const exportarReportes = asyncHandler(async (req, res) => {
 
     doc.end();
   } catch (error) {
-    console.error('Error en exportarReportes:', error.message);
+    console.error('Error en exportarReportes:', error);
     if (!res.headersSent) {
-      sendErrorResponse(res, 500, 'Error generando PDF', 'PDF_ERROR');
+      res.status(500).json({ mensaje: 'Error generando PDF', error: error.message });
     }
   }
-});
-
-/**
- * Export autoevaluaciones to PDF
- */
-const exportarAutoevaluaciones = asyncHandler(async (req, res) => {
+};
+const exportarAutoevaluaciones = async (req, res) => {
   try {
     const Autoevaluacion = require('../models/Autoevaluacion');
-    const usuarioId = req.usuario.id || req.usuario._id;
-    
-    const evaluaciones = await Autoevaluacion.find({ usuario: usuarioId })
-      .populate('usuario', 'nombre empresa')
-      .lean();
+    const evaluaciones = await Autoevaluacion.find({ usuario: req.usuario.id })
+      .populate('usuario', 'nombre empresa').lean();
 
     const doc = new PDFDocument({ margin: 40, size: 'A4' });
     res.setHeader('Content-Type', 'application/pdf');
-    res.setHeader('Content-Disposition', `attachment; filename=autoevaluaciones-secupyme-${Date.now()}.pdf`);
+    res.setHeader('Content-Disposition', 'attachment; filename=autoevaluaciones-secupyme.pdf');
     doc.pipe(res);
 
-    // Error handler
-    doc.on('error', (err) => {
-      console.error('PDF generation error:', err);
-      if (!res.headersSent) {
-        sendErrorResponse(res, 500, 'Error generando PDF', 'PDF_ERROR');
-      }
-    });
-
-    criarDocumentoPDF(doc, 'SECUPYME', 'Historial de Autoevaluaciones de Seguridad');
+    crearDocumentoPDF(doc, 'SECUPYME', 'Historial de Autoevaluaciones de Seguridad');
 
     if (evaluaciones.length === 0) {
       doc.fontSize(12).fillColor(colors.textoSuave).text('No hay evaluaciones disponibles', { align: 'center' });
     } else {
-      evaluaciones.slice(0, 20).forEach((e, i) => {
-        criarSeccion(doc, `EVALUACIÓN #${i + 1}`);
+      evaluaciones.forEach((e, i) => {
+        crearSeccion(doc, `EVALUACIÓN #${i + 1}`);
         doc.fontSize(9).fillColor(colors.textoSuave).font('Helvetica');
-        doc.text(`Empresa: ${e.usuario?.empresa || 'N/A'}`);
-        doc.text(`Fecha: ${new Date(e.fecha || Date.now()).toLocaleDateString('es-CO')}`);
-        doc.text(`Puntaje: ${e.puntaje || 0}/20`);
+        doc.text(`Empresa: ${e.usuario.empresa}`);
+        doc.text(`Fecha: ${new Date(e.fecha).toLocaleDateString('es-CO')}`);
+        doc.text(`Puntaje: ${e.puntaje}/20`);
 
         if (e.nivelRiesgo === 'alto') doc.fillColor(colors.rojo);
         else if (e.nivelRiesgo === 'medio') doc.fillColor(colors.amarillo);
         else doc.fillColor(colors.verde);
-        doc.text(`Nivel de riesgo: ${(e.nivelRiesgo || 'N/A').toUpperCase()}`);
+        doc.text(`Nivel de riesgo: ${e.nivelRiesgo.toUpperCase()}`);
 
         doc.fillColor(colors.textoSuave).moveDown(0.5);
         doc.font('Helvetica-Bold').text('Recomendaciones:');
         doc.font('Helvetica');
-        if (Array.isArray(e.recomendaciones)) {
-          e.recomendaciones.forEach(r => doc.text(`  • ${r}`));
-        }
+        e.recomendaciones.forEach(r => doc.text(`  • ${r}`));
         doc.moveDown(1.5);
       });
     }
@@ -315,11 +249,8 @@ const exportarAutoevaluaciones = asyncHandler(async (req, res) => {
     doc.fontSize(8).fillColor(colors.textoSuave).text('Secupyme © 2026 - Documento Confidencial', { align: 'center' });
     doc.end();
   } catch (error) {
-    console.error('Error en exportarAutoevaluaciones:', error.message);
-    if (!res.headersSent) {
-      sendErrorResponse(res, 500, 'Error generando PDF', 'PDF_ERROR');
-    }
+    if (!res.headersSent) res.status(500).json({ mensaje: 'Error generando PDF', error: error.message });
   }
-});
+};
 
 module.exports = { exportarReportes, exportarReporteIndividual, exportarAutoevaluaciones };
