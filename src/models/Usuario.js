@@ -28,6 +28,8 @@ plan: {
   enum: ['free', 'basico', 'premium'],
   default: 'free'
 },
+twoFactorSecret: { type: String, default: null },
+twoFactorEnabled: { type: Boolean, default: false },
   fechaRegistro: {
     type: Date,
     default: Date.now

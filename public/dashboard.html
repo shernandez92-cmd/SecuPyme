@@ -18,6 +18,20 @@
       </div>
 
       <div class="stats-grid">
+        <div class="form-card">
+  <h3>ÚLTIMOS REPORTES</h3>
+  <table class="tabla-reportes">
+    <thead>
+      <tr>
+        <th>EMPRESA</th>
+        <th>TIPO</th>
+        <th>ESTADO</th>
+        <th>FECHA</th>
+      </tr>
+    </thead>
+    <tbody id="tablaBody"></tbody>
+  </table>
+</div>
 <div class="form-card">
   <h3>REPORTES POR TIPO DE VULNERABILIDAD</h3>
   <canvas id="graficaReportes" style="max-height: 300px;"></canvas>
@@ -56,6 +70,27 @@
 
   <script src="sidebar.js"></script>
   <script>
+    async function cargarUltimosReportes() {
+  const response = await fetch('/api/reportes', {
+    headers: { 'authorization': token }
+  });
+  const reportes = await response.json();
+  const tbody = document.getElementById('tablaBody');
+  tbody.innerHTML = '';
+  reportes.slice(0, 5).forEach(r => {
+    const fecha = new Date(r.fecha).toLocaleDateString('es-CO');
+    const badgeClass = r.estado === 'abierto' ? 'badge-abierto' : r.estado === 'en proceso' ? 'badge-proceso' : 'badge-resuelto';
+    tbody.innerHTML += `
+      <tr style="cursor:pointer;" onclick="window.location.href='/reporte-detalle.html?id=${r._id}'">
+        <td>${r.empresa}</td>
+        <td>${r.tipoVulnerabilidad}</td>
+        <td><span class="badge ${badgeClass}">${r.estado.toUpperCase()}</span></td>
+        <td>${fecha}</td>
+      </tr>
+    `;
+  });
+}
+cargarUltimosReportes();
     const token = localStorage.getItem('token');
     if (!token) window.location.href = '/';
 

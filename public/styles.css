@@ -610,3 +610,19 @@ textarea:focus {
   border-color: var(--acento);
   color: var(--acento);
 }
+.popup {
+  position: fixed;
+  top: 24px;
+  right: 24px;
+  background: rgba(13,6,24,0.95);
+  border: 1px solid #10b981;
+  border-radius: 4px;
+  padding: 20px 28px;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 13px;
+  color: #10b981;
+  letter-spacing: 2px;
+  z-index: 9999;
+  display: none;
+  box-shadow: 0 0 30px rgba(16,185,129,0.2);
+}

@@ -1,4 +1,4 @@
-# Secupyme 🛡️
+# Secupyme
 
 **Cybersecurity Platform for Colombian Small & Medium Enterprises (PYMEs)**
 
@@ -10,13 +10,13 @@ Secupyme is a specialized web platform designed to help Colombian SMEs manage se
 
 ### Key Features
 
-- 📋 **Incident Reporting**: Report and track security incidents with detailed information
-- 📊 **Security Assessment**: Automated self-assessment with weighted scoring (0-10 scale)
-- 📄 **PDF Reports**: Generate professional security reports for stakeholders
-- 💬 **Real-Time Chat**: Communicate with security team about incidents
-- 👥 **Role-Based Access**: Separate dashboards for admins and clients
-- 📧 **Email Notifications**: Automatic alerts for incident updates
-- 🎨 **Dark Cybersecurity Theme**: Professional, security-focused interface
+- **Incident Reporting**: Report and track security incidents with detailed information
+- **Security Assessment**: Automated self-assessment with weighted scoring (0-10 scale)
+- **PDF Reports**: Generate professional security reports for stakeholders
+- **Real-Time Chat**: Communicate with security team about incidents
+- **Role-Based Access**: Separate dashboards for admins and clients
+- **Email Notifications**: Automatic alerts for incident updates
+- **Dark Cybersecurity Theme**: Professional, security-focused interface
 
 ---
 
@@ -169,16 +169,16 @@ Admin can:
 ### 2. Security Self-Assessment
 
 10-question evaluation covering:
-- ✅ Password security practices
-- ✅ Two-factor authentication
-- ✅ System updates
-- ✅ Software licensing
-- ✅ Backup procedures
-- ✅ External backups
-- ✅ Employee training
-- ✅ Phishing recognition
-- ✅ Firewall protection
-- ✅ WiFi security
+- Password security practices
+- Two-factor authentication
+- System updates
+- Software licensing
+- Backup procedures
+- External backups
+- Employee training
+- Phishing recognition
+- Firewall protection
+- WiFi security
 
 **Scoring**: 0-10 points with automated risk level and recommendations
 
@@ -260,7 +260,7 @@ See [DEPLOYMENT-RENDER.md](./DEPLOYMENT-RENDER.md) for detailed instructions.
 
 ## Security
 
-✅ **Implemented Security Features**:
+**Implemented Security Features**:
 - Password hashing with bcryptjs
 - JWT token-based authentication
 - MongoDB injection prevention (Mongoose)
@@ -268,7 +268,7 @@ See [DEPLOYMENT-RENDER.md](./DEPLOYMENT-RENDER.md) for detailed instructions.
 - Environment variable isolation
 - Role-based access control
 
-⚠️ **Recommended Enhancements**:
+**Recommended Enhancements**:
 - Add rate limiting
 - Implement CORS
 - Add request validation
@@ -383,14 +383,14 @@ Before deployment:
 
 ## Future Enhancements
 
-- 🔔 Push notifications
-- 📱 Mobile app (React Native)
-- 📈 Advanced analytics dashboard
-- 🔐 Two-factor authentication for users
-- 🌍 Multi-language support
-- ♿ Enhanced accessibility
-- 📊 Custom report templates
-- 🔄 Integration with third-party security tools
+- Push notifications
+- Mobile app (React Native)
+- Advanced analytics dashboard
+- Two-factor authentication for users
+- Multi-language support
+- Enhanced accessibility
+- Custom report templates
+- Integration with third-party security tools
 
 ---
 
@@ -413,10 +413,10 @@ Before deployment:
 
 ## Support
 
-- 📖 Read [TECHNICAL-DOCS.md](./TECHNICAL-DOCS.md) for detailed documentation
-- 🚀 See [DEPLOYMENT-RENDER.md](./DEPLOYMENT-RENDER.md) for deployment help
-- 📧 Contact: support@secupyme.com
-- 💬 GitHub Issues: Report bugs and request features
+- Read [TECHNICAL-DOCS.md](./TECHNICAL-DOCS.md) for detailed documentation
+- See [DEPLOYMENT-RENDER.md](./DEPLOYMENT-RENDER.md) for deployment help
+- Contact: support@secupyme.com
+- GitHub Issues: Report bugs and request features
 
 ---
 
@@ -431,14 +431,14 @@ May 2026
 ## Changelog
 
 ### v1.0.0 (May 8, 2026)
-- ✨ Initial release
-- 📋 Incident reporting system
-- 📊 Security self-assessment
-- 📄 PDF report generation
-- 💬 Real-time chat
-- 👥 Role-based access control
-- 📧 Email notifications
+- Initial release
+- Incident reporting system
+- Security self-assessment
+- PDF report generation
+- Real-time chat
+- Role-based access control
+- Email notifications
 
 ---
 
-**Secure your business. Report incidents. Stay protected. 🛡️**
+**Secure your business. Report incidents. Stay protected.**

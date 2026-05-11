@@ -13,6 +13,9 @@ const crearReporte = async (req, res) => {
   try {
     const { empresa, tipoVulnerabilidad, descripcion } = req.body;
 
+    if (!empresa || !tipoVulnerabilidad || !descripcion) {
+      return res.status(400).json({ mensaje: 'Todos los campos son obligatorios' });
+    }
     const reporte = new Reporte({
       usuario: req.usuario.id,
       empresa,
@@ -21,6 +24,8 @@ const crearReporte = async (req, res) => {
     });
 
     await reporte.save();
+    const { registrarEvento } = require('./siemController');
+await registrarEvento('nuevo_reporte', `Nuevo reporte de ${empresa}`, 'medium', req.usuario.id, req.ip);
 
     const mailOptions = {
       from: process.env.EMAIL_USER,
