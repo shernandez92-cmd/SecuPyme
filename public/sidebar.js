@@ -14,8 +14,8 @@ function cargarSidebar(paginaActiva) {
   const sidebar = `
     <nav class="sidebar">
       <div class="sidebar-logo">
-        <h1>SECUPYME</h1>
-        <p>PROTECCIÓN DIGITAL</p>
+        <img src="/Logo.png" style="width: 130px; margin-bottom: 6px; display: block;">
+        <p style="font-family: 'Share Tech Mono', monospace; font-size: 9px; color: #6b5a8a; letter-spacing: 2px;">CIBERSEGURIDAD SIMPLIFICADA</p>
       </div>
       <ul class="sidebar-menu">
         <li class="${paginaActiva === 'dashboard' ? 'active' : ''}">
@@ -35,7 +35,7 @@ function cargarSidebar(paginaActiva) {
         </li>
         ${menuAdmin}
         <li>
-          <a href="#" onclick="cerrarSesion()">CERRAR SESIÓN</a>
+          <a href="#" onclick="confirmarCerrarSesion()">CERRAR SESIÓN</a>
         </li>
       </ul>
       <div class="sidebar-user">
@@ -45,10 +45,16 @@ function cargarSidebar(paginaActiva) {
     </nav>
 
     <div id="chat-flotante" style="position: fixed; bottom: 24px; right: 24px; z-index: 1000;">
-      <div id="chat-ventana" style="display:none; width: 340px; height: 480px; background: #0d0618; border: 1px solid #4a1a8a; border-radius: 4px; flex-direction: column; box-shadow: 0 0 40px rgba(124,58,237,0.2);">
+      <div id="chat-ventana" style="display:none; width: 360px; height: 520px; background: #0d0618; border: 1px solid #4a1a8a; border-radius: 4px; flex-direction: column; box-shadow: 0 0 40px rgba(124,58,237,0.2);">
         <div style="padding: 16px; border-bottom: 1px solid #1a0a2e; display: flex; justify-content: space-between; align-items: center;">
-          <span style="font-family: 'Share Tech Mono', monospace; font-size: 12px; color: #a855f7; letter-spacing: 2px;">SOPORTE SECUPYME</span>
-          <button onclick="toggleChat()" style="background: none; border: none; color: #6b5a8a; cursor: pointer; font-size: 16px;">✕</button>
+          <div>
+            <span style="font-family: 'Share Tech Mono', monospace; font-size: 12px; color: #a855f7; letter-spacing: 2px;">SOPORTE SECUPYME</span>
+            <p style="font-size: 10px; color: #6b5a8a; margin-top: 2px;">En línea</p>
+          </div>
+          <div style="display: flex; gap: 8px; align-items: center;">
+            <button onclick="borrarChat()" style="background: none; border: none; color: #6b5a8a; cursor: pointer; font-size: 12px; font-family: 'Share Tech Mono', monospace;" title="Borrar historial">🗑</button>
+            <button onclick="toggleChat()" style="background: none; border: none; color: #6b5a8a; cursor: pointer; font-size: 16px;">✕</button>
+          </div>
         </div>
         <div id="chat-mensajes" style="flex: 1; overflow-y: auto; padding: 16px;"></div>
         <div style="padding: 12px; border-top: 1px solid #1a0a2e;">
@@ -79,6 +85,16 @@ function toggleChat() {
   if (chatAbierto) cargarChatMensajes();
 }
 
+async function borrarChat() {
+  if (!confirm('¿Borrar el historial de este chat?')) return;
+  const token = localStorage.getItem('token');
+  await fetch('/api/chat/borrar', {
+    method: 'DELETE',
+    headers: { 'authorization': token }
+  });
+  cargarChatMensajes();
+}
+
 async function cargarReportesChat() {
   const token = localStorage.getItem('token');
   try {
@@ -105,6 +121,15 @@ async function cargarChatMensajes() {
     const contenedor = document.getElementById('chat-mensajes');
     if (!contenedor) return;
     contenedor.innerHTML = '';
+
+    contenedor.innerHTML += `
+      <div style="margin-bottom: 12px; text-align: left;">
+        <div style="display: inline-block; background: rgba(124,58,237,0.15); border: 1px solid #4a1a8a; padding: 8px 14px; border-radius: 2px; font-size: 11px; color: #a855f7; max-width: 95%; line-height: 1.6;">
+          👋 Gracias por comunicarte con SecuPyme. En un momento, uno de nuestros expertos se comunicará contigo para atender tu solicitud.
+        </div>
+      </div>
+    `;
+
     mensajes.forEach(m => {
       const esYo = m.usuario.rol === rol;
       const fecha = new Date(m.fecha).toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' });
@@ -141,9 +166,15 @@ async function enviarChatMensaje() {
   cargarChatMensajes();
 }
 
+function confirmarCerrarSesion() {
+  if (confirm('¿Seguro que deseas cerrar sesión?')) {
+    localStorage.clear();
+    window.location.href = '/';
+  }
+}
+
 function cerrarSesion() {
-  localStorage.clear();
-  window.location.href = '/';
+  confirmarCerrarSesion();
 }
 
 setInterval(() => {

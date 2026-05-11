@@ -18,6 +18,35 @@
       </div>
 
       <div class="stats-grid">
+  <div class="stat-card" style="cursor:pointer;" onclick="window.location.href='/reportes.html'">
+    <div class="stat-icon">⚠</div>
+    <div class="stat-info">
+      <h3 id="totalReportes">0</h3>
+      <p>REPORTES TOTALES</p>
+    </div>
+  </div>
+  <div class="stat-card" style="cursor:pointer;" onclick="window.location.href='/reportes.html?estado=abierto'">
+    <div class="stat-icon">🔴</div>
+    <div class="stat-info">
+      <h3 id="reportesAbiertos">0</h3>
+      <p>ABIERTOS</p>
+    </div>
+  </div>
+  <div class="stat-card" style="cursor:pointer;" onclick="window.location.href='/reportes.html?estado=en+proceso'">
+    <div class="stat-icon">🟡</div>
+    <div class="stat-info">
+      <h3 id="reportesEnProceso">0</h3>
+      <p>EN PROCESO</p>
+    </div>
+  </div>
+  <div class="stat-card" style="cursor:pointer;" onclick="window.location.href='/reportes.html?estado=resuelto'">
+    <div class="stat-icon">🟢</div>
+    <div class="stat-info">
+      <h3 id="reportesResueltos">0</h3>
+      <p>RESUELTOS</p>
+    </div>
+  </div>
+</div>
         <div class="form-card">
   <h3>ÚLTIMOS REPORTES</h3>
   <table class="tabla-reportes">
