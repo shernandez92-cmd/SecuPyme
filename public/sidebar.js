@@ -205,3 +205,65 @@ function toggleModo() {
     if (indicador) indicador.style.left = '22px';
   }
 }
+let socket;
+let mensajesNoLeidos = 0;
+let empresaIdActual;
+
+function inicializarSocket() {
+  const token = localStorage.getItem('token');
+  if (!token) return;
+
+  socket = io();
+  const payload = JSON.parse(atob(token.split('.')[1]));
+  empresaIdActual = payload.id;
+
+  socket.emit('identificar', {
+    userId: payload.id,
+    empresaId: payload.id,
+    nombre: localStorage.getItem('nombre'),
+    rol: localStorage.getItem('rol')
+  });
+
+  socket.on('nuevoMensaje', (mensaje) => {
+    const esMio = mensaje.usuario._id === empresaIdActual || mensaje.usuario.id === empresaIdActual;
+    if (!esMio) {
+      mensajesNoLeidos++;
+      actualizarBadge();
+      reproducirSonido();
+    }
+    const contenedor = document.getElementById('chat-mensajes');
+    if (contenedor) agregarMensajeDOM(mensaje);
+  });
+}
+
+function actualizarBadge() {
+  const badge = document.getElementById('badge-noLeidos');
+  if (!badge) return;
+  badge.style.display = mensajesNoLeidos > 0 ? 'block' : 'none';
+  badge.textContent = mensajesNoLeidos > 9 ? '9+' : mensajesNoLeidos;
+}
+
+function reproducirSonido() {
+  try {
+    const audio = new Audio('/notificacion.mp3');
+    audio.volume = 0.3;
+    audio.play();
+  } catch (e) {}
+}
+
+function agregarMensajeDOM(m) {
+  const contenedor = document.getElementById('chat-mensajes');
+  if (!contenedor) return;
+  const rol = localStorage.getItem('rol');
+  const esYo = m.usuario._id === empresaIdActual || m.usuario.id === empresaIdActual;
+  const fecha = new Date(m.fecha).toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' });
+  contenedor.innerHTML += `
+    <div style="margin-bottom: 10px; text-align: ${esYo ? 'right' : 'left'};">
+      <span style="font-size: 9px; color: #6b5a8a;">${m.usuario.nombre} · ${fecha}</span>
+      <div style="display: inline-block; background: ${esYo ? 'rgba(124,58,237,0.2)' : 'rgba(255,255,255,0.05)'}; border: 1px solid ${esYo ? '#7c3aed' : '#1a0a2e'}; padding: 6px 12px; border-radius: 2px; margin-top: 2px; font-size: 12px; max-width: 85%; word-break: break-word;">
+        ${m.texto}
+      </div>
+    </div>
+  `;
+  contenedor.scrollTop = contenedor.scrollHeight;
+}
