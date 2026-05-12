@@ -1,6 +1,29 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+<div class="stats-grid" style="grid-template-columns: repeat(3, 1fr); margin-bottom: 24px;">
+  <div class="stat-card">
+    <div class="stat-icon">📊</div>
+    <div class="stat-info">
+      <h3 id="totalEventos">0</h3>
+      <p>TOTAL EVENTOS</p>
+    </div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon">🔴</div>
+    <div class="stat-info">
+      <h3 id="eventosAltos">0</h3>
+      <p>SEVERIDAD ALTA</p>
+    </div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon">📅</div>
+    <div class="stat-info">
+      <h3 id="eventosHoy">0</h3>
+      <p>HOY</p>
+    </div>
+  </div>
+</div>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Secupyme — SIEM</title>
