@@ -1,131 +1,72 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
+const token = localStorage.getItem('token');
+const rol = localStorage.getItem('rol');
+if (!token) window.location.href = '/';
+if (rol !== 'admin') window.location.href = '/dashboard.html';
+cargarSidebar('siem');
+
+async function cargarEstadisticas() {
+  const response = await fetch('/api/siem/estadisticas', { headers: { 'authorization': token } });
+  const data = await response.json();
+  document.getElementById('statTotal').textContent = data.total;
+  document.getElementById('statAltos').textContent = data.altos;
+  document.getElementById('statHoy').textContent = data.hoy;
+}
 <div class="stats-grid" style="grid-template-columns: repeat(3, 1fr); margin-bottom: 24px;">
   <div class="stat-card">
     <div class="stat-icon">📊</div>
     <div class="stat-info">
-      <h3 id="totalEventos">0</h3>
-      <p>TOTAL EVENTOS</p>
+      <h3 id="statTotal">0</h3>
+      <p>CONTEO DE EVENTOS</p>
     </div>
   </div>
   <div class="stat-card">
     <div class="stat-icon">🔴</div>
     <div class="stat-info">
-      <h3 id="eventosAltos">0</h3>
+      <h3 id="statAltos">0</h3>
       <p>SEVERIDAD ALTA</p>
     </div>
   </div>
   <div class="stat-card">
     <div class="stat-icon">📅</div>
     <div class="stat-info">
-      <h3 id="eventosHoy">0</h3>
+      <h3 id="statHoy">0</h3>
       <p>HOY</p>
     </div>
   </div>
 </div>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Secupyme — SIEM</title>
-  <link rel="stylesheet" href="styles.css">
-</head>
-<body>
-  <div class="app-container">
-    <div id="sidebar-container"></div>
+async function cargarEventos() {
+  const tipo = document.getElementById('filtroTipo').value;
+  const severidad = document.getElementById('filtroSeveridad').value;
+  let url = '/api/siem/events';
+  const params = [];
+  if (tipo) params.push(`tipo=${tipo}`);
+  if (severidad) params.push(`severidad=${severidad}`);
+  if (params.length) url += '?' + params.join('&');
 
-    <main class="main-content">
-      <div class="page-header">
-        <h2>SIEM — EVENTOS DE SEGURIDAD</h2>
-        <p>Registro de actividad en tiempo real</p>
-      </div>
+  const response = await fetch(url, { headers: { 'authorization': token } });
+  const eventos = await response.json();
 
-      <div class="form-card" style="margin-bottom: 24px;">
-        <h3>FILTROS</h3>
-        <div class="form-row">
-          <div class="form-group">
-            <label>TIPO DE EVENTO</label>
-            <select id="filtroTipo" onchange="cargarEventos()">
-              <option value="">TODOS</option>
-              <option value="login_exitoso">LOGIN EXITOSO</option>
-              <option value="login_fallido">LOGIN FALLIDO</option>
-              <option value="nuevo_reporte">NUEVO REPORTE</option>
-              <option value="cambio_rol">CAMBIO DE ROL</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label>SEVERIDAD</label>
-            <select id="filtroSeveridad" onchange="cargarEventos()">
-              <option value="">TODAS</option>
-              <option value="high">ALTA</option>
-              <option value="medium">MEDIA</option>
-              <option value="low">BAJA</option>
-            </select>
-          </div>
-        </div>
-      </div>
+  document.getElementById('conteoEventos').textContent = `(${eventos.length} eventos)`;
+  const tbody = document.getElementById('tablaEventos');
+  tbody.innerHTML = '';
 
-      <div class="form-card">
-        <h3>EVENTOS <span id="totalEventos" style="color: var(--texto-suave); font-size: 12px;"></span></h3>
-        <table class="tabla-reportes">
-          <thead>
-            <tr>
-              <th>TIPO</th>
-              <th>DESCRIPCIÓN</th>
-              <th>USUARIO</th>
-              <th>SEVERIDAD</th>
-              <th>IP</th>
-              <th>FECHA</th>
-            </tr>
-          </thead>
-          <tbody id="tablaEventos"></tbody>
-        </table>
-      </div>
-    </main>
-  </div>
+  eventos.forEach(e => {
+    const fecha = new Date(e.timestamp).toLocaleString('es-CO');
+    const badgeClass = e.severity === 'high' ? 'badge-abierto' : e.severity === 'medium' ? 'badge-proceso' : 'badge-resuelto';
+    const usuario = e.userId ? e.userId.nombre : '—';
+    tbody.innerHTML += `
+      <tr>
+        <td style="font-family: 'Share Tech Mono', monospace; color: var(--acento); font-size: 11px;">${e.type.toUpperCase()}</td>
+        <td>${e.description}</td>
+        <td style="font-size: 12px; color: var(--texto-suave);">${usuario}</td>
+        <td><span class="badge ${badgeClass}">${e.severity.toUpperCase()}</span></td>
+        <td style="font-family: 'Share Tech Mono', monospace; font-size: 11px; color: var(--texto-suave);">${e.ip || '—'}</td>
+        <td style="font-size: 11px; color: var(--texto-suave);">${fecha}</td>
+      </tr>
+    `;
+  });
+}
 
-  <script src="sidebar.js"></script>
-  <script>
-    const token = localStorage.getItem('token');
-    const rol = localStorage.getItem('rol');
-    if (!token) window.location.href = '/';
-    if (rol !== 'admin') window.location.href = '/dashboard.html';
-    cargarSidebar('siem');
-
-    async function cargarEventos() {
-      const tipo = document.getElementById('filtroTipo').value;
-      const severidad = document.getElementById('filtroSeveridad').value;
-      let url = '/api/siem/events';
-      const params = [];
-      if (tipo) params.push(`tipo=${tipo}`);
-      if (severidad) params.push(`severidad=${severidad}`);
-      if (params.length) url += '?' + params.join('&');
-
-      const response = await fetch(url, { headers: { 'authorization': token } });
-      const eventos = await response.json();
-
-      document.getElementById('totalEventos').textContent = `(${eventos.length} eventos)`;
-      const tbody = document.getElementById('tablaEventos');
-      tbody.innerHTML = '';
-
-      eventos.forEach(e => {
-        const fecha = new Date(e.timestamp).toLocaleString('es-CO');
-        const badgeClass = e.severity === 'high' ? 'badge-abierto' : e.severity === 'medium' ? 'badge-proceso' : 'badge-resuelto';
-        const usuario = e.userId ? e.userId.nombre : '—';
-        tbody.innerHTML += `
-          <tr>
-            <td style="font-family: 'Share Tech Mono', monospace; color: var(--acento); font-size: 11px;">${e.type.toUpperCase()}</td>
-            <td>${e.description}</td>
-            <td style="font-size: 12px; color: var(--texto-suave);">${usuario}</td>
-            <td><span class="badge ${badgeClass}">${e.severity.toUpperCase()}</span></td>
-            <td style="font-family: 'Share Tech Mono', monospace; font-size: 11px; color: var(--texto-suave);">${e.ip || '—'}</td>
-            <td style="font-size: 11px; color: var(--texto-suave);">${fecha}</td>
-          </tr>
-        `;
-      });
-    }
-
-    cargarEventos();
-    setInterval(cargarEventos, 10000);
-  </script>
-</body>
-</html>
+cargarEstadisticas();
+cargarEventos();
+setInterval(cargarEventos, 10000);

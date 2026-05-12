@@ -37,7 +37,7 @@ function cargarSidebar(paginaActiva) {
       </div>
       <div style="padding: 12px 24px; border-top: 1px solid var(--borde); display: flex; align-items: center; gap: 8px;">
         <span style="font-size: 10px; color: var(--texto-suave); font-family: 'Share Tech Mono', monospace;">MODO</span>
-        <button onclick="toggleModo()" id="btnModo" style="background: var(--morado-claro); border: none; border-radius: 12px; width: 40px; height: 20px; cursor: pointer; position: relative; transition: all 0.3s;">
+        <button onclick="toggleModo()" id="btnModo" style="background: var(--morado-claro); border: none; border-radius: 12px; width: 40px; height: 20px; cursor: pointer; position: relative;">
           <span id="indicadorModo" style="position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; background: white; border-radius: 50%; transition: all 0.3s;"></span>
         </button>
         <span id="textoModo" style="font-size: 10px; color: var(--texto-suave); font-family: 'Share Tech Mono', monospace;">DARK</span>
@@ -75,7 +75,6 @@ function cargarSidebar(paginaActiva) {
   `;
 
   document.getElementById('sidebar-container').innerHTML = sidebar;
-
   inicializarModo();
   inicializarSocket();
   cargarReportesChat();
@@ -85,31 +84,27 @@ function cargarSidebar(paginaActiva) {
 function inicializarSocket() {
   const token = localStorage.getItem('token');
   const rol = localStorage.getItem('rol');
+  if (!token) return;
 
   socket = io();
-
   const payload = JSON.parse(atob(token.split('.')[1]));
   empresaIdActual = payload.id;
 
   socket.emit('identificar', {
     userId: payload.id,
     empresaId: payload.id,
-    rol: rol,
+    rol,
     nombre: localStorage.getItem('nombre')
   });
 
   socket.on('nuevoMensaje', (mensaje) => {
     const esMio = mensaje.usuario._id === empresaIdActual || mensaje.usuario.id === empresaIdActual;
-
-    if (!chatAbierto && !esMio) {
+    if (!esMio && !chatAbierto) {
       mensajesNoLeidos++;
       actualizarBadge();
       reproducirSonido();
     }
-
-    if (chatAbierto) {
-      agregarMensajeAlChat(mensaje);
-    }
+    agregarMensajeAlChat(mensaje);
   });
 
   socket.on('usuariosOnline', (total) => {
@@ -198,7 +193,6 @@ async function cargarChatMensajes() {
     const contenedor = document.getElementById('chat-mensajes');
     if (!contenedor) return;
     contenedor.innerHTML = '';
-
     contenedor.innerHTML += `
       <div style="margin-bottom: 12px; text-align: left;">
         <div style="display: inline-block; background: rgba(124,58,237,0.15); border: 1px solid #4a1a8a; padding: 8px 14px; border-radius: 2px; font-size: 11px; color: #a855f7; max-width: 95%; line-height: 1.6;">
@@ -206,7 +200,6 @@ async function cargarChatMensajes() {
         </div>
       </div>
     `;
-
     mensajes.forEach(m => agregarMensajeAlChat(m));
   } catch (e) {}
 }
@@ -256,10 +249,7 @@ function aplicarModo(modo) {
     root.style.setProperty('--texto', '#1a0a2e');
     root.style.setProperty('--texto-suave', '#6b5a8a');
     root.style.setProperty('--borde', '#e8e0f5');
-    if (indicador) {
-      indicador.style.left = '22px';
-      indicador.style.background = '#7c3aed';
-    }
+    if (indicador) { indicador.style.left = '22px'; indicador.style.background = '#7c3aed'; }
     if (texto) texto.textContent = 'LIGHT';
   } else {
     root.style.setProperty('--negro', '#050508');
@@ -271,10 +261,7 @@ function aplicarModo(modo) {
     root.style.setProperty('--texto', '#e2d9f3');
     root.style.setProperty('--texto-suave', '#6b5a8a');
     root.style.setProperty('--borde', '#1a0a2e');
-    if (indicador) {
-      indicador.style.left = '2px';
-      indicador.style.background = 'white';
-    }
+    if (indicador) { indicador.style.left = '2px'; indicador.style.background = 'white'; }
     if (texto) texto.textContent = 'DARK';
   }
 }
