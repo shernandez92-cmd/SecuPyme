@@ -626,84 +626,64 @@ textarea:focus {
   display: none;
   box-shadow: 0 0 30px rgba(16,185,129,0.2);
 }
-@media (max-width: 768px) {
-  .app-container {
-    flex-direction: column;
-  }
-
-  .sidebar {
-    width: 100%;
-    height: auto;
-    position: relative;
-    padding: 16px 0;
-  }
-
-  .sidebar-menu {
-    display: flex;
-    overflow-x: auto;
-    padding: 0 16px;
-  }
-
-  .sidebar-menu li a {
-    white-space: nowrap;
-    padding: 10px 16px;
-    border-left: none;
-    border-bottom: 2px solid transparent;
-  }
-
-  .sidebar-menu li.active a,
-  .sidebar-menu li a:hover {
-    border-left: none;
-    border-bottom-color: var(--acento);
-  }
-
-  .sidebar-user {
-    display: none;
-  }
-
-  .main-content {
-    margin-left: 0;
-    padding: 24px 16px;
-  }
-
-  .stats-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  .form-row {
-    grid-template-columns: 1fr;
-  }
-
-  .stat-info h3 {
-    font-size: 24px;
-  }
-
-  #chat-flotante {
-    bottom: 16px;
-    right: 16px;
-  }
-
-  #chat-ventana {
-    width: calc(100vw - 32px) !important;
-  }
-
-  .tabla-reportes {
-    font-size: 11px;
-  }
-
-  .tabla-reportes th,
-  .tabla-reportes td {
-    padding: 8px;
-  }
+.spinner {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--borde);
+  border-top-color: var(--acento);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
 }
 
-@media (max-width: 480px) {
-  .stats-grid {
-    grid-template-columns: 1fr;
-  }
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
 
-  .login-box {
-    padding: 32px 24px;
-    margin: 16px;
-  }
+.loading {
+  text-align: center;
+  padding: 40px;
+  font-family: 'Share Tech Mono', monospace;
+  color: var(--texto-suave);
+  font-size: 12px;
+  letter-spacing: 2px;
+}
+/* LIGHT MODE */
+body.light {
+  --negro: #f8f7ff;
+  --morado-oscuro: #f0ebff;
+  --morado: #7c3aed;
+  --morado-claro: #7c3aed;
+  --acento: #6d28d9;
+  --acento-brillante: #7c3aed;
+  --texto: #1a0a2e;
+  --texto-suave: #6b5a8a;
+  --borde: #e8e0f5;
+}
+
+body.light .stat-card {
+  background: #ffffff;
+  border-color: #e8e0f5;
+}
+
+body.light .form-card {
+  background: #ffffff;
+  border-color: #e8e0f5;
+}
+
+body.light .sidebar {
+  background: #f0ebff;
+  border-color: #e8e0f5;
+}
+
+body.light .tabla-reportes td {
+  border-color: #e8e0f5;
+}
+
+body.light select,
+body.light input,
+body.light textarea {
+  background: #ffffff;
+  border-color: #e8e0f5;
+  color: #1a0a2e;
 }

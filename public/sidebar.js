@@ -42,6 +42,12 @@ function cargarSidebar(paginaActiva) {
         <p>${nombre}</p>
         <span>${rol ? rol.toUpperCase() : ''}</span>
       </div>
+      <div style="padding: 12px 24px; border-top: 1px solid var(--borde); display: flex; align-items: center; gap: 8px;">
+  <span style="font-size: 10px; color: var(--texto-suave); font-family: 'Share Tech Mono', monospace;">MODO</span>
+  <button onclick="toggleModo()" style="background: var(--morado-claro); border: none; border-radius: 12px; width: 40px; height: 20px; cursor: pointer; position: relative;">
+   <span id="toggleIndicador" style="position: absolute; top: 2px; left: ${localStorage.getItem('modo') === 'light' ? '22px' : '2px'}; width: 16px; height: 16px; background: white; border-radius: 50%; transition: left 0.3s;"></span>
+  </button>
+</div>
     </nav>
 
     <div id="chat-flotante" style="position: fixed; bottom: 24px; right: 24px; z-index: 1000;">
@@ -73,7 +79,8 @@ function cargarSidebar(paginaActiva) {
 
   document.getElementById('sidebar-container').innerHTML = sidebar;
   cargarReportesChat();
-  cargarChatMensajes();
+  cargarChatMensajes(); 
+  inicializarModo();
 }
 
 let chatAbierto = false;
@@ -180,3 +187,21 @@ function cerrarSesion() {
 setInterval(() => {
   if (chatAbierto) cargarChatMensajes();
 }, 5000);
+function inicializarModo() {
+  const modo = localStorage.getItem('modo') || 'dark';
+  if (modo === 'light') document.body.classList.add('light');
+}
+
+function toggleModo() {
+  const esLight = document.body.classList.contains('light');
+  const indicador = document.getElementById('toggleIndicador');
+  if (esLight) {
+    document.body.classList.remove('light');
+    localStorage.setItem('modo', 'dark');
+    if (indicador) indicador.style.left = '2px';
+  } else {
+    document.body.classList.add('light');
+    localStorage.setItem('modo', 'light');
+    if (indicador) indicador.style.left = '22px';
+  }
+}
