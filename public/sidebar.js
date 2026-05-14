@@ -1,3 +1,9 @@
+// Variables globales
+let socket;
+let empresaIdActual;
+let mensajesNoLeidos = 0;
+
+// =================== SIDEBAR ===================
 function cargarSidebar(paginaActiva) {
   const rol = localStorage.getItem('rol');
   const nombre = localStorage.getItem('nombre');
@@ -42,11 +48,10 @@ function cargarSidebar(paginaActiva) {
   document.getElementById('sidebar-container').innerHTML = sidebar;
   inicializarModo();
   inicializarChat();
-document.addEventListener('DOMContentLoaded', () => {
   inicializarSocket();
-});
 }
 
+// =================== MODO ===================
 function inicializarModo() {
   const modo = localStorage.getItem('modo') || 'dark';
   if (modo === 'light') document.body.classList.add('light');
@@ -66,8 +71,10 @@ function toggleModo() {
   }
 }
 
+// =================== SESION ===================
 function confirmarCerrarSesion() {
   if (confirm('¿Seguro que deseas cerrar sesión?')) {
+    if (socket) socket.disconnect();
     localStorage.clear();
     window.location.href = '/';
   }
@@ -75,4 +82,83 @@ function confirmarCerrarSesion() {
 
 function cerrarSesion() {
   confirmarCerrarSesion();
+}
+
+// =================== SOCKET ===================
+function inicializarSocket() {
+  const token = localStorage.getItem('token');
+  if (!token) return;
+  if (socket && socket.connected) return;
+
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    empresaIdActual = payload.id;
+
+    socket = io();
+
+    socket.on('connect', () => {
+      console.log('Socket conectado:', socket.id);
+      socket.emit('identificar', {
+        userId: payload.id,
+        empresaId: payload.id,
+        nombre: localStorage.getItem('nombre'),
+        rol: localStorage.getItem('rol')
+      });
+    });
+
+    socket.on('nuevoMensaje', (mensaje) => {
+      const esMio = mensaje.usuario._id === empresaIdActual || mensaje.usuario.id === empresaIdActual;
+
+      if (!esMio) {
+        mensajesNoLeidos++;
+        actualizarBadge();
+        reproducirSonido();
+      }
+
+      const ventana = document.getElementById('chat-ventana');
+      const estaAbierto = ventana && ventana.style.display === 'flex';
+      if (estaAbierto) {
+        agregarMensajeDOM(mensaje);
+      }
+    });
+
+    socket.on('disconnect', () => {
+      console.log('Socket desconectado');
+    });
+
+  } catch (e) {
+    console.error('Error inicializando socket:', e);
+  }
+}
+
+// =================== CHAT DOM ===================
+function agregarMensajeDOM(m) {
+  const contenedor = document.getElementById('chat-mensajes');
+  if (!contenedor) return;
+  const esYo = m.usuario._id === empresaIdActual || m.usuario.id === empresaIdActual;
+  const fecha = new Date(m.fecha).toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' });
+  contenedor.innerHTML += `
+    <div style="margin-bottom: 10px; text-align: ${esYo ? 'right' : 'left'};">
+      <span style="font-size: 9px; color: #6b5a8a;">${m.usuario.nombre} · ${fecha}</span>
+      <div style="display: inline-block; background: ${esYo ? 'rgba(124,58,237,0.2)' : 'rgba(255,255,255,0.05)'}; border: 1px solid ${esYo ? '#7c3aed' : 'var(--borde)'}; padding: 6px 12px; border-radius: 2px; margin-top: 2px; font-size: 12px; max-width: 85%; word-break: break-word;">
+        ${m.texto}
+      </div>
+    </div>
+  `;
+  contenedor.scrollTop = contenedor.scrollHeight;
+}
+
+function actualizarBadge() {
+  const badge = document.getElementById('badge-noLeidos');
+  if (!badge) return;
+  badge.style.display = mensajesNoLeidos > 0 ? 'block' : 'none';
+  badge.textContent = mensajesNoLeidos > 9 ? '9+' : mensajesNoLeidos;
+}
+
+function reproducirSonido() {
+  try {
+    const audio = new Audio('/notificacion.mp3');
+    audio.volume = 0.3;
+    audio.play();
+  } catch (e) {}
 }
