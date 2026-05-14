@@ -42,6 +42,9 @@ function cargarSidebar(paginaActiva) {
   document.getElementById('sidebar-container').innerHTML = sidebar;
   inicializarModo();
   inicializarChat();
+document.addEventListener('DOMContentLoaded', () => {
+  inicializarSocket();
+});
 }
 
 function inicializarModo() {
