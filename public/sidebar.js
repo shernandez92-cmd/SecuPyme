@@ -116,10 +116,7 @@ function inicializarSocket() {
       }
 
       const ventana = document.getElementById('chat-ventana');
-      const estaAbierto = ventana && ventana.style.display === 'flex';
-      if (estaAbierto) {
-        agregarMensajeDOM(mensaje);
-      }
+      agregarMensajeDOM(mensaje);
     });
 
     socket.on('disconnect', () => {
