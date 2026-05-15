@@ -5,6 +5,7 @@ const { Server } = require('socket.io');
 require('dotenv').config();
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
+const Conversation = require('./models/Conversation');
 
 const app = express();
 const server = http.createServer(app);
@@ -51,9 +52,29 @@ const usuariosConectados = {};
 io.on('connection', (socket) => {
   console.log('Usuario conectado:', socket.id);
 
-  socket.on('identificar', (data) => {
+  socket.on('identificar', async (data) => {
     usuariosConectados[socket.id] = data;
     socket.join(data.empresaId || data.userId);
+    
+    // Unirse a rooms de conversaciones
+    try {
+      if (data.rol === 'admin') {
+        // Admin: unirse a TODAS sus conversaciones
+        const conversations = await Conversation.find({ adminId: data.userId });
+        conversations.forEach(conv => {
+          socket.join(`conv:${conv._id}`);
+        });
+      } else {
+        // Empresa: unirse a SU conversación
+        const conversation = await Conversation.findOne({ empresaId: data.empresaId || data.userId });
+        if (conversation) {
+          socket.join(`conv:${conversation._id}`);
+        }
+      }
+    } catch (e) {
+      console.log('Error al unir a rooms de conversación:', e.message);
+    }
+    
     io.emit('usuariosOnline', Object.values(usuariosConectados).length);
   });
 
@@ -64,6 +85,7 @@ io.on('connection', (socket) => {
         usuario: data.userId,
         empresaId: data.empresaId,
         texto: data.texto,
+        conversationId: data.conversationId || null,
         reporteRelacionado: data.reporteRelacionado || null
       });
       await mensaje.save();
@@ -71,7 +93,13 @@ io.on('connection', (socket) => {
         .populate('usuario', 'nombre rol')
         .populate('reporteRelacionado', 'empresa tipoVulnerabilidad');
       
-      io.emit('nuevoMensaje', populado);
+      // Emitir SOLO a la room de la conversación si existe
+      if (data.conversationId) {
+        io.to(`conv:${data.conversationId}`).emit('nuevoMensaje', populado);
+      } else {
+        // Sin conversationId, mantener compatibilidad: emit global
+        io.emit('nuevoMensaje', populado);
+      }
     } catch (e) {
       console.log('Error socket mensaje:', e.message);
     }

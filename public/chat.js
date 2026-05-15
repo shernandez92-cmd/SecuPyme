@@ -47,6 +47,28 @@ function toggleChat() {
     mensajesNoLeidos = 0;
     actualizarBadge();
     cargarChatMensajes();
+    // Renderizar mensajes que llegaron mientras estaba cerrado
+    setTimeout(() => {
+      if (mensajesPendientes.length > 0) {
+        const contenedor = document.getElementById('chat-mensajes');
+        if (contenedor) {
+          mensajesPendientes.forEach(m => {
+            const esYo = m.usuario.rol === localStorage.getItem('rol');
+            const fecha = new Date(m.fecha).toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' });
+            contenedor.innerHTML += `
+              <div style="margin-bottom: 10px; text-align: ${esYo ? 'right' : 'left'};">
+                <span style="font-size: 9px; color: #6b5a8a;">${m.usuario.nombre} · ${fecha}</span>
+                <div style="display: inline-block; background: ${esYo ? 'rgba(124,58,237,0.2)' : 'rgba(255,255,255,0.05)'}; border: 1px solid ${esYo ? '#7c3aed' : 'var(--borde)'}; padding: 6px 12px; border-radius: 2px; margin-top: 2px; font-size: 12px; max-width: 85%; word-break: break-word;">
+                  ${m.texto}
+                </div>
+              </div>
+            `;
+          });
+          contenedor.scrollTop = contenedor.scrollHeight;
+          mensajesPendientes = []; // Limpiar después de renderizar
+        }
+      }
+    }, 50);
   }
 }
 

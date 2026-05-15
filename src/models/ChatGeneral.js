@@ -22,6 +22,11 @@ empresaId: {
   fecha: {
     type: Date,
     default: Date.now
+  },
+  conversationId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Conversation',
+    default: null
   }
 });
 

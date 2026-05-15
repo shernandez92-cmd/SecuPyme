@@ -131,7 +131,13 @@ function inicializarSocket() {
 // =================== CHAT DOM ===================
 function agregarMensajeDOM(m) {
   const contenedor = document.getElementById('chat-mensajes');
-  if (!contenedor) return;
+  if (!contenedor) {
+    // Chat está cerrado: guardar en memoria (evitar duplicados con _id)
+    if (!mensajesPendientes.find(msg => msg._id === m._id)) {
+      mensajesPendientes.push(m);
+    }
+    return;
+  }
   const esYo = m.usuario._id === empresaIdActual || m.usuario.id === empresaIdActual;
   const fecha = new Date(m.fecha).toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' });
   contenedor.innerHTML += `
