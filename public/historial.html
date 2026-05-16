@@ -84,7 +84,11 @@
 
       const tbody = document.getElementById('tablaHistorial');
       tbody.innerHTML = '';
-      evaluaciones.reverse().forEach(e => {
+if (evaluaciones.length === 0) {
+  tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; padding: 48px; color: var(--texto-suave); font-family: 'Share Tech Mono', monospace; font-size: 12px; letter-spacing: 2px;"><div style="font-size: 32px; margin-bottom: 12px;">📋</div>SIN EVALUACIONES AÚN</td></tr>`;
+  return;
+}
+evaluaciones.reverse().forEach(e => {
         const fecha = new Date(e.fecha).toLocaleDateString('es-CO');
         const badgeClass = e.nivelRiesgo === 'alto' ? 'badge-abierto' : e.nivelRiesgo === 'medio' ? 'badge-proceso' : 'badge-resuelto';
         tbody.innerHTML += `

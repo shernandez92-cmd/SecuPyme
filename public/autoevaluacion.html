@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Secupyme — Autoevaluación</title>
   <link rel="stylesheet" href="styles.css">
-<script src="/socket.io/socket.io.js"></script>
 </head>
 <body>
   <div class="app-container">
@@ -103,7 +102,6 @@
     </main>
   </div>
 
-  <script src="/chat.js"></script>
   <script src="sidebar.js"></script>
   <script>
     const token = localStorage.getItem('token');
@@ -124,7 +122,7 @@
 
     async function enviarEvaluacion() {
       if (Object.keys(respuestas).length < 10) {
-        alert('Por favor responde todas las preguntas');
+        mostrarToast('Por favor responde todas las preguntas', 'warning');
         return;
       }
 
@@ -157,5 +155,6 @@
       resultado.scrollIntoView({ behavior: 'smooth' });
     }
   </script>
+  <script src="/inactividad.js"></script>
 </body>
 </html>

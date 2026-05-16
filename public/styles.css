@@ -846,3 +846,16 @@ body.light textarea {
     letter-spacing: 2px;
   }
 }
+/* TRANSICIONES */
+.stat-card, .form-card, .btn-primary, .btn-secondary, .sidebar-menu li a {
+  transition: all 0.2s ease;
+}
+
+.stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(124,58,237,0.15);
+}
+
+input:focus, select:focus, textarea:focus {
+  box-shadow: 0 0 0 2px rgba(168,85,247,0.1);
+}
