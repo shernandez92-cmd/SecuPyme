@@ -1,4 +1,5 @@
 let mensajesPendientes = [];
+let conversationIdActual = null;
 function inicializarChat() {
   if (document.getElementById('chat-flotante')) return;
 
