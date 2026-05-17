@@ -129,5 +129,15 @@ const actualizarEstado = async (req, res) => {
     res.status(500).json({ mensaje: 'Error en el servidor', error });
   }
 };
-
-module.exports = { crearReporte, obtenerReportes, obtenerReporte, actualizarReporte, actualizarEstado };
+const eliminarReporte = async (req, res) => {
+  try {
+    const reporte = await Reporte.findByIdAndDelete(req.params.id);
+    if (!reporte) {
+      return res.status(404).json({ mensaje: 'Reporte no encontrado' });
+    }
+    res.json({ mensaje: 'Reporte eliminado' });
+  } catch (error) {
+    res.status(500).json({ mensaje: 'Error en el servidor', error });
+  }
+};
+module.exports = { crearReporte, obtenerReportes, obtenerReporte, actualizarReporte, actualizarEstado, eliminarReporte };
