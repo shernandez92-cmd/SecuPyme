@@ -42,7 +42,7 @@
       </div>
 
       <div class="form-card" style="margin-top: 24px;">
-        <h3>EVALUACIONES ANTERIORES <a href="#" onclick="descargarPDF()" style="float: right; font-family: 'Share Tech Mono', monospace; font-size: 11px; color: var(--acento); letter-spacing: 2px; text-decoration: none;">↓ EXPORTAR PDF</a></h3>
+        <h3>EVALUACIONES ANTERIORES <a href="#" onclick="descargarPDF()" style="float: right; font-family: 'Share Tech Mono', monospace; font-size: 11px; color: var(--acento); letter-spacing: 2px; text-decoration: none;">↓ EXPORTAR PDF</a> <a href="#" onclick="verResumenSemanal()" style="float: right; font-family: 'Share Tech Mono', monospace; font-size: 11px; color: #10b981; letter-spacing: 2px; text-decoration: none; margin-right: 16px;">🤖 RESUMEN IA</a></h3>
         <table class="tabla-reportes">
           <thead>
             <tr>
@@ -58,6 +58,7 @@
     </main>
   </div>
 
+  <script src="/toast.js"></script>
   <script src="/chat.js"></script>
   <script src="sidebar.js"></script>
   <script>
@@ -107,6 +108,20 @@ evaluaciones.reverse().forEach(e => {
     }
 
     cargarHistorial();
+
+    async function verResumenSemanal() {
+      const token = localStorage.getItem("token");
+      mostrarToast("Generando resumen...", "info", 3000);
+      try {
+        const r = await fetch("/api/ia/resumen-semanal", { headers: { "authorization": token } });
+        const d = await r.json();
+        const m = document.createElement("div");
+        m.style.cssText = "position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:99999;display:flex;align-items:center;justify-content:center;padding:24px;";
+        m.innerHTML = "<div style=background:var(--morado-oscuro);border:1px solid #10b981;border-radius:4px;padding:32px;max-width:640px;width:100%;position:relative;max-height:80vh;overflow-y:auto;><button onclick=this.parentElement.parentElement.remove() style=position:absolute;top:16px;right:16px;background:none;border:none;color:var(--texto-suave);cursor:pointer;font-size:18px;>X</button><p style=font-family:Share Tech Mono,monospace;font-size:11px;color:#10b981;letter-spacing:3px;margin-bottom:16px;>RESUMEN SEMANAL IA</p><p style=font-size:13px;line-height:1.8;color:var(--texto);white-space:pre-wrap;>" + d.resumen + "</p></div>";
+        document.body.appendChild(m);
+        m.onclick = (e) => { if (e.target === m) m.remove(); };
+      } catch(e) { mostrarToast("Error generando resumen", "error"); }
+    }
   </script>
 </body>
 </html>
