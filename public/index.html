@@ -8,12 +8,11 @@
 </head>
 <body>
   <div class="login-container">
-    <div class="login-box">
-    <p style="text-align:center; margin-top: 16px; font-size: 12px; color: var(--texto-suave);">¿No tienes cuenta? <a href="/registro.html" style="color: var(--acento); text-decoration: none;">Regístrate</a></p>
+
+    <div class="login-box" id="login-box">
       <div class="login-logo">
-<img src="/Logo.png" style="width: 160px; margin-bottom: 8px; display: block; margin-left: auto; margin-right: auto;">
-<p>CIBERSEGURIDAD SIMPLIFICADA</p>
-        <p style="text-align:center; margin-top: 16px; font-size: 12px; color: var(--texto-suave);">¿No tienes cuenta? <a href="/registro.html" style="color: var(--acento); text-decoration: none;">Regístrate</a></p>
+        <img src="/Logo.png" style="width: 160px; margin-bottom: 8px; display: block; margin-left: auto; margin-right: auto;">
+        <p>CIBERSEGURIDAD SIMPLIFICADA</p>
       </div>
       <div class="form-group">
         <label>CORREO ELECTRÓNICO</label>
@@ -24,8 +23,23 @@
         <input type="password" id="password" placeholder="••••••••">
       </div>
       <button class="btn-primary" onclick="login()">INGRESAR</button>
+      <p style="text-align:center; margin-top: 16px; font-size: 12px; color: var(--texto-suave);">¿No tienes cuenta? <a href="/registro.html" style="color: var(--acento); text-decoration: none;">Regístrate</a></p>
       <p class="error-msg" id="error">Credenciales incorrectas</p>
     </div>
+
+    <div class="login-box" id="box-2fa" style="display:none;">
+      <div class="login-logo">
+        <img src="/Logo.png" style="width: 160px; margin-bottom: 8px; display: block; margin-left: auto; margin-right: auto;">
+        <p>VERIFICACIÓN 2FA</p>
+      </div>
+      <div class="form-group">
+        <label>CÓDIGO DE GOOGLE AUTHENTICATOR</label>
+        <input type="text" id="codigo2fa" placeholder="123456" maxlength="6" style="text-align:center; letter-spacing: 8px; font-size: 20px;">
+      </div>
+      <button class="btn-primary" onclick="verificar2FA()">VERIFICAR</button>
+      <p class="error-msg" id="error2fa">Código incorrecto</p>
+    </div>
+
   </div>
 
   <script>
@@ -44,6 +58,40 @@
         const data = await response.json();
 
         if (response.ok) {
+          if (data.requires2FA) {
+            localStorage.setItem('tempToken', data.tempToken);
+            document.getElementById('login-box').style.display = 'none';
+            document.getElementById('box-2fa').style.display = 'block';
+          } else {
+            localStorage.setItem('token', data.token);
+            localStorage.setItem('rol', data.rol);
+            localStorage.setItem('nombre', data.nombre);
+            window.location.href = '/dashboard.html';
+          }
+        } else {
+          errorMsg.style.display = 'block';
+        }
+      } catch (error) {
+        errorMsg.style.display = 'block';
+      }
+    }
+
+    async function verificar2FA() {
+      const codigo = document.getElementById('codigo2fa').value;
+      const tempToken = localStorage.getItem('tempToken');
+      const errorMsg = document.getElementById('error2fa');
+
+      try {
+        const response = await fetch('/api/auth/2fa/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ token: codigo, tempToken })
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          localStorage.removeItem('tempToken');
           localStorage.setItem('token', data.token);
           localStorage.setItem('rol', data.rol);
           localStorage.setItem('nombre', data.nombre);

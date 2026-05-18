@@ -33,12 +33,20 @@ const login = async (req, res) => {
       await registrarEvento('login_fallido', `Contraseña incorrecta: ${email}`, 'high', null, req.ip);
       return res.status(400).json({ mensaje: 'Credenciales incorrectas' });
     }
+    if (usuario.twoFactorEnabled) {
+      const tempToken = jwt.sign(
+        { id: usuario._id, requires2FA: true },
+        process.env.JWT_SECRET,
+        { expiresIn: "10m" }
+      );
+      return res.json({ requires2FA: true, tempToken });
+    }
     const token = jwt.sign(
       { id: usuario._id, rol: usuario.rol },
       process.env.JWT_SECRET,
-      { expiresIn: '8h' }
+      { expiresIn: "8h" }
     );
-    await registrarEvento('login_exitoso', `Login de ${usuario.email}`, 'low', usuario._id, req.ip);
+    await registrarEvento("login_exitoso", `Login de ${usuario.email}`, "low", usuario._id, req.ip);
     res.json({ token, rol: usuario.rol, nombre: usuario.nombre });
   } catch (error) {
     res.status(500).json({ mensaje: 'Error en el servidor', error });
