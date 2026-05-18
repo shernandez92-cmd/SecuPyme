@@ -160,8 +160,15 @@ function actualizarBadge() {
 
 function reproducirSonido() {
   try {
-    const audio = new Audio('/notificacion.mp3');
+    const audio = new Audio("/notificacion.mp3");
     audio.volume = 0.3;
-    audio.play();
+    const promise = audio.play();
+    if (promise !== undefined) {
+      promise.catch(() => {
+        document.addEventListener("click", () => {
+          audio.play().catch(() => {});
+        }, { once: true });
+      });
+    }
   } catch (e) {}
 }

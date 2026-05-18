@@ -249,3 +249,16 @@ function recibirMensajeSocket(mensaje) {
     }
   }
 }
+
+// Desbloquear audio en primer clic
+let audioDesbloqueado = false;
+function desbloquearAudio() {
+  if (audioDesbloqueado) return;
+  const audio = new Audio('/notificacion.mp3');
+  audio.volume = 0;
+  audio.play().then(() => {
+    audio.pause();
+    audioDesbloqueado = true;
+  }).catch(() => {});
+}
+document.addEventListener('click', desbloquearAudio, { once: false });
