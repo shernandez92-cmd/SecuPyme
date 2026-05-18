@@ -7,5 +7,5 @@ router.post('/', verificarToken, crearReporte);
 router.get('/', verificarToken, obtenerReportes);
 router.get('/:id', verificarToken, obtenerReporte);
 router.put('/:id', verificarToken, verificarAdmin, actualizarReporte);
-router.delete('/:id', verificarToken, verificarAdmin, eliminarReporte);
+router.delete("/:id", verificarToken, eliminarReporte);
 module.exports = router;

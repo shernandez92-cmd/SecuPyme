@@ -134,13 +134,15 @@ const actualizarEstado = async (req, res) => {
 };
 const eliminarReporte = async (req, res) => {
   try {
-    const reporte = await Reporte.findByIdAndDelete(req.params.id);
-    if (!reporte) {
-      return res.status(404).json({ mensaje: 'Reporte no encontrado' });
-    }
-    res.json({ mensaje: 'Reporte eliminado' });
+    const reporte = await Reporte.findById(req.params.id);
+    if (!reporte) return res.status(404).json({ mensaje: "Reporte no encontrado" });
+    const esAdmin = req.usuario.rol === "admin";
+    const esDueno = reporte.usuario && reporte.usuario.toString() === req.usuario.id;
+    if (!esAdmin && !esDueno) return res.status(403).json({ mensaje: "No autorizado" });
+    await Reporte.findByIdAndDelete(req.params.id);
+    res.json({ mensaje: "Reporte eliminado" });
   } catch (error) {
-    res.status(500).json({ mensaje: 'Error en el servidor', error });
+    res.status(500).json({ mensaje: "Error en el servidor", error });
   }
 };
 module.exports = { crearReporte, obtenerReportes, obtenerReporte, actualizarReporte, actualizarEstado, eliminarReporte };

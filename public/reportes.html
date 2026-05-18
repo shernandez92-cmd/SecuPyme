@@ -5,10 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Secupyme — Reportes</title>
   <link rel="stylesheet" href="styles.css">
+  <script src="/socket.io/socket.io.js"></script>
 </head>
 <body>
-  <div class="popup" id="popup">✓ REPORTE ENVIADO EXITOSAMENTE</div>
-
   <div class="app-container">
     <div id="sidebar-container"></div>
 
@@ -20,16 +19,15 @@
 
       <div class="form-card">
         <h3>NUEVO REPORTE</h3>
-          <div class="form-group">
-            <label>TIPO DE VULNERABILIDAD</label>
-            <select id="tipoVulnerabilidad">
-              <option value="phishing">Correo falso (Phishing)</option>
-              <option value="malware">Programa malicioso (Malware)</option>
-              <option value="acceso no autorizado">Acceso no autorizado</option>
-              <option value="fuga de datos">Fuga de datos</option>
-              <option value="otro">Otro</option>
-            </select>
-          </div>
+        <div class="form-group">
+          <label>TIPO DE VULNERABILIDAD</label>
+          <select id="tipoVulnerabilidad">
+            <option value="phishing">Correo falso (Phishing)</option>
+            <option value="malware">Programa malicioso (Malware)</option>
+            <option value="acceso no autorizado">Acceso no autorizado</option>
+            <option value="fuga de datos">Fuga de datos</option>
+            <option value="otro">Otro</option>
+          </select>
         </div>
         <div class="form-group" style="margin-top: 16px;">
           <label>DESCRIPCIÓN DEL INCIDENTE</label>
@@ -118,7 +116,7 @@
 
         <button class="btn-primary" style="width: auto; padding: 12px 32px; margin-top: 32px;" onclick="enviarEvaluacion()">EVALUAR SEGURIDAD</button>
 
-        <div class="resultado-card" id="resultado">
+        <div class="resultado-card" id="resultado" style="display:none;">
           <div class="resultado-nivel" id="nivelTexto"></div>
           <div class="resultado-puntaje" id="puntajeTexto"></div>
           <h3 style="font-family: 'Share Tech Mono', monospace; font-size: 12px; color: var(--texto-suave); letter-spacing: 3px; margin-bottom: 16px;">RECOMENDACIONES</h3>
@@ -145,32 +143,37 @@
     </main>
   </div>
 
+  <script src="/toast.js"></script>
   <script src="/chat.js"></script>
   <script src="sidebar.js"></script>
   <script>
     const token = localStorage.getItem('token');
-    const rol = localStorage.getItem("rol");
+    const rol = localStorage.getItem('rol');
     if (!token) window.location.href = '/';
     cargarSidebar('reportes');
 
     const respuestas = {};
 
     async function crearReporte() {
-  const tipoVulnerabilidad = document.getElementById('tipoVulnerabilidad').value;
-  const descripcion = document.getElementById('descripcion').value;
-
-  const response = await fetch('/api/reportes', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'authorization': token },
-    body: JSON.stringify({ tipoVulnerabilidad, descripcion })
-  });
+      const tipoVulnerabilidad = document.getElementById('tipoVulnerabilidad').value;
+      const descripcion = document.getElementById('descripcion').value;
+      if (!descripcion.trim()) {
+        mostrarToast('Por favor describe el incidente', 'warning');
+        return;
+      }
+      if (!confirm('¿Confirmas el envío de este reporte de seguridad?')) return;
+      const response = await fetch('/api/reportes', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'authorization': token },
+        body: JSON.stringify({ tipoVulnerabilidad, descripcion })
+      });
       if (response.ok) {
-        const popup = document.getElementById('popup');
-        popup.style.display = 'block';
-        setTimeout(() => popup.style.display = 'none', 3000);
+        mostrarToast('Reporte enviado exitosamente', 'success');
         document.getElementById('btnEvaluacion').style.display = 'block';
         document.getElementById('descripcion').value = '';
         cargarReportes();
+      } else {
+        mostrarToast('Error al enviar el reporte', 'error');
       }
     }
 
@@ -188,7 +191,7 @@
 
     async function enviarEvaluacion() {
       if (Object.keys(respuestas).length < 10) {
-        alert('Por favor responde todas las preguntas');
+        mostrarToast('Por favor responde todas las preguntas', 'warning');
         return;
       }
       const response = await fetch('/api/autoevaluaciones', {
@@ -208,21 +211,25 @@
       lista.innerHTML = '';
       data.recomendaciones.forEach(r => lista.innerHTML += `<li>${r}</li>`);
       resultado.scrollIntoView({ behavior: 'smooth' });
+      mostrarToast('Evaluación completada — nivel ' + data.nivelRiesgo.toUpperCase(), 'success');
     }
 
     async function cargarReportes() {
-      const response = await fetch("/api/reportes", { headers: { "authorization": token } });
+      const response = await fetch('/api/reportes', { headers: { 'authorization': token } });
       const reportes = await response.json();
-      const tbody = document.getElementById("tablaBody");
-      tbody.innerHTML = "";
+      const tbody = document.getElementById('tablaBody');
+      tbody.innerHTML = '';
       if (reportes.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding: 48px; color: var(--texto-suave); font-family: 'Share Tech Mono', monospace; font-size: 12px;">SIN REPORTES AÚN</td></tr>`;
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding: 48px; color: var(--texto-suave); font-family: Share Tech Mono, monospace; font-size: 12px;">SIN REPORTES AÚN</td></tr>';
         return;
       }
       reportes.forEach(r => {
-        const fecha = new Date(r.fecha).toLocaleDateString("es-CO");
-        const badgeClass = r.estado === "abierto" ? "badge-abierto" : r.estado === "en proceso" ? "badge-proceso" : "badge-resuelto";
-        const btnEliminar = rol === "admin" ? `<td><button onclick="event.stopPropagation(); eliminarReporte('${r._id}')" style="background:none; border:1px solid #ef4444; color:#ef4444; padding:4px 10px; cursor:pointer; font-family:Share Tech Mono,monospace; font-size:10px;">✕</button></td>` : "<td></td>";
+        const fecha = new Date(r.fecha).toLocaleDateString('es-CO');
+        const badgeClass = r.estado === 'abierto' ? 'badge-abierto' : r.estado === 'en proceso' ? 'badge-proceso' : 'badge-resuelto';
+        const puedeEliminar = rol === 'admin' || r.usuario === JSON.parse(atob(token.split('.')[1])).id;
+        const btnEliminar = puedeEliminar
+          ? `<td><button onclick="event.stopPropagation(); eliminarReporte('${r._id}')" style="background:none; border:1px solid #ef4444; color:#ef4444; padding:4px 10px; cursor:pointer; font-family:Share Tech Mono,monospace; font-size:10px;">✕</button></td>`
+          : '<td></td>';
         tbody.innerHTML += `
           <tr style="cursor:pointer;" onclick="window.location.href='/reporte-detalle.html?id=${r._id}'">
             <td>${r.empresa}</td>
@@ -237,15 +244,21 @@
     }
 
     async function eliminarReporte(id) {
-      if (!confirm("¿Eliminar este reporte?")) return;
+      if (!confirm('¿Eliminar este reporte?')) return;
       await fetch(`/api/reportes/${id}`, {
-        method: "DELETE",
-        headers: { "authorization": token }
+        method: 'DELETE',
+        headers: { 'authorization': token }
       });
-      mostrarToast("Reporte eliminado", "success");
+      mostrarToast('Reporte eliminado', 'success');
       cargarReportes();
     }
+
+    function descargarPDF() {
+      window.open(`/api/pdf/reportes?token=${token}`);
+    }
+
     cargarReportes();
   </script>
+  <script src="/inactividad.js"></script>
 </body>
 </html>
