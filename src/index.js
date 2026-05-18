@@ -45,6 +45,8 @@ app.use('/api/integraciones', integracionRoutes);
 app.use('/api/public', publicRoutes);
 const riskRoutes = require("./routes/riskRoutes");
 app.use("/api/risk", riskRoutes);
+const iaRoutes = require("./routes/iaRoutes");
+app.use("/api/ia", iaRoutes);
 const uploadRoutes = require("./routes/uploadRoutes");
 app.use("/api/upload", uploadRoutes);
 
