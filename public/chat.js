@@ -1,20 +1,32 @@
 let mensajesPendientes = [];
 let conversationIdActual = null;
+let empresaSeleccionada = null;
+
 function inicializarChat() {
   if (document.getElementById('chat-flotante')) return;
+  const rol = localStorage.getItem('rol');
+
+  const panelConversaciones = rol === 'admin' ? `
+    <div id="chat-conversaciones" style="border-bottom: 1px solid var(--borde); max-height: 140px; overflow-y: auto; background: rgba(0,0,0,0.2);">
+      <div style="padding: 8px 12px; font-family: 'Share Tech Mono', monospace; font-size: 10px; color: #6b5a8a; letter-spacing: 2px;">CONVERSACIONES</div>
+      <div id="lista-conversaciones"></div>
+    </div>
+  ` : '';
 
   const chatHTML = `
     <div id="chat-flotante" style="position: fixed; bottom: 24px; right: 24px; z-index: 9999;">
-      <div id="chat-ventana" style="display:none; flex-direction: column; width: 360px; height: 520px; background: var(--morado-oscuro); border: 1px solid var(--morado); border-radius: 4px; box-shadow: 0 0 40px rgba(124,58,237,0.2);">
-        <div style="padding: 16px; border-bottom: 1px solid var(--borde); display: flex; justify-content: space-between; align-items: center;">
+      <div id="chat-ventana" style="display:none; flex-direction: column; width: 360px; height: 560px; background: var(--morado-oscuro); border: 1px solid var(--morado); border-radius: 4px; box-shadow: 0 0 40px rgba(124,58,237,0.2);">
+        <div style="padding: 14px 16px; border-bottom: 1px solid var(--borde); display: flex; justify-content: space-between; align-items: center;">
           <div>
             <span style="font-family: 'Share Tech Mono', monospace; font-size: 12px; color: #a855f7; letter-spacing: 2px;">SOPORTE SECUPYME</span>
+            <p id="chat-empresa-nombre" style="font-size: 10px; color: #6b5a8a; margin-top: 2px;">${rol === 'admin' ? 'Selecciona una empresa' : 'En línea'}</p>
           </div>
           <div style="display: flex; gap: 8px;">
             <button onclick="borrarChat()" style="background: none; border: none; color: #6b5a8a; cursor: pointer; font-size: 14px;">🗑</button>
             <button onclick="toggleChat()" style="background: none; border: none; color: #6b5a8a; cursor: pointer; font-size: 16px;">✕</button>
           </div>
         </div>
+        ${panelConversaciones}
         <div id="chat-mensajes" style="flex: 1; overflow-y: auto; padding: 16px;"></div>
         <div style="padding: 12px; border-top: 1px solid var(--borde);">
           <select id="chat-reporte" style="width: 100%; margin-bottom: 8px; font-size: 11px;">
@@ -35,7 +47,12 @@ function inicializarChat() {
 
   document.body.insertAdjacentHTML('beforeend', chatHTML);
   cargarReportesChat();
-  cargarChatMensajes();
+
+  if (rol === 'admin') {
+    cargarConversacionesAdmin();
+  } else {
+    cargarChatMensajes();
+  }
 }
 
 let chatAbierto = false;
@@ -47,30 +64,53 @@ function toggleChat() {
   if (chatAbierto) {
     mensajesNoLeidos = 0;
     actualizarBadge();
-    cargarChatMensajes();
-    // Renderizar mensajes que llegaron mientras estaba cerrado
-    setTimeout(() => {
-      if (mensajesPendientes.length > 0) {
-        const contenedor = document.getElementById('chat-mensajes');
-        if (contenedor) {
-          mensajesPendientes.forEach(m => {
-            const esYo = m.usuario.rol === localStorage.getItem('rol');
-            const fecha = new Date(m.fecha).toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' });
-            contenedor.innerHTML += `
-              <div style="margin-bottom: 10px; text-align: ${esYo ? 'right' : 'left'};">
-                <span style="font-size: 9px; color: #6b5a8a;">${m.usuario.nombre} · ${fecha}</span>
-                <div style="display: inline-block; background: ${esYo ? 'rgba(124,58,237,0.2)' : 'rgba(255,255,255,0.05)'}; border: 1px solid ${esYo ? '#7c3aed' : 'var(--borde)'}; padding: 6px 12px; border-radius: 2px; margin-top: 2px; font-size: 12px; max-width: 85%; word-break: break-word;">
-                  ${m.texto}
-                </div>
-              </div>
-            `;
-          });
-          contenedor.scrollTop = contenedor.scrollHeight;
-          mensajesPendientes = []; // Limpiar después de renderizar
-        }
-      }
-    }, 50);
+    const rol = localStorage.getItem('rol');
+    if (rol === 'admin') {
+      cargarConversacionesAdmin();
+    } else {
+      cargarChatMensajes();
+    }
   }
+}
+
+async function cargarConversacionesAdmin() {
+  const token = localStorage.getItem('token');
+  try {
+    const response = await fetch('/api/conversations', { headers: { 'authorization': token } });
+    const conversaciones = await response.json();
+    const lista = document.getElementById('lista-conversaciones');
+    if (!lista) return;
+    lista.innerHTML = '';
+
+    if (conversaciones.length === 0) {
+      lista.innerHTML = '<p style="padding: 8px 12px; font-size: 11px; color: #6b5a8a; font-family: Share Tech Mono, monospace;">Sin conversaciones aún</p>';
+      return;
+    }
+
+    conversaciones.forEach(conv => {
+      const btn = document.createElement('div');
+      btn.style.cssText = 'padding: 8px 12px; cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.05); transition: background 0.2s;';
+      btn.innerHTML = `
+        <div style="font-family: 'Share Tech Mono', monospace; font-size: 11px; color: var(--acento);">${conv.empresaId?.empresa || conv.empresaId?.nombre || 'Empresa'}</div>
+        <div style="font-size: 10px; color: #6b5a8a; margin-top: 2px;">${conv.ultimoMensaje ? conv.ultimoMensaje.substring(0, 35) + '...' : 'Sin mensajes'}</div>
+      `;
+      btn.onmouseover = () => btn.style.background = 'rgba(168,85,247,0.1)';
+      btn.onmouseout = () => btn.style.background = 'transparent';
+      btn.onclick = () => seleccionarConversacion(conv);
+      lista.appendChild(btn);
+    });
+  } catch (e) {
+    console.log('Error cargando conversaciones:', e);
+  }
+}
+
+async function seleccionarConversacion(conv) {
+  conversationIdActual = conv._id;
+  empresaSeleccionada = conv.empresaId?._id || conv.empresaId;
+  const nombre = conv.empresaId?.empresa || conv.empresaId?.nombre || 'Empresa';
+  const subtitulo = document.getElementById('chat-empresa-nombre');
+  if (subtitulo) subtitulo.textContent = nombre;
+  await cargarChatMensajes();
 }
 
 function actualizarBadge() {
@@ -106,21 +146,38 @@ async function cargarReportesChat() {
 async function cargarChatMensajes() {
   const token = localStorage.getItem('token');
   const rol = localStorage.getItem('rol');
+
+  if (rol === 'admin' && !empresaSeleccionada) {
+    const contenedor = document.getElementById('chat-mensajes');
+    if (contenedor) contenedor.innerHTML = '<div style="text-align:center; padding: 32px; color: #6b5a8a; font-family: Share Tech Mono, monospace; font-size: 11px;">Selecciona una empresa para ver la conversación</div>';
+    return;
+  }
+
   try {
-    const response = await fetch('/api/chat', { headers: { 'authorization': token } });
+    const url = rol === 'admin' && empresaSeleccionada
+      ? `/api/chat?conId=${empresaSeleccionada}`
+      : '/api/chat';
+
+    const response = await fetch(url, { headers: { 'authorization': token } });
     const mensajes = await response.json();
     const contenedor = document.getElementById('chat-mensajes');
     if (!contenedor) return;
+
+    const myId = JSON.parse(atob(token.split('.')[1])).id;
     contenedor.innerHTML = '';
-    contenedor.innerHTML += `
-      <div style="margin-bottom: 12px;">
-        <div style="display: inline-block; background: rgba(124,58,237,0.15); border: 1px solid #4a1a8a; padding: 8px 14px; border-radius: 2px; font-size: 11px; color: #a855f7; max-width: 95%; line-height: 1.6;">
-          👋 Gracias por comunicarte con SecuPyme. En un momento, uno de nuestros expertos se comunicará contigo.
+
+    if (rol !== 'admin') {
+      contenedor.innerHTML += `
+        <div style="margin-bottom: 12px;">
+          <div style="display: inline-block; background: rgba(124,58,237,0.15); border: 1px solid #4a1a8a; padding: 8px 14px; border-radius: 2px; font-size: 11px; color: #a855f7; max-width: 95%; line-height: 1.6;">
+            👋 Gracias por comunicarte con SecuPyme. En un momento, uno de nuestros expertos se comunicará contigo.
+          </div>
         </div>
-      </div>
-    `;
+      `;
+    }
+
     mensajes.forEach(m => {
-      const esYo = m.usuario.rol === rol;
+      const esYo = m.usuario._id === myId || m.usuario.id === myId;
       const fecha = new Date(m.fecha).toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' });
       contenedor.innerHTML += `
         <div style="margin-bottom: 10px; text-align: ${esYo ? 'right' : 'left'};">
@@ -130,20 +187,65 @@ async function cargarChatMensajes() {
           </div>
         </div>
       `;
-      contenedor.scrollTop = contenedor.scrollHeight;
     });
+    contenedor.scrollTop = contenedor.scrollHeight;
   } catch (e) {}
 }
 
 async function enviarChatMensaje() {
   const token = localStorage.getItem('token');
+  const rol = localStorage.getItem('rol');
   const texto = document.getElementById('chat-texto').value.trim();
   const reporteRelacionado = document.getElementById('chat-reporte').value;
   if (!texto) return;
+
+  if (rol === 'admin' && !empresaSeleccionada) {
+    mostrarToast('Selecciona una empresa primero', 'warning');
+    return;
+  }
+
+  const body = { texto, reporteRelacionado: reporteRelacionado || null };
+  if (rol === 'admin' && empresaSeleccionada) {
+    body.paraId = empresaSeleccionada;
+  }
+
   await fetch('/api/chat', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'authorization': token },
-    body: JSON.stringify({ texto, reporteRelacionado: reporteRelacionado || null })
+    body: JSON.stringify(body)
   });
+
   document.getElementById('chat-texto').value = '';
+}
+
+function recibirMensajeSocket(mensaje) {
+  const token = localStorage.getItem('token');
+  if (!token) return;
+  const myId = JSON.parse(atob(token.split('.')[1])).id;
+  const esYo = mensaje.usuario._id === myId || mensaje.usuario.id === myId;
+
+  if (!esYo) {
+    mensajesNoLeidos++;
+    actualizarBadge();
+    reproducirSonido();
+  }
+
+  const contenedor = document.getElementById('chat-mensajes');
+  if (contenedor && chatAbierto) {
+    const fecha = new Date(mensaje.fecha).toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' });
+    contenedor.innerHTML += `
+      <div style="margin-bottom: 10px; text-align: ${esYo ? 'right' : 'left'};">
+        <span style="font-size: 9px; color: #6b5a8a;">${mensaje.usuario.nombre} · ${fecha}</span>
+        <div style="display: inline-block; background: ${esYo ? 'rgba(124,58,237,0.2)' : 'rgba(255,255,255,0.05)'}; border: 1px solid ${esYo ? '#7c3aed' : 'var(--borde)'}; padding: 6px 12px; border-radius: 2px; margin-top: 2px; font-size: 12px; max-width: 85%; word-break: break-word;">
+          ${mensaje.texto}
+        </div>
+      </div>
+    `;
+    contenedor.scrollTop = contenedor.scrollHeight;
+
+    const rol = localStorage.getItem('rol');
+    if (rol === 'admin') {
+      cargarConversacionesAdmin();
+    }
+  }
 }

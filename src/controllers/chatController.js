@@ -65,10 +65,12 @@ const obtenerMensajes = async (req, res) => {
     const rol = req.usuario.rol;
     let mensajes;
 
-    if (rol === 'admin') {
-      mensajes = await ChatGeneral.find()
-        .populate('usuario', 'nombre rol empresa')
-        .populate('reporteRelacionado', 'empresa tipoVulnerabilidad')
+    if (rol === "admin") {
+      const conId = req.query.conId;
+      const filtro = conId ? { empresaId: conId } : {};
+      mensajes = await ChatGeneral.find(filtro)
+        .populate("usuario", "nombre rol empresa")
+        .populate("reporteRelacionado", "empresa tipoVulnerabilidad")
         .sort({ fecha: 1 });
     } else {
       mensajes = await ChatGeneral.find({

@@ -12,6 +12,7 @@ router.get('/', verificarToken, async (req, res) => {
     let conversations;
     if (rol === 'admin') {
       conversations = await Conversation.find({ adminId: userId })
+        .populate("empresaId", "nombre empresa rol")
         .sort({ ultimaActividad: -1 });
     } else {
       const conv = await Conversation.findOne({ empresaId: userId });
