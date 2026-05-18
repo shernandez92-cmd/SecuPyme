@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const securityEventSchema = new mongoose.Schema({
   type: {
     type: String,
-    enum: ['login_exitoso', 'login_fallido', 'nuevo_reporte', 'cambio_rol'],
+    enum: ['login_exitoso', 'login_fallido', 'nuevo_reporte', 'cambio_rol', 'bloqueo_automatico', 'alerta_siem'],
     required: true
   },
   description: { type: String, required: true },

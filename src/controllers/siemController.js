@@ -27,4 +27,21 @@ const obtenerEventos = async (req, res) => {
   }
 };
 
-module.exports = { registrarEvento, obtenerEventos };
+
+const obtenerEstadisticas = async (req, res) => {
+  try {
+    const total = await SecurityEvent.countDocuments();
+    const altos = await SecurityEvent.countDocuments({ severity: 'high' });
+    const hoy = new Date();
+    hoy.setHours(0, 0, 0, 0);
+    const hoyCount = await SecurityEvent.countDocuments({ timestamp: { $gte: hoy } });
+    const porTipo = await SecurityEvent.aggregate([
+      { $group: { _id: '$type', count: { $sum: 1 } } }
+    ]);
+    res.json({ total, altos, hoy: hoyCount, porTipo });
+  } catch (error) {
+    res.status(500).json({ mensaje: 'Error', error });
+  }
+};
+
+module.exports = { registrarEvento, obtenerEventos, obtenerEstadisticas };

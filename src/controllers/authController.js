@@ -32,8 +32,24 @@ const login = async (req, res) => {
     }
     const contraseñaValida = await bcrypt.compare(contraseña, usuario.contraseña);
     if (!contraseñaValida) {
-      await registrarEvento('login_fallido', `Contraseña incorrecta: ${email}`, 'high', null, req.ip);
-      return res.status(400).json({ mensaje: 'Credenciales incorrectas' });
+      await registrarEvento("login_fallido", `Contraseña incorrecta: ${email}`, "high", usuario._id, req.ip);
+      const { actualizarRisk: ar2 } = require("./riskController");
+      await ar2(usuario._id, "login_fallido");
+      const intentosRecientes = await require("../models/SecurityEvent").countDocuments({
+        userId: usuario._id,
+        type: "login_fallido",
+        timestamp: { $gte: new Date(Date.now() - 15 * 60 * 1000) }
+      });
+      if (intentosRecientes >= 3) {
+        await registrarEvento("bloqueo_automatico", `Múltiples intentos fallidos: ${email}`, "high", usuario._id, req.ip);
+        const RiskScore = require("../models/RiskScore");
+        await RiskScore.findOneAndUpdate(
+          { empresaId: usuario._id },
+          { bloqueado: true, bloqueoHasta: new Date(Date.now() + 15 * 60 * 1000) },
+          { upsert: true }
+        );
+      }
+      return res.status(400).json({ mensaje: "Credenciales incorrectas" });
     }
     if (usuario.twoFactorEnabled) {
       const tempToken = jwt.sign(
