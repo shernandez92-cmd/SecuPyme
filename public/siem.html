@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Secupyme — SIEM</title>
   <link rel="stylesheet" href="styles.css">
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
   <div class="app-container">
@@ -12,13 +14,56 @@
 
     <main class="main-content">
       <div class="page-header">
-        <h2>SIEM — EVENTOS DE SEGURIDAD</h2>
-        <p>Registro de actividad en tiempo real</p>
+        <h2>SIEM — CENTRO DE OPERACIONES</h2>
+        <p>Monitoreo en tiempo real · NIST SP 800-61</p>
       </div>
 
+      <!-- Stats -->
+      <div class="stats-grid" style="grid-template-columns: repeat(4, 1fr); margin-bottom: 24px;">
+        <div class="stat-card">
+          <div class="stat-icon">📊</div>
+          <div class="stat-info">
+            <h3 id="statTotal">0</h3>
+            <p>TOTAL EVENTOS</p>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">🔴</div>
+          <div class="stat-info">
+            <h3 id="statAltos">0</h3>
+            <p>SEVERIDAD ALTA</p>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">📅</div>
+          <div class="stat-info">
+            <h3 id="statHoy">0</h3>
+            <p>HOY</p>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">🏢</div>
+          <div class="stat-info">
+            <h3 id="statEmpresas">0</h3>
+            <p>EMPRESAS EN RIESGO</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Risk Score por empresa -->
       <div class="form-card" style="margin-bottom: 24px;">
-        <h3>FILTROS</h3>
-        <div class="form-row">
+        <h3>RISK SCORE POR EMPRESA</h3>
+        <div id="riskScores" style="display: flex; flex-direction: column; gap: 12px;"></div>
+      </div>
+
+      <!-- Gráfica y filtros -->
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px;">
+        <div class="form-card">
+          <h3>EVENTOS POR SEVERIDAD</h3>
+          <canvas id="graficaSeveridad" style="max-height: 200px;"></canvas>
+        </div>
+        <div class="form-card">
+          <h3>FILTROS</h3>
           <div class="form-group">
             <label>TIPO DE EVENTO</label>
             <select id="filtroTipo" onchange="cargarEventos()">
@@ -27,9 +72,16 @@
               <option value="login_fallido">LOGIN FALLIDO</option>
               <option value="nuevo_reporte">NUEVO REPORTE</option>
               <option value="cambio_rol">CAMBIO DE ROL</option>
+              <option value="bloqueo_automatico">BLOQUEO AUTOMÁTICO</option>
             </select>
           </div>
           <div class="form-group">
+            <label>EMPRESA</label>
+            <select id="filtroEmpresa" onchange="cargarEventos(); cargarRiskEmpresa()">
+              <option value="">TODAS</option>
+            </select>
+          </div>
+          <div class="form-group" style="margin-top: 12px;">
             <label>SEVERIDAD</label>
             <select id="filtroSeveridad" onchange="cargarEventos()">
               <option value="">TODAS</option>
@@ -41,8 +93,12 @@
         </div>
       </div>
 
+      <!-- Alertas en tiempo real -->
+      <div id="alertasContainer" style="margin-bottom: 24px;"></div>
+
+      <!-- Timeline de eventos -->
       <div class="form-card">
-        <h3>EVENTOS <span id="totalEventos" style="color: var(--texto-suave); font-size: 12px;"></span></h3>
+        <h3>TIMELINE DE EVENTOS <span id="conteoEventos" style="color: var(--texto-suave); font-size: 12px;"></span></h3>
         <table class="tabla-reportes">
           <thead>
             <tr>
@@ -70,19 +126,130 @@
     if (rol !== 'admin') window.location.href = '/dashboard.html';
     cargarSidebar('siem');
 
+    async function cargarEmpresas() {
+      const response = await fetch("/api/auth/usuarios", { headers: { "authorization": token } });
+      const usuarios = await response.json();
+      const select = document.getElementById("filtroEmpresa");
+      usuarios.filter(u => u.rol === "cliente").forEach(u => {
+        select.innerHTML += `<option value="${u._id}">${u.empresa || u.nombre}</option>`;
+      });
+    }
+
+    async function cargarRiskEmpresa() {
+      const empresaId = document.getElementById("filtroEmpresa").value;
+      if (!empresaId) return cargarRiskScores();
+      const response = await fetch("/api/risk", { headers: { "authorization": token } });
+      const scores = await response.json();
+      const filtrado = scores.filter(s => s.empresaId?._id === empresaId);
+      // Reusar cargarRiskScores con datos filtrados
+    }
+
+    let graficaSeveridad = null;
+
+    async function cargarEstadisticas() {
+      const response = await fetch('/api/siem/estadisticas', { headers: { 'authorization': token } });
+      const data = await response.json();
+      document.getElementById('statTotal').textContent = data.total;
+      document.getElementById('statAltos').textContent = data.altos;
+      document.getElementById('statHoy').textContent = data.hoy;
+    }
+
+    async function cargarRiskScores() {
+      const response = await fetch('/api/risk', { headers: { 'authorization': token } });
+      const scores = await response.json();
+
+      const enRiesgo = scores.filter(s => s.nivel !== 'normal').length;
+      document.getElementById('statEmpresas').textContent = enRiesgo;
+
+      const container = document.getElementById('riskScores');
+      if (scores.length === 0) {
+        container.innerHTML = '<p style="color: var(--texto-suave); font-size: 12px; font-family: Share Tech Mono, monospace;">Sin datos de riesgo aún</p>';
+        return;
+      }
+
+      container.innerHTML = scores.map(s => {
+        const colores = {
+          normal: '#10b981',
+          monitoreo: '#f59e0b',
+          alerta: '#f97316',
+          critico: '#ef4444'
+        };
+        const color = colores[s.nivel] || '#10b981';
+        const pct = s.score;
+        const empresa = s.empresaId?.empresa || s.empresaId?.nombre || 'Empresa';
+
+        return `
+          <div style="display: flex; align-items: center; gap: 16px;">
+            <div style="width: 140px; font-family: 'Share Tech Mono', monospace; font-size: 11px; color: var(--texto);">${empresa}</div>
+            <div style="flex: 1; background: var(--borde); border-radius: 2px; height: 8px; position: relative;">
+              <div style="width: ${pct}%; background: ${color}; height: 100%; border-radius: 2px; transition: width 0.5s;"></div>
+            </div>
+            <div style="width: 40px; font-family: 'Share Tech Mono', monospace; font-size: 12px; color: ${color};">${pct}</div>
+            <span style="font-size: 10px; color: ${color}; font-family: 'Share Tech Mono', monospace; letter-spacing: 1px;">${s.nivel.toUpperCase()}</span>
+            ${s.bloqueado ? `<button onclick="desbloquear('${s.empresaId?._id}')" style="font-size: 10px; background: transparent; border: 1px solid #ef4444; color: #ef4444; padding: 4px 8px; cursor: pointer; font-family: 'Share Tech Mono', monospace;">DESBLOQUEAR</button>` : ''}
+          </div>
+        `;
+      }).join('');
+
+      // Gráfica
+      // Cargar eventos para la grafica
+      const empresa = document.getElementById("filtroEmpresa") ? document.getElementById("filtroEmpresa").value : "";
+      let urlGrafica = "/api/siem/events";
+      if (empresa) urlGrafica += `?userId=${empresa}`;
+      const evResponse = await fetch(urlGrafica, { headers: { "authorization": token } });
+      const eventos = await evResponse.json();
+
+      const ctx = document.getElementById("graficaSeveridad").getContext("2d");
+      const conteos = [
+        eventos.filter(e => e.severity === "low").length,
+        eventos.filter(e => e.severity === "medium").length,
+        eventos.filter(e => e.severity === "high").length
+      ];
+
+      if (graficaSeveridad) graficaSeveridad.destroy();
+      graficaSeveridad = new Chart(ctx, {
+        type: "doughnut",
+        data: {
+          labels: ["Baja", "Media", "Alta"],
+          datasets: [{
+            data: conteos,
+            backgroundColor: ["#10b981", "#f59e0b", "#ef4444"],
+            borderWidth: 0
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: { labels: { color: "#e2d9f3", font: { family: "Share Tech Mono" }, boxWidth: 12 } }
+          }
+        }
+      });
+    }
+
+    async function desbloquear(empresaId) {
+      await fetch(`/api/risk/desbloquear/${empresaId}`, {
+        method: 'PUT',
+        headers: { 'authorization': token }
+      });
+      mostrarToast('Empresa desbloqueada', 'success');
+      cargarRiskScores();
+    }
+
     async function cargarEventos() {
-      const tipo = document.getElementById('filtroTipo').value;
-      const severidad = document.getElementById('filtroSeveridad').value;
-      let url = '/api/siem/events';
+      const tipo = document.getElementById("filtroTipo").value;
+      const severidad = document.getElementById("filtroSeveridad").value;
+      const empresa = document.getElementById("filtroEmpresa") ? document.getElementById("filtroEmpresa").value : "";
+      let url = "/api/siem/events";
       const params = [];
       if (tipo) params.push(`tipo=${tipo}`);
       if (severidad) params.push(`severidad=${severidad}`);
+      if (empresa) params.push(`userId=${empresa}`);
       if (params.length) url += '?' + params.join('&');
 
       const response = await fetch(url, { headers: { 'authorization': token } });
       const eventos = await response.json();
 
-      document.getElementById('totalEventos').textContent = `(${eventos.length} eventos)`;
+      document.getElementById('conteoEventos').textContent = `(${eventos.length} eventos)`;
       const tbody = document.getElementById('tablaEventos');
       tbody.innerHTML = '';
 
@@ -93,8 +260,8 @@
         tbody.innerHTML += `
           <tr>
             <td style="font-family: 'Share Tech Mono', monospace; color: var(--acento); font-size: 11px;">${e.type.toUpperCase()}</td>
-            <td>${e.description}</td>
-            <td style="font-size: 12px; color: var(--texto-suave);">${usuario}</td>
+            <td style="font-size: 12px;">${e.description}</td>
+            <td style="font-size: 11px; color: var(--texto-suave);">${usuario}</td>
             <td><span class="badge ${badgeClass}">${e.severity.toUpperCase()}</span></td>
             <td style="font-family: 'Share Tech Mono', monospace; font-size: 11px; color: var(--texto-suave);">${e.ip || '—'}</td>
             <td style="font-size: 11px; color: var(--texto-suave);">${fecha}</td>
@@ -103,8 +270,32 @@
       });
     }
 
+    // Socket para alertas en tiempo real
+    document.addEventListener('DOMContentLoaded', () => {
+      if (typeof io !== 'undefined') {
+        const s = io();
+        s.on('alertaCritica', (data) => {
+          const container = document.getElementById('alertasContainer');
+          const alerta = document.createElement('div');
+          alerta.style.cssText = 'background: rgba(239,68,68,0.15); border: 1px solid #ef4444; border-radius: 4px; padding: 14px 20px; font-family: Share Tech Mono, monospace; font-size: 12px; color: #ef4444; margin-bottom: 8px;';
+          alerta.innerHTML = `🚨 ALERTA CRÍTICA — ${data.mensaje}`;
+          container.prepend(alerta);
+          mostrarToast(data.mensaje, 'error', 6000);
+          setTimeout(() => alerta.remove(), 30000);
+        });
+
+        s.on('riskUpdate', () => {
+          cargarRiskScores();
+        });
+      }
+    });
+
+    cargarEmpresas();
+    cargarEstadisticas();
+    cargarRiskScores();
     cargarEventos();
-    setInterval(cargarEventos, 10000);
+    setInterval(() => { cargarEventos(); cargarRiskScores(); }, 15000);
   </script>
+  <script src="/inactividad.js"></script>
 </body>
 </html>

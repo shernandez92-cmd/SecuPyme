@@ -11,10 +11,11 @@ const registrarEvento = async (type, description, severity, userId, ip) => {
 
 const obtenerEventos = async (req, res) => {
   try {
-    const { tipo, severidad } = req.query;
+    const { tipo, severidad, userId } = req.query;
     let filtro = {};
     if (tipo) filtro.type = tipo;
     if (severidad) filtro.severity = severidad;
+    if (userId) filtro.userId = userId;
 
     const eventos = await SecurityEvent.find(filtro)
       .populate('userId', 'nombre email empresa')
