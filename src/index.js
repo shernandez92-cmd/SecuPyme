@@ -43,6 +43,8 @@ app.use('/api/pdf', pdfRoutes);
 app.use('/api/siem', siemRoutes);
 app.use('/api/integraciones', integracionRoutes);
 app.use('/api/public', publicRoutes);
+const uploadRoutes = require("./routes/uploadRoutes");
+app.use("/api/upload", uploadRoutes);
 
 app.use((req, res) => {
   res.status(404).sendFile(__dirname + '/../public/404.html');

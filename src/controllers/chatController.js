@@ -128,4 +128,14 @@ const borrarChat = async (req, res) => {
   }
 };
 
-module.exports = { enviarMensaje, obtenerMensajes, obtenerReportesUsuario, borrarChat };
+
+const marcarLeido = async (req, res) => {
+  try {
+    const { conversacionId } = req.params;
+    await Conversation.findByIdAndUpdate(conversacionId, { noLeidos: 0 });
+    res.json({ mensaje: 'Marcado como leído' });
+  } catch (error) {
+    res.status(500).json({ mensaje: 'Error', error });
+  }
+};
+module.exports = { enviarMensaje, obtenerMensajes, obtenerReportesUsuario, borrarChat, marcarLeido };

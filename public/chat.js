@@ -33,6 +33,8 @@ function inicializarChat() {
             <option value="">Sin reporte relacionado</option>
           </select>
           <div style="display: flex; gap: 8px;">
+            <input type="file" id="chat-archivo" accept="image/*,.pdf" style="display:none" onchange="subirArchivoChatFn()">
+            <button onclick="document.getElementById('chat-archivo').click()" style="background: none; border: 1px solid var(--borde); color: var(--texto-suave); padding: 8px 10px; cursor: pointer; border-radius: 2px; font-size: 14px;">📎</button>
             <input type="text" id="chat-texto" placeholder="Escribe un mensaje..." style="flex: 1; font-size: 12px;" onkeypress="if(event.key==='Enter') enviarChatMensaje()">
             <button onclick="enviarChatMensaje()" style="background: #7c3aed; border: none; color: white; padding: 8px 14px; cursor: pointer; font-family: 'Share Tech Mono', monospace; font-size: 11px; border-radius: 2px;">→</button>
           </div>
@@ -106,7 +108,8 @@ async function cargarConversacionesAdmin() {
 
 async function seleccionarConversacion(conv) {
   conversationIdActual = conv._id;
-  empresaSeleccionada = conv.empresaId?._id || conv.empresaId;
+  fetch(`/api/chat/leido/${conv._id}`, { method: "PUT", headers: { "authorization": localStorage.getItem("token") } });
+  empresaSeleccionada = (conv.empresaId?._id || conv.empresaId)?.toString();
   const nombre = conv.empresaId?.empresa || conv.empresaId?.nombre || 'Empresa';
   const subtitulo = document.getElementById('chat-empresa-nombre');
   if (subtitulo) subtitulo.textContent = nombre;
@@ -183,7 +186,7 @@ async function cargarChatMensajes() {
         <div style="margin-bottom: 10px; text-align: ${esYo ? 'right' : 'left'};">
           <span style="font-size: 9px; color: #6b5a8a;">${m.usuario.nombre} · ${fecha}</span>
           <div style="display: inline-block; background: ${esYo ? 'rgba(124,58,237,0.2)' : 'rgba(255,255,255,0.05)'}; border: 1px solid ${esYo ? '#7c3aed' : 'var(--borde)'}; padding: 6px 12px; border-radius: 2px; margin-top: 2px; font-size: 12px; max-width: 85%; word-break: break-word;">
-            ${m.texto}
+            ${renderTextoMensaje(m.texto)}
           </div>
         </div>
       `;
@@ -237,7 +240,7 @@ function recibirMensajeSocket(mensaje) {
       <div style="margin-bottom: 10px; text-align: ${esYo ? 'right' : 'left'};">
         <span style="font-size: 9px; color: #6b5a8a;">${mensaje.usuario.nombre} · ${fecha}</span>
         <div style="display: inline-block; background: ${esYo ? 'rgba(124,58,237,0.2)' : 'rgba(255,255,255,0.05)'}; border: 1px solid ${esYo ? '#7c3aed' : 'var(--borde)'}; padding: 6px 12px; border-radius: 2px; margin-top: 2px; font-size: 12px; max-width: 85%; word-break: break-word;">
-          ${mensaje.texto}
+          ${renderTextoMensaje(mensaje.texto)}
         </div>
       </div>
     `;
@@ -262,3 +265,69 @@ function desbloquearAudio() {
   }).catch(() => {});
 }
 document.addEventListener('click', desbloquearAudio, { once: false });
+
+async function subirArchivoChatFn() {
+  const fileInput = document.getElementById('chat-archivo');
+  const file = fileInput.files[0];
+  if (!file) return;
+
+  const token = localStorage.getItem('token');
+  const rol = localStorage.getItem('rol');
+
+  if (rol === 'admin' && !empresaSeleccionada) {
+    mostrarToast('Selecciona una empresa primero', 'warning');
+    return;
+  }
+
+  mostrarToast('Subiendo archivo...', 'info');
+
+  const formData = new FormData();
+  formData.append('archivo', file);
+
+  const uploadResponse = await fetch('/api/upload', {
+    method: 'POST',
+    headers: { 'authorization': token },
+    body: formData
+  });
+
+  const uploadData = await uploadResponse.json();
+
+  if (!uploadResponse.ok) {
+    mostrarToast('Error subiendo archivo', 'error');
+    return;
+  }
+
+  const esImagen = file.type.startsWith('image/');
+  const texto = esImagen
+    ? `[IMAGEN] ${uploadData.url}`
+    : `[PDF] ${uploadData.nombre} - ${uploadData.url}`;
+
+  const body = { texto, reporteRelacionado: null };
+  if (rol === 'admin' && empresaSeleccionada) body.paraId = empresaSeleccionada;
+
+  await fetch('/api/chat', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'authorization': token },
+    body: JSON.stringify(body)
+  });
+
+  fileInput.value = '';
+  mostrarToast('Archivo enviado', 'success');
+}
+
+function renderTextoMensaje(texto) {
+  if (!texto) return '';
+  if (texto.startsWith('[IMAGEN]')) {
+    const url = texto.replace('[IMAGEN] ', '');
+    return `<img src="${url}" style="max-width:200px; border-radius:4px; display:block; margin-top:4px; cursor:pointer;" onclick="window.open('${url}', '_blank')">`;
+  }
+  if (texto.startsWith("[PDF]")) {
+    const partes = texto.split(" - ");
+    const nombre = partes[0].replace("[PDF] ", "");
+    const url = partes[1];
+    const descargaUrl = `/api/upload/descargar?url=${encodeURIComponent(url)}&nombre=${encodeURIComponent(nombre)}`;
+    return `<a href="${descargaUrl}" style="color:var(--acento); font-family:'Share Tech Mono',monospace; font-size:11px; text-decoration:none;">📄 ${nombre} ↓</a>`;
+    return `<a href="${viewerUrl}" target="_blank" style="color:var(--acento); font-family:'Share Tech Mono',monospace; font-size:11px; text-decoration:none;">📄 ${nombre}</a>`;
+  }
+  return texto;
+}

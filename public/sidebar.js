@@ -116,7 +116,7 @@ function inicializarSocket() {
       }
 
       const ventana = document.getElementById('chat-ventana');
-      agregarMensajeDOM(mensaje);
+      if (typeof recibirMensajeSocket === "function") { recibirMensajeSocket(mensaje); } else { agregarMensajeDOM(mensaje); }
     });
 
     socket.on('disconnect', () => {
