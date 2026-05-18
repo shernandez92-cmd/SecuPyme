@@ -26,6 +26,8 @@ const login = async (req, res) => {
     const usuario = await Usuario.findOne({ email });
     if (!usuario) {
       await registrarEvento('login_fallido', `Intento fallido: ${email}`, 'high', null, req.ip);
+      const { actualizarRisk } = require("./riskController");
+      await actualizarRisk(null, "login_fallido");
       return res.status(400).json({ mensaje: 'Credenciales incorrectas' });
     }
     const contraseñaValida = await bcrypt.compare(contraseña, usuario.contraseña);
@@ -47,6 +49,8 @@ const login = async (req, res) => {
       { expiresIn: "8h" }
     );
     await registrarEvento("login_exitoso", `Login de ${usuario.email}`, "low", usuario._id, req.ip);
+      const { actualizarRisk: ar } = require("./riskController");
+      await ar(usuario._id, "login_exitoso");
     res.json({ token, rol: usuario.rol, nombre: usuario.nombre });
   } catch (error) {
     res.status(500).json({ mensaje: 'Error en el servidor', error });

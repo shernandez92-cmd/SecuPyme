@@ -27,6 +27,9 @@ const crearReporte = async (req, res) => {
     });
 
     await reporte.save();
+      const { actualizarRisk } = require("./riskController");
+      const tipoRisk = "nuevo_reporte_" + (tipoVulnerabilidad || "otro").replace(/ /g, "_");
+      await actualizarRisk(req.usuario.id, tipoRisk);
     const { registrarEvento } = require('./siemController');
 await registrarEvento('nuevo_reporte', `Nuevo reporte de ${empresa}`, 'medium', req.usuario.id, req.ip);
 

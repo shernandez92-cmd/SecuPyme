@@ -49,6 +49,8 @@ const crearAutoevaluacion = async (req, res) => {
       recomendaciones
     });
     await autoevaluacion.save();
+      const { actualizarRisk } = require("./riskController");
+      await actualizarRisk(req.usuario.id, "autoevaluacion_" + nivelRiesgo);
 
     if (nivelRiesgo === 'alto') {
       const usuario = await Usuario.findById(req.usuario.id);

@@ -43,6 +43,8 @@ app.use('/api/pdf', pdfRoutes);
 app.use('/api/siem', siemRoutes);
 app.use('/api/integraciones', integracionRoutes);
 app.use('/api/public', publicRoutes);
+const riskRoutes = require("./routes/riskRoutes");
+app.use("/api/risk", riskRoutes);
 const uploadRoutes = require("./routes/uploadRoutes");
 app.use("/api/upload", uploadRoutes);
 
