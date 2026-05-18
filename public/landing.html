@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SecuPyme — Ciberseguridad simplificada para pymes colombianas</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Syne:wght@400;700;800&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --negro: #050508;
+      --morado: #4a1a8a;
+      --acento: #a855f7;
+      --acento2: #7c3aed;
+      --texto: #e2d9f3;
+      --suave: #6b5a8a;
+      --verde: #10b981;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--negro);
+      color: var(--texto);
+      font-family: 'Syne', sans-serif;
+      overflow-x: hidden;
+    }
+
+    /* SCANLINES */
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.08) 2px, rgba(0,0,0,0.08) 4px);
+      pointer-events: none;
+      z-index: 9999;
+    }
+
+    /* NAV */
+    nav {
+      position: fixed;
+      top: 0;
+      width: 100%;
+      padding: 20px 60px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 100;
+      background: rgba(5,5,8,0.8);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(168,85,247,0.1);
+    }
+
+    .nav-logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .nav-logo img { height: 36px; }
+
+    .nav-links {
+      display: flex;
+      gap: 40px;
+      list-style: none;
+    }
+
+    .nav-links a {
+      color: var(--suave);
+      text-decoration: none;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 12px;
+      letter-spacing: 2px;
+      transition: color 0.2s;
+    }
+
+    .nav-links a:hover { color: var(--acento); }
+
+    .nav-cta {
+      background: transparent;
+      border: 1px solid var(--acento2);
+      color: var(--acento);
+      padding: 10px 24px;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 12px;
+      letter-spacing: 3px;
+      cursor: pointer;
+      transition: all 0.3s;
+      text-decoration: none;
+    }
+
+    .nav-cta:hover {
+      background: var(--acento2);
+      color: white;
+    }
+
+    /* HERO */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      padding: 120px 60px 60px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: -200px;
+      right: -200px;
+      width: 700px;
+      height: 700px;
+      background: radial-gradient(circle, rgba(124,58,237,0.15) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .hero::after {
+      content: '';
+      position: absolute;
+      bottom: -200px;
+      left: -200px;
+      width: 500px;
+      height: 500px;
+      background: radial-gradient(circle, rgba(168,85,247,0.08) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .hero-content {
+      max-width: 700px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .hero-badge {
+      display: inline-block;
+      border: 1px solid rgba(168,85,247,0.4);
+      color: var(--acento);
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 3px;
+      padding: 6px 16px;
+      margin-bottom: 32px;
+      animation: fadeIn 0.6s ease;
+    }
+
+    .hero h1 {
+      font-size: clamp(48px, 7vw, 88px);
+      font-weight: 800;
+      line-height: 1.0;
+      margin-bottom: 24px;
+      animation: slideUp 0.8s ease;
+    }
+
+    .hero h1 span {
+      color: var(--acento);
+      display: block;
+    }
+
+    .hero p {
+      font-size: 18px;
+      color: var(--suave);
+      line-height: 1.7;
+      margin-bottom: 40px;
+      max-width: 540px;
+      animation: slideUp 1s ease;
+    }
+
+    .hero-ctas {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      animation: slideUp 1.2s ease;
+    }
+
+    .btn-hero-primary {
+      background: var(--acento2);
+      border: none;
+      color: white;
+      padding: 16px 36px;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 13px;
+      letter-spacing: 3px;
+      cursor: pointer;
+      transition: all 0.3s;
+      text-decoration: none;
+      display: inline-block;
+    }
+
+    .btn-hero-primary:hover {
+      background: var(--acento);
+      box-shadow: 0 0 30px rgba(168,85,247,0.4);
+    }
+
+    .btn-hero-secondary {
+      background: transparent;
+      border: 1px solid var(--suave);
+      color: var(--suave);
+      padding: 16px 36px;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 13px;
+      letter-spacing: 3px;
+      cursor: pointer;
+      transition: all 0.3s;
+      text-decoration: none;
+      display: inline-block;
+    }
+
+    .btn-hero-secondary:hover {
+      border-color: var(--acento);
+      color: var(--acento);
+    }
+
+    .hero-stats {
+      position: absolute;
+      right: 60px;
+      top: 50%;
+      transform: translateY(-50%);
+      display: flex;
+      flex-direction: column;
+      gap: 32px;
+      z-index: 1;
+      animation: fadeIn 1.4s ease;
+    }
+
+    .hero-stat {
+      text-align: right;
+      border-right: 2px solid var(--acento2);
+      padding-right: 20px;
+    }
+
+    .hero-stat-num {
+      font-size: 48px;
+      font-weight: 800;
+      color: var(--acento);
+      line-height: 1;
+    }
+
+    .hero-stat-label {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 10px;
+      color: var(--suave);
+      letter-spacing: 2px;
+      margin-top: 4px;
+    }
+
+    /* SECCIONES */
+    section {
+      padding: 100px 60px;
+    }
+
+    .section-label {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 11px;
+      color: var(--acento);
+      letter-spacing: 4px;
+      margin-bottom: 16px;
+    }
+
+    .section-title {
+      font-size: clamp(32px, 4vw, 52px);
+      font-weight: 800;
+      line-height: 1.1;
+      margin-bottom: 20px;
+    }
+
+    .section-subtitle {
+      font-size: 16px;
+      color: var(--suave);
+      line-height: 1.7;
+      max-width: 600px;
+    }
+
+    /* PROBLEMA */
+    .problema {
+      background: linear-gradient(180deg, var(--negro) 0%, #0d0618 100%);
+    }
+
+    .problema-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+      margin-top: 60px;
+    }
+
+    .problema-card {
+      border: 1px solid rgba(168,85,247,0.15);
+      padding: 32px;
+      position: relative;
+      transition: all 0.3s;
+    }
+
+    .problema-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--acento2), transparent);
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .problema-card:hover {
+      border-color: rgba(168,85,247,0.4);
+      transform: translateY(-4px);
+    }
+
+    .problema-card:hover::before { opacity: 1; }
+
+    .problema-icon {
+      font-size: 36px;
+      margin-bottom: 16px;
+    }
+
+    .problema-card h3 {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 12px;
+      color: var(--texto);
+    }
+
+    .problema-card p {
+      font-size: 14px;
+      color: var(--suave);
+      line-height: 1.7;
+    }
+
+    /* CARACTERÍSTICAS */
+    .features {
+      background: #0d0618;
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 2px;
+      margin-top: 60px;
+      border: 1px solid rgba(168,85,247,0.15);
+    }
+
+    .feature-item {
+      padding: 40px;
+      border: 1px solid rgba(168,85,247,0.1);
+      transition: all 0.3s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .feature-item::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at 0% 0%, rgba(124,58,237,0.05) 0%, transparent 60%);
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .feature-item:hover::after { opacity: 1; }
+
+    .feature-icon {
+      font-size: 28px;
+      margin-bottom: 16px;
+    }
+
+    .feature-item h3 {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 10px;
+      color: var(--texto);
+    }
+
+    .feature-item p {
+      font-size: 14px;
+      color: var(--suave);
+      line-height: 1.7;
+    }
+
+    /* PLANES */
+    .planes {
+      background: var(--negro);
+    }
+
+    .planes-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+      margin-top: 60px;
+    }
+
+    .plan-card {
+      border: 1px solid rgba(168,85,247,0.2);
+      padding: 40px 32px;
+      transition: all 0.3s;
+      position: relative;
+    }
+
+    .plan-card.featured {
+      border-color: var(--acento2);
+      background: rgba(124,58,237,0.05);
+    }
+
+    .plan-card.featured::before {
+      content: 'MÁS POPULAR';
+      position: absolute;
+      top: -12px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--acento2);
+      color: white;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 2px;
+      padding: 4px 16px;
+    }
+
+    .plan-nombre {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 12px;
+      letter-spacing: 3px;
+      color: var(--acento);
+      margin-bottom: 16px;
+    }
+
+    .plan-precio {
+      font-size: 48px;
+      font-weight: 800;
+      color: var(--texto);
+      margin-bottom: 4px;
+    }
+
+    .plan-precio span {
+      font-size: 16px;
+      color: var(--suave);
+      font-weight: 400;
+    }
+
+    .plan-desc {
+      font-size: 13px;
+      color: var(--suave);
+      margin-bottom: 32px;
+    }
+
+    .plan-features {
+      list-style: none;
+      margin-bottom: 32px;
+    }
+
+    .plan-features li {
+      font-size: 13px;
+      color: var(--texto);
+      padding: 8px 0;
+      border-bottom: 1px solid rgba(168,85,247,0.1);
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .plan-features li::before {
+      content: '✓';
+      color: var(--verde);
+      font-size: 12px;
+      flex-shrink: 0;
+    }
+
+    .plan-features li.no::before {
+      content: '✗';
+      color: var(--suave);
+    }
+
+    .plan-features li.no {
+      color: var(--suave);
+    }
+
+    .btn-plan {
+      width: 100%;
+      padding: 14px;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 12px;
+      letter-spacing: 3px;
+      cursor: pointer;
+      transition: all 0.3s;
+      text-decoration: none;
+      display: block;
+      text-align: center;
+    }
+
+    .btn-plan-outline {
+      background: transparent;
+      border: 1px solid var(--suave);
+      color: var(--suave);
+    }
+
+    .btn-plan-outline:hover {
+      border-color: var(--acento);
+      color: var(--acento);
+    }
+
+    .btn-plan-filled {
+      background: var(--acento2);
+      border: none;
+      color: white;
+    }
+
+    .btn-plan-filled:hover {
+      background: var(--acento);
+      box-shadow: 0 0 20px rgba(168,85,247,0.3);
+    }
+
+    /* CTA FINAL */
+    .cta-final {
+      background: linear-gradient(135deg, #0d0618 0%, #1a0a2e 50%, #0d0618 100%);
+      text-align: center;
+      padding: 120px 60px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .cta-final::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, rgba(124,58,237,0.12) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .cta-final h2 {
+      font-size: clamp(36px, 5vw, 64px);
+      font-weight: 800;
+      margin-bottom: 20px;
+      position: relative;
+    }
+
+    .cta-final p {
+      font-size: 16px;
+      color: var(--suave);
+      margin-bottom: 40px;
+      position: relative;
+    }
+
+    /* FOOTER */
+    footer {
+      padding: 40px 60px;
+      border-top: 1px solid rgba(168,85,247,0.1);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    footer p {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 11px;
+      color: var(--suave);
+      letter-spacing: 2px;
+    }
+
+    /* ANIMACIONES */
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* RESPONSIVE */
+    @media (max-width: 768px) {
+      nav { padding: 16px 24px; }
+      .nav-links { display: none; }
+      .hero { padding: 100px 24px 60px; }
+      .hero-stats { display: none; }
+      section { padding: 60px 24px; }
+      .problema-grid { grid-template-columns: 1fr; }
+      .features-grid { grid-template-columns: 1fr; }
+      .planes-grid { grid-template-columns: 1fr; }
+      footer { flex-direction: column; gap: 16px; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav>
+    <div class="nav-logo">
+      <img src="/Logo.png" alt="SecuPyme">
+    </div>
+    <ul class="nav-links">
+      <li><a href="#problema">PROBLEMA</a></li>
+      <li><a href="#features">SOLUCIÓN</a></li>
+      <li><a href="#planes">PLANES</a></li>
+    </ul>
+    <a href="/registro.html" class="nav-cta">EMPEZAR GRATIS</a>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-content">
+      <div class="hero-badge">🔒 CIBERSEGURIDAD PARA PYMES COLOMBIANAS</div>
+      <h1>
+        Protege tu empresa
+        <span>sin ser experto.</span>
+      </h1>
+      <p>SecuPyme es la plataforma de ciberseguridad diseñada para pequeñas y medianas empresas colombianas. Detecta amenazas, responde incidentes y conoce tu nivel de riesgo — todo en un solo lugar.</p>
+      <div class="hero-ctas">
+        <a href="/registro.html" class="btn-hero-primary">CREAR CUENTA GRATIS</a>
+        <a href="/index.html" class="btn-hero-secondary">INICIAR SESIÓN</a>
+      </div>
+    </div>
+    <div class="hero-stats">
+      <div class="hero-stat">
+        <div class="hero-stat-num">94%</div>
+        <div class="hero-stat-label">PYMES SIN PROTECCIÓN</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-num">$0</div>
+        <div class="hero-stat-label">PARA EMPEZAR</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-num">24/7</div>
+        <div class="hero-stat-label">MONITOREO ACTIVO</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PROBLEMA -->
+  <section class="problema" id="problema">
+    <div class="section-label">EL PROBLEMA</div>
+    <h2 class="section-title">Las pymes son el blanco<br>más fácil.</h2>
+    <p class="section-subtitle">El 60% de las pymes que sufren un ciberataque cierran en los siguientes 6 meses. No porque no les importe — sino porque no tienen las herramientas adecuadas.</p>
+
+    <div class="problema-grid">
+      <div class="problema-card">
+        <div class="problema-icon">💸</div>
+        <h3>Herramientas costosas</h3>
+        <p>Las soluciones empresariales cuestan millones al año. Las pymes no pueden pagarlas ni tienen el personal para operarlas.</p>
+      </div>
+      <div class="problema-card">
+        <div class="problema-icon">🤷</div>
+        <h3>Sin conocimiento técnico</h3>
+        <p>La mayoría de las pymes no tienen un equipo de IT. Cuando ocurre un incidente, no saben qué hacer ni a quién llamar.</p>
+      </div>
+      <div class="problema-card">
+        <div class="problema-icon">⏰</div>
+        <h3>Reacción tardía</h3>
+        <p>Sin monitoreo, los ataques se detectan semanas después. Para entonces, el daño ya está hecho y la reputación, comprometida.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- FEATURES -->
+  <section class="features" id="features">
+    <div class="section-label">LA SOLUCIÓN</div>
+    <h2 class="section-title">Todo lo que necesitas<br>en un solo lugar.</h2>
+    <p class="section-subtitle">SecuPyme traduce la ciberseguridad empresarial a algo que cualquier pyme puede entender y usar desde el primer día.</p>
+
+    <div class="features-grid">
+      <div class="feature-item">
+        <div class="feature-icon">🚨</div>
+        <h3>Gestión de Incidentes</h3>
+        <p>Reporta y rastrea incidentes de seguridad. Tu equipo recibe notificaciones inmediatas y puede gestionar cada caso con prioridades y estados claros.</p>
+      </div>
+      <div class="feature-item">
+        <div class="feature-icon">📊</div>
+        <h3>Autoevaluación Inteligente</h3>
+        <p>Cuestionario de 10 preguntas que calcula tu nivel de riesgo real. Recibe recomendaciones específicas basadas en tus respuestas.</p>
+      </div>
+      <div class="feature-item">
+        <div class="feature-icon">🔍</div>
+        <h3>SIEM con Risk Score</h3>
+        <p>Monitoreo en tiempo real alineado con NIST SP 800-61. Risk score dinámico integrado con Shodan y VirusTotal para detectar amenazas antes de que impacten.</p>
+      </div>
+      <div class="feature-item">
+        <div class="feature-icon">🤖</div>
+        <h3>Asistente IA</h3>
+        <p>Explicaciones en español simple de cada amenaza detectada. La IA traduce eventos técnicos a acciones concretas que cualquier empleado puede ejecutar.</p>
+      </div>
+      <div class="feature-item">
+        <div class="feature-icon">💬</div>
+        <h3>Soporte en Tiempo Real</h3>
+        <p>Chat directo con expertos de SecuPyme. Cada conversación está vinculada a tus reportes para que el experto tenga todo el contexto.</p>
+      </div>
+      <div class="feature-item">
+        <div class="feature-icon">🔐</div>
+        <h3>Autenticación Robusta</h3>
+        <p>Login seguro con autenticación de dos factores. Tus datos protegidos con JWT, encriptación bcrypt y rate limiting contra fuerza bruta.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- PLANES -->
+  <section class="planes" id="planes">
+    <div class="section-label">PLANES</div>
+    <h2 class="section-title">Empieza gratis.<br>Crece cuando quieras.</h2>
+    <p class="section-subtitle">Sin contratos. Sin sorpresas. Cancela cuando quieras.</p>
+
+    <div class="planes-grid">
+      <div class="plan-card">
+        <div class="plan-nombre">FREE</div>
+        <div class="plan-precio">$0 <span>/ mes</span></div>
+        <div class="plan-desc">Para empezar a protegerte hoy mismo.</div>
+        <ul class="plan-features">
+          <li>Hasta 3 reportes de incidentes</li>
+          <li>Autoevaluación de seguridad</li>
+          <li>Dashboard básico</li>
+          <li class="no">Soporte prioritario</li>
+          <li class="no">API pública</li>
+          <li class="no">SIEM avanzado</li>
+        </ul>
+        <a href="/registro.html" class="btn-plan btn-plan-outline">EMPEZAR GRATIS</a>
+      </div>
+
+      <div class="plan-card featured">
+        <div class="plan-nombre">BÁSICO</div>
+        <div class="plan-precio">$29.900 <span>/ mes</span></div>
+        <div class="plan-desc">Para pymes que toman la seguridad en serio.</div>
+        <ul class="plan-features">
+          <li>Hasta 20 reportes de incidentes</li>
+          <li>Autoevaluación completa + historial</li>
+          <li>SIEM con risk score</li>
+          <li>Soporte por chat</li>
+          <li>Asistente IA</li>
+          <li class="no">API pública</li>
+        </ul>
+        <a href="/registro.html" class="btn-plan btn-plan-filled">EMPEZAR AHORA</a>
+      </div>
+
+      <div class="plan-card">
+        <div class="plan-nombre">PREMIUM</div>
+        <div class="plan-precio">$79.900 <span>/ mes</span></div>
+        <div class="plan-desc">Protección total para empresas en crecimiento.</div>
+        <ul class="plan-features">
+          <li>Reportes ilimitados</li>
+          <li>SIEM completo + integraciones</li>
+          <li>Soporte prioritario 24/7</li>
+          <li>Asistente IA avanzado</li>
+          <li>API pública</li>
+          <li>Exportar reportes PDF</li>
+        </ul>
+        <a href="/registro.html" class="btn-plan btn-plan-outline">CONTACTAR</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA FINAL -->
+  <section class="cta-final">
+    <h2>Tu empresa merece<br>estar protegida.</h2>
+    <p>Únete a las pymes colombianas que ya confían en SecuPyme.</p>
+    <a href="/registro.html" class="btn-hero-primary">CREAR CUENTA GRATIS →</a>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <p>© 2026 SECUPYME — CIBERSEGURIDAD SIMPLIFICADA</p>
+    <p>HECHO EN COLOMBIA 🇨🇴</p>
+    <a href="/index.html" style="color: var(--acento); font-family: 'Share Tech Mono', monospace; font-size: 11px; letter-spacing: 2px; text-decoration: none;">INICIAR SESIÓN →</a>
+  </footer>
+
+</body>
+</html>
