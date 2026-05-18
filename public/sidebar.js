@@ -49,6 +49,7 @@ function cargarSidebar(paginaActiva) {
   inicializarModo();
   inicializarChat();
   inicializarSocket();
+  inicializarAsistenteIA();
 }
 
 // =================== MODO ===================
@@ -171,4 +172,91 @@ function reproducirSonido() {
       });
     }
   } catch (e) {}
+}
+
+// =================== ASISTENTE IA ===================
+function inicializarAsistenteIA() {
+  if (document.getElementById('ia-flotante')) return;
+
+  const iaHTML = `
+    <div id="ia-flotante" style="position: fixed; bottom: 90px; right: 24px; z-index: 9998;">
+      <div id="ia-ventana" style="display:none; flex-direction: column; width: 360px; height: 480px; background: var(--morado-oscuro); border: 1px solid #7c3aed; border-radius: 4px; box-shadow: 0 0 40px rgba(124,58,237,0.3);">
+        <div style="padding: 14px 16px; border-bottom: 1px solid var(--borde); display: flex; justify-content: space-between; align-items: center;">
+          <div>
+            <span style="font-family: 'Share Tech Mono', monospace; font-size: 12px; color: #a855f7; letter-spacing: 2px;">🤖 ASISTENTE IA</span>
+            <p style="font-size: 10px; color: #6b5a8a; margin-top: 2px;">Powered by LLaMA 3.3</p>
+          </div>
+          <button onclick="toggleIA()" style="background: none; border: none; color: #6b5a8a; cursor: pointer; font-size: 16px;">✕</button>
+        </div>
+        <div id="ia-mensajes" style="flex: 1; overflow-y: auto; padding: 16px;">
+          <div style="margin-bottom: 12px;">
+            <div style="display: inline-block; background: rgba(124,58,237,0.15); border: 1px solid #4a1a8a; padding: 8px 14px; border-radius: 2px; font-size: 11px; color: #a855f7; max-width: 95%; line-height: 1.6;">
+              👋 Hola, soy tu asistente de ciberseguridad. Puedo explicarte eventos de seguridad, analizar riesgos y responder tus preguntas. ¿En qué te ayudo?
+            </div>
+          </div>
+        </div>
+        <div style="padding: 12px; border-top: 1px solid var(--borde);">
+          <div style="display: flex; gap: 8px;">
+            <input type="text" id="ia-texto" placeholder="Pregunta sobre ciberseguridad..." style="flex: 1; font-size: 12px;" onkeypress="if(event.key==='Enter') enviarPreguntaIA()">
+            <button onclick="enviarPreguntaIA()" style="background: #7c3aed; border: none; color: white; padding: 8px 14px; cursor: pointer; font-family: 'Share Tech Mono', monospace; font-size: 11px; border-radius: 2px;">→</button>
+          </div>
+        </div>
+      </div>
+      <button onclick="toggleIA()" style="width: 46px; height: 46px; background: linear-gradient(135deg, #7c3aed, #a855f7); border: none; border-radius: 50%; color: white; font-size: 18px; cursor: pointer; box-shadow: 0 0 20px rgba(168,85,247,0.4);">🤖</button>
+    </div>
+  `;
+
+  document.body.insertAdjacentHTML('beforeend', iaHTML);
+}
+
+let iaAbierto = false;
+
+function toggleIA() {
+  iaAbierto = !iaAbierto;
+  const ventana = document.getElementById('ia-ventana');
+  ventana.style.display = iaAbierto ? 'flex' : 'none';
+}
+
+async function enviarPreguntaIA() {
+  const input = document.getElementById('ia-texto');
+  const pregunta = input.value.trim();
+  if (!pregunta) return;
+
+  const contenedor = document.getElementById('ia-mensajes');
+  const token = localStorage.getItem('token');
+
+  contenedor.innerHTML += `
+    <div style="margin-bottom: 10px; text-align: right;">
+      <div style="display: inline-block; background: rgba(124,58,237,0.2); border: 1px solid #7c3aed; padding: 6px 12px; border-radius: 2px; font-size: 12px; max-width: 85%;">
+        ${pregunta}
+      </div>
+    </div>
+  `;
+
+  contenedor.innerHTML += `<div id="ia-typing" style="color: #6b5a8a; font-size: 11px; font-family: 'Share Tech Mono', monospace; padding: 4px 0;">Analizando...</div>`;
+  contenedor.scrollTop = contenedor.scrollHeight;
+  input.value = '';
+
+  try {
+    const response = await fetch('/api/ia/asistente', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'authorization': token },
+      body: JSON.stringify({ pregunta, contexto: `Usuario rol: ${localStorage.getItem('rol')}` })
+    });
+
+    const data = await response.json();
+    document.getElementById('ia-typing')?.remove();
+
+    contenedor.innerHTML += `
+      <div style="margin-bottom: 10px; text-align: left;">
+        <div style="display: inline-block; background: rgba(255,255,255,0.05); border: 1px solid var(--borde); padding: 8px 12px; border-radius: 2px; font-size: 12px; max-width: 90%; line-height: 1.6; color: var(--texto);">
+          ${data.respuesta || data.mensaje}
+        </div>
+      </div>
+    `;
+    contenedor.scrollTop = contenedor.scrollHeight;
+  } catch (e) {
+    document.getElementById('ia-typing')?.remove();
+    contenedor.innerHTML += `<div style="color: #ef4444; font-size: 11px;">Error conectando con IA</div>`;
+  }
 }
