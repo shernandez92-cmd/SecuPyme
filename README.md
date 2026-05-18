@@ -1,4 +1,4 @@
-# 🔒 SecuPyme
+# SecuPyme
 
 **Plataforma de ciberseguridad simplificada para pymes colombianas**
 
@@ -8,13 +8,13 @@
 
 ---
 
-## 📋 Descripción
+## Descripción
 
 SecuPyme es una plataforma SaaS de ciberseguridad diseñada específicamente para pequeñas y medianas empresas colombianas que no cuentan con equipos técnicos especializados. Traduce conceptos complejos de ciberseguridad a acciones concretas y comprensibles.
 
 ---
 
-## 🚀 Stack Tecnológico
+## Stack Tecnológico
 
 | Capa | Tecnología |
 |------|-----------|
@@ -30,21 +30,21 @@ SecuPyme es una plataforma SaaS de ciberseguridad diseñada específicamente par
 
 ---
 
-## ✨ Funcionalidades
+## Funcionalidades
 
-### 🔐 Autenticación
+### Autenticación
 - Login seguro con JWT 8h de expiración
 - Autenticación de dos factores 2FA con Google Authenticator
 - Rate limiting máximo 5 intentos de login por 15 minutos
 - Cierre de sesión automático por inactividad 10 minutos
 - Roles admin y cliente
 
-### 📊 Dashboard
+### Dashboard
 - Resumen de reportes por estado
 - Reportes de las últimas 72 horas
 - Gráfica de vulnerabilidades por tipo
 
-### 🚨 Gestión de Incidentes
+### Gestión de Incidentes
 - Crear editar y eliminar reportes de incidentes
 - Estados abierto en proceso resuelto
 - Prioridades alta media baja
@@ -52,7 +52,7 @@ SecuPyme es una plataforma SaaS de ciberseguridad diseñada específicamente par
 - Notas del admin con notificación por correo al cliente
 - Exportar reportes a PDF
 
-### 📋 Autoevaluación
+### Autoevaluación
 - 10 preguntas con puntaje ponderado 0-20
 - Niveles de riesgo bajo medio alto
 - Recomendaciones automáticas por área de mejora
@@ -60,7 +60,7 @@ SecuPyme es una plataforma SaaS de ciberseguridad diseñada específicamente par
 - Exportar historial a PDF
 - Alerta por correo si riesgo es alto
 
-### 🔍 SIEM alineado con NIST SP 800-61
+### SIEM alineado con NIST SP 800-61
 
 Preparación
 - Sistema de logs centralizado
@@ -88,7 +88,7 @@ Post-Incidente
 - Exportar reportes
 - Resumen semanal IA
 
-### 📈 Risk Score Dinámico
+### Risk Score Dinámico
 
 | Evento | Cambio |
 |--------|--------|
@@ -110,13 +110,13 @@ Umbrales
 - 61-80 Alerta
 - 81-100 Crítico bloqueo automático
 
-### 🤖 Inteligencia Artificial Groq LLaMA 3.3 70B
+### Inteligencia Artificial Groq LLaMA 3.3 70B
 - Asistente flotante chat de ciberseguridad en todas las páginas
 - Explicador de eventos traduce eventos técnicos a lenguaje simple
 - Análisis de risk score diagnóstico y recomendaciones
 - Resumen semanal informe ejecutivo automático
 
-### 💬 Chat Multiempresa
+### Chat Multiempresa
 - Conversaciones aisladas admin empresa
 - Mensajes en tiempo real via Socket.IO
 - Contador de mensajes no leídos por conversación
@@ -124,18 +124,18 @@ Umbrales
 - Sonido de notificación
 - Historial persistente
 
-### 🔗 Integraciones Externas
+### Integraciones Externas
 - Shodan consulta de IPs detección de puertos críticos
 - VirusTotal análisis de hashes de archivos maliciosos
 
-### 👥 Panel Admin
+### Panel Admin
 - Gestión de usuarios y roles
 - Cambio de planes free básico premium
 - Ver todas las conversaciones
 - SIEM completo
 - Desbloqueo de empresas
 
-### 💳 Planes
+### Planes
 
 | Plan | Reportes | Precio |
 |------|----------|--------|
@@ -145,7 +145,7 @@ Umbrales
 
 ---
 
-## ⚙️ Variables de Entorno
+## Variables de Entorno
 
 PORT
 MONGODB_URI
@@ -161,7 +161,7 @@ GROQ_API_KEY
 
 ---
 
-## 🚀 Instalación Local
+## Instalación Local
 
 git clone https://github.com/shernandez92-cmd/SecuPyme.git
 cd SecuPyme
@@ -170,7 +170,7 @@ node src/index.js
 
 ---
 
-## 👤 Credenciales de Prueba
+## Credenciales de Prueba
 
 | Rol | Email | Contraseña |
 |-----|-------|------------|
@@ -181,7 +181,7 @@ El admin tiene 2FA activo usar Google Authenticator.
 
 ---
 
-## 🔮 Trabajo Futuro
+## Trabajo Futuro
 
 - Bloqueo por IP
 - Refresh tokens
@@ -195,6 +195,6 @@ El admin tiene 2FA activo usar Google Authenticator.
 
 ---
 
-## 📄 Licencia
+## Licencia
 
 Proyecto académico SENA 2026
