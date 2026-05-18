@@ -136,6 +136,7 @@
               <th>DESCRIPCIÓN</th>
               <th>ESTADO</th>
               <th>FECHA</th>
+              <th></th>
             </tr>
           </thead>
           <tbody id="tablaBody"></tbody>
@@ -148,6 +149,7 @@
   <script src="sidebar.js"></script>
   <script>
     const token = localStorage.getItem('token');
+    const rol = localStorage.getItem("rol");
     if (!token) window.location.href = '/';
     cargarSidebar('reportes');
 
@@ -209,13 +211,18 @@
     }
 
     async function cargarReportes() {
-      const response = await fetch('/api/reportes', { headers: { 'authorization': token } });
+      const response = await fetch("/api/reportes", { headers: { "authorization": token } });
       const reportes = await response.json();
-      const tbody = document.getElementById('tablaBody');
-      tbody.innerHTML = '';
+      const tbody = document.getElementById("tablaBody");
+      tbody.innerHTML = "";
+      if (reportes.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding: 48px; color: var(--texto-suave); font-family: 'Share Tech Mono', monospace; font-size: 12px;">SIN REPORTES AÚN</td></tr>`;
+        return;
+      }
       reportes.forEach(r => {
-        const fecha = new Date(r.fecha).toLocaleDateString('es-CO');
-        const badgeClass = r.estado === 'abierto' ? 'badge-abierto' : r.estado === 'en proceso' ? 'badge-proceso' : 'badge-resuelto';
+        const fecha = new Date(r.fecha).toLocaleDateString("es-CO");
+        const badgeClass = r.estado === "abierto" ? "badge-abierto" : r.estado === "en proceso" ? "badge-proceso" : "badge-resuelto";
+        const btnEliminar = rol === "admin" ? `<td><button onclick="event.stopPropagation(); eliminarReporte('${r._id}')" style="background:none; border:1px solid #ef4444; color:#ef4444; padding:4px 10px; cursor:pointer; font-family:Share Tech Mono,monospace; font-size:10px;">✕</button></td>` : "<td></td>";
         tbody.innerHTML += `
           <tr style="cursor:pointer;" onclick="window.location.href='/reporte-detalle.html?id=${r._id}'">
             <td>${r.empresa}</td>
@@ -223,15 +230,21 @@
             <td>${r.descripcion.substring(0, 50)}...</td>
             <td><span class="badge ${badgeClass}">${r.estado.toUpperCase()}</span></td>
             <td>${fecha}</td>
+            ${btnEliminar}
           </tr>
         `;
       });
     }
 
-    function descargarPDF() {
-      window.open(`/api/pdf/reportes?token=${token}`);
+    async function eliminarReporte(id) {
+      if (!confirm("¿Eliminar este reporte?")) return;
+      await fetch(`/api/reportes/${id}`, {
+        method: "DELETE",
+        headers: { "authorization": token }
+      });
+      mostrarToast("Reporte eliminado", "success");
+      cargarReportes();
     }
-
     cargarReportes();
   </script>
 </body>
