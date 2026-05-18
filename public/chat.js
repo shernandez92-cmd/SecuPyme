@@ -91,7 +91,7 @@ async function cargarConversacionesAdmin() {
       const btn = document.createElement('div');
       btn.style.cssText = 'padding: 8px 12px; cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.05); transition: background 0.2s;';
       btn.innerHTML = `
-        <div style="font-family: 'Share Tech Mono', monospace; font-size: 11px; color: var(--acento);">${conv.empresaId?.empresa || conv.empresaId?.nombre || 'Empresa'}</div>
+        <div style="display:flex; justify-content:space-between; align-items:center;"><span style="font-family: 'Share Tech Mono', monospace; font-size: 11px; color: var(--acento);">${conv.empresaId?.empresa || conv.empresaId?.nombre || 'Empresa'}</span>${conv.noLeidos > 0 ? `<span style="background: #ef4444; color: white; border-radius: 50%; width: 16px; height: 16px; font-size: 9px; line-height: 16px; text-align: center; display: inline-block;">${conv.noLeidos}</span>` : ''}</div>
         <div style="font-size: 10px; color: #6b5a8a; margin-top: 2px;">${conv.ultimoMensaje ? conv.ultimoMensaje.substring(0, 35) + '...' : 'Sin mensajes'}</div>
       `;
       btn.onmouseover = () => btn.style.background = 'rgba(168,85,247,0.1)';

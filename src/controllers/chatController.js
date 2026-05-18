@@ -34,10 +34,16 @@ const enviarMensaje = async (req, res) => {
     await mensaje.save();
 
     if (conversation) {
-      await Conversation.findByIdAndUpdate(conversation._id, {
+      const updateData = {
         ultimoMensaje: texto,
         ultimaActividad: new Date()
-      });
+      };
+      if (rol !== "admin") {
+        updateData["$inc"] = { noLeidos: 1 };
+      } else {
+        updateData.noLeidos = 0;
+      }
+      await Conversation.findByIdAndUpdate(conversation._id, updateData);
     }
 
     const populado = await ChatGeneral.findById(mensaje._id)

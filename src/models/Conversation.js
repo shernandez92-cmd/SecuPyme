@@ -17,6 +17,11 @@ const conversationSchema = new mongoose.Schema({
   
   // ==== METADATA DE ACTIVIDAD ====
   
+  noLeidos: {
+    type: Number,
+    default: 0
+  },
+
   ultimoMensaje: {
     type: String,
     default: null,
