@@ -67,10 +67,34 @@ io.on('connection', (socket) => {
           socket.join(`conv:${conv._id}`);
         });
       } else {
-        // Empresa: unirse a SU conversación
-        const conversation = await Conversation.findOne({ empresaId: data.empresaId || data.userId });
+        const empresaId = data.empresaId || data.userId;
+        let conversation = await Conversation.findOne({ empresaId });
+        if (!conversation) {
+          const Usuario = require("./models/Usuario");
+          const admin = await Usuario.findOne({ rol: "admin" });
+          if (admin) {
+            try {
+              conversation = await Conversation.findOneAndUpdate(
+                { adminId: admin._id, empresaId },
+                { ultimaActividad: new Date() },
+                { upsert: true, new: true }
+              );
+              console.log("Conversacion creada para empresa:", empresaId);
+              const adminSockets = Object.entries(usuariosConectados)
+                .filter(([, u]) => u.userId === admin._id.toString())
+                .map(([socketId]) => socketId);
+              adminSockets.forEach(sid => {
+                const s = io.sockets.sockets.get(sid);
+                if (s) s.join("conv:" + conversation._id);
+              });
+            } catch (e) {
+              if (e.code !== 11000) console.log("Error creando conversacion:", e.message);
+              conversation = await Conversation.findOne({ empresaId });
+            }
+          }
+        }
         if (conversation) {
-          socket.join(`conv:${conversation._id}`);
+          socket.join("conv:" + conversation._id);
         }
       }
     } catch (e) {

@@ -136,28 +136,14 @@ async function cargarChatMensajes() {
 }
 
 async function enviarChatMensaje() {
-  const texto = document.getElementById('chat-texto').value;
+  const token = localStorage.getItem('token');
+  const texto = document.getElementById('chat-texto').value.trim();
   const reporteRelacionado = document.getElementById('chat-reporte').value;
   if (!texto) return;
-
-  if (typeof socket !== 'undefined' && socket && socket.connected) {
-    const token = localStorage.getItem('token');
-    const payload = JSON.parse(atob(token.split('.')[1]));
-    socket.emit('mensajeChat', {
-      userId: payload.id,
-      empresaId: payload.id,
-      texto,
-      reporteRelacionado: reporteRelacionado || null
-    });
-  } else {
-    const token = localStorage.getItem('token');
-    await fetch('/api/chat', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'authorization': token },
-      body: JSON.stringify({ texto, reporteRelacionado: reporteRelacionado || null })
-    });
-    cargarChatMensajes();
-  }
-
+  await fetch('/api/chat', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'authorization': token },
+    body: JSON.stringify({ texto, reporteRelacionado: reporteRelacionado || null })
+  });
   document.getElementById('chat-texto').value = '';
 }
