@@ -113,6 +113,7 @@ function inicializarSocket() {
     });
 
     socket.on('nuevoMensaje', (mensaje) => {
+      if (!mensaje || !mensaje.usuario) return;
       const esMio = mensaje.usuario._id === empresaIdActual || mensaje.usuario.id === empresaIdActual;
 
       if (!esMio) {
