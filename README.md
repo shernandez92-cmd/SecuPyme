@@ -287,7 +287,7 @@ Ver [DEPLOYMENT-RENDER.md](./DEPLOYMENT-RENDER.md) para instrucciones detalladas
 
 **Sebastián Hernández Erazo**  
 Tecnólogo en Análisis y Desarrollo de Software  
-SENA — Centro de Gestión de Mercados, Logística y TI  
+SENA
 Bogotá, Colombia · 2026
 
 ---
