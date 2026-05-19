@@ -18,9 +18,13 @@ function cargarSidebar(paginaActiva) {
 
   const sidebar = `
     <nav class="sidebar">
-      <div class="sidebar-logo">
+      <div class="sidebar-logo" style="position: relative;">
         <img src="/Logo.png" style="width: 130px; margin-bottom: 6px; display: block;">
         <p style="font-family: 'Share Tech Mono', monospace; font-size: 9px; color: #6b5a8a; letter-spacing: 2px;">CIBERSEGURIDAD SIMPLIFICADA</p>
+        <button onclick="Notificaciones.abrirPanel()" style="position: absolute; top: 0; right: 0; background: none; border: none; cursor: pointer; width: 34px; height: 34px; display: flex; align-items: center; justify-content: center;" title="Notificaciones">
+          <span style="font-size: 16px;">🔔</span>
+          <span id="notif-badge-total" style="display: none; position: absolute; top: 2px; right: 2px; background: #ef4444; color: white; font-family: 'Share Tech Mono', monospace; font-size: 8px; font-weight: bold; min-width: 16px; height: 16px; border-radius: 8px; padding: 0 3px; align-items: center; justify-content: center;">0</span>
+        </button>
       </div>
       <ul class="sidebar-menu">
         <li class="${paginaActiva === 'dashboard' ? 'active' : ''}"><a href="/dashboard.html">DASHBOARD</a></li>
@@ -50,6 +54,7 @@ function cargarSidebar(paginaActiva) {
   inicializarChat();
   inicializarSocket();
   inicializarAsistenteIA();
+  if (typeof Notificaciones !== 'undefined') Notificaciones.init();
 }
 
 // =================== MODO ===================

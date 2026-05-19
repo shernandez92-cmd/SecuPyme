@@ -89,11 +89,17 @@
 
   <script src="/toast.js"></script>
   <script src="/chat.js"></script>
+  <script src="/notifications.js"></script>
   <script src="sidebar.js"></script>
   <script>
     const token = localStorage.getItem('token');
     if (!token) window.location.href = '/';
     cargarSidebar('dashboard');
+    if (!sessionStorage.getItem('notif_login_done')) {
+      const nombre = localStorage.getItem('nombre') || 'Usuario';
+      Notificaciones.agregar('sistema', 'Sesión iniciada', 'Bienvenido, ' + nombre);
+      sessionStorage.setItem('notif_login_done', '1');
+    }
 
     async function cargarRiskScore() {
       try {
@@ -108,6 +114,11 @@
         document.getElementById('riskIcono').textContent = iconos[nivel] || '🛡';
         const colores = { normal: '#22c55e', monitoreo: '#eab308', alerta: '#f97316', critico: '#ef4444' };
         document.getElementById('riskScoreCard').style.borderColor = colores[nivel] || '#7c3aed';
+        const nivelPrevio = localStorage.getItem('secupyme_risk_nivel');
+        if (nivelPrevio !== nivel && (nivel === 'alerta' || nivel === 'critico')) {
+          Notificaciones.agregar('riesgo', 'Risk Score: ' + nivel.toUpperCase(), 'Tu puntuación es ' + score + '/100');
+        }
+        localStorage.setItem('secupyme_risk_nivel', nivel);
       } catch(e) { console.error('Risk score:', e); }
     }
     cargarRiskScore();
