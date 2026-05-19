@@ -30,7 +30,11 @@
               <th>ACCIONES</th>
             </tr>
           </thead>
-          <tbody id="tablaUsuarios"></tbody>
+          <tbody id="tablaUsuarios">
+          <tr class="skeleton-tabla"><td colspan="6"><div class="skeleton skeleton-row"></div></td></tr>
+          <tr class="skeleton-tabla"><td colspan="6"><div class="skeleton skeleton-row"></div></td></tr>
+          <tr class="skeleton-tabla"><td colspan="6"><div class="skeleton skeleton-row"></div></td></tr>
+        </tbody>
         </table>
       </div>
     </main>
@@ -59,6 +63,7 @@
       const usuarios = await response.json();
       const tbody = document.getElementById('tablaUsuarios');
       tbody.innerHTML = '';
+      document.querySelectorAll('.skeleton-tabla').forEach(r => r.remove());
 
       usuarios.forEach(u => {
         const fecha = new Date(u.fechaRegistro).toLocaleDateString('es-CO');

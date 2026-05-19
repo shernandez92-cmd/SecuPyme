@@ -18,6 +18,15 @@
         <p>Resumen de seguridad</p>
 
 
+      <div id="skeleton-stats" class="stats-grid">
+        <div class="skeleton-card skeleton-stat skeleton"></div>
+        <div class="skeleton-card skeleton-stat skeleton"></div>
+        <div class="skeleton-card skeleton-stat skeleton"></div>
+        <div class="skeleton-card skeleton-stat skeleton"></div>
+        <div class="skeleton-card skeleton-stat skeleton"></div>
+      </div>
+
+      <div id="contenido-stats" style="display:none;">
       <div class="stats-grid">
         <div class="stat-card" style="cursor:pointer;" onclick="window.location.href='/reportes.html'">
           <div class="stat-icon">⚠</div>
@@ -56,6 +65,8 @@
         </div>
       </div>
 
+      </div><!-- /contenido-stats -->
+
       <div class="form-card" style="margin-top: 24px;">
         <h3>REPORTES ÚLTIMAS 72 HORAS</h3>
         <table class="tabla-reportes">
@@ -67,7 +78,11 @@
               <th>FECHA</th>
             </tr>
           </thead>
-          <tbody id="tablaBody"></tbody>
+          <tbody id="tablaBody">
+          <tr class="skeleton-tabla"><td colspan="4"><div class="skeleton skeleton-row"></div></td></tr>
+          <tr class="skeleton-tabla"><td colspan="4"><div class="skeleton skeleton-row"></div></td></tr>
+          <tr class="skeleton-tabla"><td colspan="4"><div class="skeleton skeleton-row"></div></td></tr>
+        </tbody>
         </table>
 
 
@@ -129,6 +144,8 @@
         if (!response.ok) throw new Error('Error');
         const reportes = await response.json();
 
+        document.getElementById('skeleton-stats').style.display = 'none';
+        document.getElementById('contenido-stats').style.display = 'block';
         document.getElementById('totalReportes').textContent = reportes.length;
         document.getElementById('reportesAbiertos').textContent = reportes.filter(r => r.estado === 'abierto').length;
         document.getElementById('reportesEnProceso').textContent = reportes.filter(r => r.estado === 'en proceso').length;
@@ -138,6 +155,7 @@
         const recientes = reportes.filter(r => new Date(r.fecha) > hace72h);
         const tbody = document.getElementById('tablaBody');
         tbody.innerHTML = '';
+        document.querySelectorAll('.skeleton-tabla').forEach(r => r.remove());
 
         if (recientes.length === 0) {
           tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color: var(--texto-suave); font-size: 12px; padding: 24px;">Sin reportes en las últimas 72 horas</td></tr>`;

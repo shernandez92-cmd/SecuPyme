@@ -137,7 +137,11 @@
               <th></th>
             </tr>
           </thead>
-          <tbody id="tablaBody"></tbody>
+          <tbody id="tablaBody">
+          <tr class="skeleton-tabla"><td colspan="6"><div class="skeleton skeleton-row"></div></td></tr>
+          <tr class="skeleton-tabla"><td colspan="6"><div class="skeleton skeleton-row"></div></td></tr>
+          <tr class="skeleton-tabla"><td colspan="6"><div class="skeleton skeleton-row"></div></td></tr>
+        </tbody>
         </table>
       </div>
     </main>
@@ -219,6 +223,7 @@
       const reportes = await response.json();
       const tbody = document.getElementById('tablaBody');
       tbody.innerHTML = '';
+      document.querySelectorAll('.skeleton-tabla').forEach(r => r.remove());
       if (reportes.length === 0) {
         tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding: 48px; color: var(--texto-suave); font-family: Share Tech Mono, monospace; font-size: 12px;">SIN REPORTES AÚN</td></tr>';
         return;

@@ -20,6 +20,13 @@
 
       <!-- Stats -->
       <div class="stats-grid" style="grid-template-columns: repeat(4, 1fr); margin-bottom: 24px;">
+        <div class="skeleton-card skeleton-stat skeleton" id="skeleton-siem-1"></div>
+        <div class="skeleton-card skeleton-stat skeleton" id="skeleton-siem-2"></div>
+        <div class="skeleton-card skeleton-stat skeleton" id="skeleton-siem-3"></div>
+        <div class="skeleton-card skeleton-stat skeleton" id="skeleton-siem-4"></div>
+      </div>
+      <div id="contenido-siem-stats" style="display:none;">
+      <div class="stats-grid" style="grid-template-columns: repeat(4, 1fr); margin-bottom: 24px;">
         <div class="stat-card">
           <div class="stat-icon">📊</div>
           <div class="stat-info">
@@ -49,6 +56,8 @@
           </div>
         </div>
       </div>
+
+      </div><!-- /contenido-siem-stats -->
 
       <!-- Risk Score por empresa -->
       <div class="form-card" style="margin-bottom: 24px;">
@@ -110,7 +119,11 @@
               <th>FECHA</th><th></th>
             </tr>
           </thead>
-          <tbody id="tablaEventos"></tbody>
+          <tbody id="tablaEventos">
+          <tr class="skeleton-tabla"><td colspan="7"><div class="skeleton skeleton-row"></div></td></tr>
+          <tr class="skeleton-tabla"><td colspan="7"><div class="skeleton skeleton-row"></div></td></tr>
+          <tr class="skeleton-tabla"><td colspan="7"><div class="skeleton skeleton-row"></div></td></tr>
+        </tbody>
         </table>
       </div>
     </main>
@@ -150,6 +163,11 @@
     async function cargarEstadisticas() {
       const response = await fetch('/api/siem/estadisticas', { headers: { 'authorization': token } });
       const data = await response.json();
+      ['skeleton-siem-1','skeleton-siem-2','skeleton-siem-3','skeleton-siem-4'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.remove();
+      });
+      document.getElementById('contenido-siem-stats').style.display = 'block';
       document.getElementById('statTotal').textContent = data.total;
       document.getElementById('statAltos').textContent = data.altos;
       document.getElementById('statHoy').textContent = data.hoy;
@@ -261,6 +279,7 @@
       }
       const tbody = document.getElementById('tablaEventos');
       tbody.innerHTML = '';
+      document.querySelectorAll('.skeleton-tabla').forEach(r => r.remove());
 
       eventos.forEach(e => {
         const fecha = new Date(e.timestamp).toLocaleString('es-CO');

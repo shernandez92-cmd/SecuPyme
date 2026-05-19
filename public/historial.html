@@ -52,7 +52,11 @@
               <th>RECOMENDACIONES</th>
             </tr>
           </thead>
-          <tbody id="tablaHistorial"></tbody>
+          <tbody id="tablaHistorial">
+          <tr class="skeleton-tabla"><td colspan="4"><div class="skeleton skeleton-row"></div></td></tr>
+          <tr class="skeleton-tabla"><td colspan="4"><div class="skeleton skeleton-row"></div></td></tr>
+          <tr class="skeleton-tabla"><td colspan="4"><div class="skeleton skeleton-row"></div></td></tr>
+        </tbody>
         </table>
       </div>
     </main>
@@ -85,6 +89,7 @@
 
       const tbody = document.getElementById('tablaHistorial');
       tbody.innerHTML = '';
+      document.querySelectorAll('.skeleton-tabla').forEach(r => r.remove());
 if (evaluaciones.length === 0) {
   tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; padding: 48px; color: var(--texto-suave); font-family: 'Share Tech Mono', monospace; font-size: 12px; letter-spacing: 2px;"><div style="font-size: 32px; margin-bottom: 12px;">📋</div>SIN EVALUACIONES AÚN</td></tr>`;
   return;

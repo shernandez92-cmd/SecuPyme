@@ -18,7 +18,23 @@
         <p id="fechaReporte"></p>
       </div>
 
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+      <div id="skeleton-detalle" style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+        <div class="skeleton-card">
+          <div class="skeleton skeleton-title"></div>
+          <div class="skeleton skeleton-line" style="width:60%"></div>
+          <div class="skeleton skeleton-line" style="width:80%"></div>
+          <div class="skeleton skeleton-line" style="width:50%"></div>
+          <div class="skeleton skeleton-line" style="width:70%"></div>
+        </div>
+        <div class="skeleton-card">
+          <div class="skeleton skeleton-title"></div>
+          <div class="skeleton skeleton-line" style="width:90%"></div>
+          <div class="skeleton skeleton-line" style="width:60%"></div>
+          <div class="skeleton skeleton-line" style="width:75%"></div>
+        </div>
+      </div>
+
+      <div id="contenido-detalle" style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; display:none;">
         <div class="form-card">
           <h3>INFORMACIÓN DEL REPORTE</h3>
           <div style="margin-bottom: 20px;">
@@ -134,6 +150,8 @@
       });
       const r = await response.json();
 
+      document.getElementById('skeleton-detalle').style.display = 'none';
+      document.getElementById('contenido-detalle').style.display = 'grid';
       document.getElementById('empresa').textContent = r.empresa;
       document.getElementById('reportadoPor').textContent = r.usuario.nombre;
       document.getElementById('emailUsuario').textContent = r.usuario.email;
