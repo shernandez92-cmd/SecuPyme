@@ -52,7 +52,8 @@ function cargarSidebar(paginaActiva) {
         <button onclick="toggleModo()" style="background: var(--morado-claro); border: none; border-radius: 12px; width: 40px; height: 20px; cursor: pointer; position: relative;">
           <span id="toggleIndicador" style="position: absolute; top: 2px; left: ${localStorage.getItem('modo') === 'light' ? '22px' : '2px'}; width: 16px; height: 16px; background: white; border-radius: 50%; transition: left 0.3s;"></span>
         </button>
-        <span style="font-size: 10px; color: var(--texto-suave); font-family: 'Share Tech Mono', monospace;">${localStorage.getItem('modo') === 'light' ? 'LIGHT' : 'DARK'}</span>
+        <span id="toggleIcono" style="font-size: 14px;">${localStorage.getItem('modo') === 'light' ? '☀️' : '🌙'}</span>
+        <span id="toggleLabel" style="font-size: 10px; color: var(--texto-suave); font-family: 'Share Tech Mono', monospace;">${localStorage.getItem('modo') === 'light' ? 'LIGHT' : 'DARK'}</span>
       </div>
     </nav>
   `;
@@ -155,14 +156,20 @@ function inicializarModo() {
 function toggleModo() {
   const esLight = document.body.classList.contains('light');
   const indicador = document.getElementById('toggleIndicador');
+  const icono = document.getElementById('toggleIcono');
+  const label = document.getElementById('toggleLabel');
   if (esLight) {
     document.body.classList.remove('light');
     localStorage.setItem('modo', 'dark');
     if (indicador) indicador.style.left = '2px';
+    if (icono) icono.textContent = '\u{1F319}';
+    if (label) label.textContent = 'DARK';
   } else {
     document.body.classList.add('light');
     localStorage.setItem('modo', 'light');
     if (indicador) indicador.style.left = '22px';
+    if (icono) icono.textContent = '\u2600\uFE0F';
+    if (label) label.textContent = 'LIGHT';
   }
 }
 
