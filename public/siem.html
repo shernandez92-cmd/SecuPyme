@@ -118,6 +118,7 @@
 
   <script src="/toast.js"></script>
   <script src="/chat.js"></script>
+  <script src="/notifications.js"></script>
   <script src="sidebar.js"></script>
   <script>
     const token = localStorage.getItem('token');
@@ -250,6 +251,14 @@
       const eventos = await response.json();
 
       document.getElementById('conteoEventos').textContent = `(${eventos.length} eventos)`;
+      const altosNuevos = eventos.filter(e => e.severity === 'high');
+      if (altosNuevos.length > 0 && typeof Notificaciones !== 'undefined') {
+        const previo = parseInt(sessionStorage.getItem('siem_altos') || '0');
+        if (altosNuevos.length > previo) {
+          Notificaciones.agregar('seguridad', altosNuevos.length + ' evento(s) de severidad alta', 'Revisa el panel SIEM');
+          sessionStorage.setItem('siem_altos', altosNuevos.length);
+        }
+      }
       const tbody = document.getElementById('tablaEventos');
       tbody.innerHTML = '';
 
@@ -282,6 +291,9 @@
           alerta.innerHTML = `🚨 ALERTA CRÍTICA — ${data.mensaje}`;
           container.prepend(alerta);
           mostrarToast(data.mensaje, 'error', 6000);
+          if (typeof Notificaciones !== 'undefined') {
+            Notificaciones.agregar('seguridad', '🚨 Alerta crítica', data.mensaje);
+          }
           setTimeout(() => alerta.remove(), 30000);
         });
 

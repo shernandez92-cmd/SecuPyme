@@ -231,6 +231,9 @@ function recibirMensajeSocket(mensaje) {
     mensajesNoLeidos++;
     actualizarBadge();
     reproducirSonido();
+    if (typeof Notificaciones !== 'undefined') {
+      Notificaciones.agregar('chat', 'Nuevo mensaje de ' + mensaje.usuario.nombre, mensaje.texto.substring(0, 60));
+    }
   }
 
   const contenedor = document.getElementById('chat-mensajes');
