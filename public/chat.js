@@ -325,9 +325,7 @@ function renderTextoMensaje(texto) {
     const partes = texto.split(" - ");
     const nombre = partes[0].replace("[PDF] ", "");
     const url = partes[1];
-    const descargaUrl = `/api/upload/descargar?url=${encodeURIComponent(url)}&nombre=${encodeURIComponent(nombre)}`;
-    return `<a href="${descargaUrl}" style="color:var(--acento); font-family:'Share Tech Mono',monospace; font-size:11px; text-decoration:none;">📄 ${nombre} ↓</a>`;
-    return `<a href="${viewerUrl}" target="_blank" style="color:var(--acento); font-family:'Share Tech Mono',monospace; font-size:11px; text-decoration:none;">📄 ${nombre}</a>`;
+    return `<a href="/api/upload/descargar?url=${encodeURIComponent(url)}&nombre=${encodeURIComponent(nombre)}" target="_blank" style="color:var(--acento); font-family:'Share Tech Mono',monospace; font-size:11px; text-decoration:none;">📄 ${nombre} ↓</a>`;
   }
   return texto;
 }
