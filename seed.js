@@ -313,7 +313,7 @@ async function seed() {
 
   for (const def of EMPRESAS_DEF) {
     const usuario = await Usuario.create({
-      nombre: def.nombre, email: def.email, password: passwordHash,
+      nombre: def.nombre, email: def.email, contraña: passwordHash,
       empresa: def.empresa, rol: 'cliente', plan: def.plan,
       fechaRegistro: daysAgo(65, 62), twoFactorEnabled: false,
     });

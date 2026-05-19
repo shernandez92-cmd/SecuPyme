@@ -51,7 +51,8 @@ const uploadRoutes = require("./routes/uploadRoutes");
 app.use("/api/upload", uploadRoutes);
 
 app.use((req, res) => {
-  res.status(404).sendFile(__dirname + '/../public/404.html');
+  const path = require('path');
+  res.status(404).sendFile(path.resolve(__dirname, '../public/404.html'));
 });
 
 // Socket.IO

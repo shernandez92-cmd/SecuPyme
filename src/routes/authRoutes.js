@@ -25,6 +25,9 @@ router.put('/usuarios/:id/rol', verificarToken, verificarAdmin, async (req, res)
 });
 router.delete('/usuarios/:id', verificarToken, verificarAdmin, async (req, res) => {
   try {
+    if (req.params.id === req.usuario.id) {
+      return res.status(403).json({ mensaje: 'No puedes eliminar tu propia cuenta' });
+    }
     await require('../models/Usuario').findByIdAndDelete(req.params.id);
     res.json({ mensaje: 'Usuario eliminado' });
   } catch (e) { res.status(500).json({ mensaje: 'Error', e }); }

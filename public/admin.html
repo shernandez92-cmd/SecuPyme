@@ -84,7 +84,7 @@
                 <option value="cliente" ${u.rol === 'cliente' ? 'selected' : ''}>CLIENTE</option>
                 <option value="admin" ${u.rol === 'admin' ? 'selected' : ''}>ADMIN</option>
               </select>
-              <button onclick="eliminarUsuario('${u._id}')" style="font-size: 10px; padding: 4px 8px; margin-left: 4px; background:#ef4444; border:none; color:white; font-family:'Share Tech Mono',monospace; cursor:pointer; border-radius:2px;">✕</button>
+              <button onclick="eliminarUsuario('${u._id}', '${u.rol}', '${u.nombre}')" style="font-size: 10px; padding: 4px 8px; margin-left: 4px; background:#ef4444; border:none; color:white; font-family:'Share Tech Mono',monospace; cursor:pointer; border-radius:2px;">✕</button>
             </td>
           </tr>
         `;
@@ -109,14 +109,22 @@
       cargarUsuarios();
     }
 
-    async function eliminarUsuario(userId) {
-      if (!confirm('¿Eliminar esta cuenta? Esta acción no se puede deshacer.')) return;
+    async function eliminarUsuario(userId, rol, nombre) {
+      const esAdmin = rol === 'admin';
+      const mensaje = esAdmin
+        ? '⚠️ ATENCIÓN: ' + nombre + ' es administrador.\n\n¿Estás seguro de que deseas eliminar esta cuenta? Esta acción no se puede deshacer.'
+        : '¿Estás seguro de que deseas eliminar a ' + nombre + '?\n\nEsta acción no se puede deshacer.';
+      if (!confirm(mensaje)) return;
       const res = await fetch(`/api/auth/usuarios/${userId}`, {
         method: 'DELETE',
         headers: { 'authorization': token }
       });
-      if (res.ok) cargarUsuarios();
-      else alert('Error al eliminar usuario');
+      if (res.ok) {
+        cargarUsuarios();
+      } else {
+        const data = await res.json();
+        alert(data.mensaje || 'Error al eliminar usuario');
+      }
     }
 
     cargarUsuarios();
