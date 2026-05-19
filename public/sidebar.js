@@ -5,6 +5,14 @@ let mensajesNoLeidos = 0;
 
 // =================== SIDEBAR ===================
 function cargarSidebar(paginaActiva) {
+  // Hamburguesa móvil
+  if (!document.getElementById('hamburguesa-overlay')) {
+    const overlay = document.createElement('div');
+    overlay.id = 'hamburguesa-overlay';
+    overlay.style.cssText = 'display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:998;';
+    overlay.onclick = () => cerrarHamburguesa();
+    document.body.appendChild(overlay);
+  }
   const rol = localStorage.getItem('rol');
   const nombre = localStorage.getItem('nombre');
 
@@ -50,11 +58,92 @@ function cargarSidebar(paginaActiva) {
   `;
 
   document.getElementById('sidebar-container').innerHTML = sidebar;
+
+  // Inyectar botón hamburguesa si no existe
+  if (!document.getElementById('btn-hamburguesa')) {
+    const btn = document.createElement('button');
+    btn.id = 'btn-hamburguesa';
+    btn.innerHTML = '☰';
+    btn.style.cssText = 'display:none;position:fixed;top:12px;left:12px;z-index:1000;background:var(--morado-oscuro);border:1px solid var(--morado-claro);color:var(--acento);font-size:20px;width:40px;height:40px;cursor:pointer;border-radius:2px;';
+    btn.onclick = () => toggleHamburguesa();
+    document.body.appendChild(btn);
+  }
+
+  // Header móvil fijo con logo + hamburguesa
+  function checkMobile() {
+    const btn = document.getElementById('btn-hamburguesa');
+    const sidebar = document.querySelector('.sidebar');
+    const main = document.querySelector('.main-content');
+    if (!btn || !sidebar || !main) return;
+
+    if (window.innerWidth <= 768) {
+      // Crear header móvil si no existe
+      if (!document.getElementById('mobile-header')) {
+        const header = document.createElement('div');
+        header.id = 'mobile-header';
+        header.style.cssText = 'position:fixed;top:0;left:0;right:0;height:52px;background:var(--morado-oscuro);border-bottom:1px solid rgba(124,58,237,0.3);display:flex;align-items:center;justify-content:space-between;padding:0 16px;z-index:1000;';
+        header.innerHTML = '<img src="/Logo.png" style="height:32px;"><button id="btn-hamburguesa-header" onclick="toggleHamburguesa()" style="background:none;border:1px solid rgba(124,58,237,0.4);color:var(--acento);font-size:18px;width:36px;height:36px;cursor:pointer;border-radius:2px;display:flex;align-items:center;justify-content:center;">☰</button>';
+        document.body.appendChild(header);
+      }
+      btn.style.display = 'none';
+      sidebar.style.transform = 'translateX(-100%)';
+      sidebar.style.position = 'fixed';
+      sidebar.style.top = '52px';
+      sidebar.style.left = '0';
+      sidebar.style.height = 'calc(100vh - 52px)';
+      sidebar.style.width = '260px';
+      sidebar.style.zIndex = '999';
+      sidebar.style.transition = 'transform 0.25s ease';
+      sidebar.style.overflowY = 'auto';
+      main.style.marginLeft = '0';
+      main.style.paddingTop = '64px';
+    } else {
+      const mh = document.getElementById('mobile-header');
+      if (mh) mh.remove();
+      btn.style.display = 'none';
+      sidebar.style.transform = '';
+      sidebar.style.position = 'fixed';
+      sidebar.style.top = '0';
+      sidebar.style.height = '100vh';
+      sidebar.style.width = '240px';
+      main.style.marginLeft = '240px';
+      main.style.paddingTop = '';
+    }
+  }
+
+  checkMobile();
+  window.addEventListener('resize', checkMobile);
   inicializarModo();
   inicializarChat();
   inicializarSocket();
   inicializarAsistenteIA();
   if (typeof Notificaciones !== 'undefined') Notificaciones.init();
+}
+
+function toggleHamburguesa() {
+  const sidebar = document.querySelector('.sidebar');
+  const overlay = document.getElementById('hamburguesa-overlay');
+  const btnHeader = document.getElementById('btn-hamburguesa-header');
+  if (!sidebar) return;
+  const abierto = sidebar.style.transform === 'translateX(0px)' || sidebar.style.transform === 'translateX(0)';
+  if (abierto) {
+    sidebar.style.transform = 'translateX(-100%)';
+    if (overlay) overlay.style.display = 'none';
+    if (btnHeader) btnHeader.innerHTML = '☰';
+  } else {
+    sidebar.style.transform = 'translateX(0)';
+    if (overlay) overlay.style.display = 'block';
+    if (btnHeader) btnHeader.innerHTML = '✕';
+  }
+}
+
+function cerrarHamburguesa() {
+  const sidebar = document.querySelector('.sidebar');
+  const overlay = document.getElementById('hamburguesa-overlay');
+  const btnHeader = document.getElementById('btn-hamburguesa-header');
+  if (sidebar) sidebar.style.transform = 'translateX(-100%)';
+  if (overlay) overlay.style.display = 'none';
+  if (btnHeader) btnHeader.innerHTML = '☰';
 }
 
 // =================== MODO ===================

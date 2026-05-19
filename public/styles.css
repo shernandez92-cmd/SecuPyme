@@ -676,8 +676,24 @@ body.light .sidebar {
   border-color: #e8e0f5;
 }
 
+body.light #mobile-header {
+  background: #f0ebff !important;
+  border-bottom-color: #e8e0f5 !important;
+}
+
 body.light .tabla-reportes td {
   border-color: #e8e0f5;
+}
+
+@media (max-width: 768px) {
+  body.light .tabla-reportes tr {
+    background: #ffffff !important;
+    border-color: #e8e0f5 !important;
+  }
+
+  body.light .tabla-reportes td {
+    border-bottom-color: #e8e0f5 !important;
+  }
 }
 
 body.light select,
@@ -699,78 +715,60 @@ body.light textarea {
 /* Móvil */
 @media (max-width: 768px) {
 
-  /* Sidebar se convierte en barra horizontal arriba */
+  /* Sidebar: panel deslizable vertical */
   .sidebar {
-    width: 100%;
-    height: auto;
-    position: relative;
-    flex-direction: row;
-    flex-wrap: wrap;
-    padding: 12px 0;
-    overflow-x: auto;
-    z-index: 100;
+    width: 260px;
+    height: calc(100vh - 52px);
+    position: fixed;
+    top: 52px;
+    left: 0;
+    flex-direction: column;
+    padding: 16px 0;
+    overflow-y: auto;
+    z-index: 999;
+    transform: translateX(-100%);
+    transition: transform 0.25s ease;
   }
 
   .sidebar-logo {
-    width: 100%;
-    padding: 8px 16px;
-    margin-bottom: 0;
-    display: flex;
-    align-items: center;
-    gap: 12px;
+    padding: 8px 20px;
+    margin-bottom: 16px;
   }
 
   .sidebar-logo img {
-    width: 80px !important;
-    margin-bottom: 0 !important;
-  }
-
-  .sidebar-logo p {
-    display: none;
+    width: 100px !important;
   }
 
   .sidebar-menu {
     display: flex;
-    flex-direction: row;
-    overflow-x: auto;
-    padding: 0 8px;
-    width: 100%;
-    -webkit-overflow-scrolling: touch;
+    flex-direction: column;
   }
 
   .sidebar-menu li a {
-    padding: 8px 12px;
-    font-size: 10px;
-    border-left: none;
-    border-bottom: 2px solid transparent;
+    padding: 14px 20px;
+    font-size: 11px;
+    border-left: 2px solid transparent;
     white-space: nowrap;
   }
 
   .sidebar-menu li.active a,
   .sidebar-menu li a:hover {
-    border-left: none;
-    border-bottom-color: var(--acento);
-    background: transparent;
+    border-left-color: var(--acento);
+    background: rgba(168,85,247,0.05);
   }
 
   .sidebar-user {
-    display: none;
+    display: block;
+    padding: 16px 20px;
   }
 
-  /* El toggle de modo va al lado del logo */
-  .sidebar nav > div:last-child {
-    padding: 8px 16px;
-    border-top: none;
-    border-left: 1px solid var(--borde);
-  }
-
-  /* Contenido principal sin margen izquierdo */
+  /* Contenido principal */
   .main-content {
     margin-left: 0 !important;
-    padding: 16px;
+    padding: 12px !important;
+    padding-top: 64px !important;
   }
 
-  /* App container en columna */
   .app-container {
     flex-direction: column;
   }
@@ -782,7 +780,11 @@ body.light textarea {
   }
 
   .stat-info h3 {
-    font-size: 24px;
+    font-size: 20px;
+  }
+
+  .stat-info p {
+    font-size: 9px;
   }
 
   /* Formularios en una columna */
@@ -791,19 +793,10 @@ body.light textarea {
     gap: 12px;
   }
 
-  /* Tablas con scroll horizontal */
   .form-card {
-    overflow-x: auto;
-  }
-
-  .tabla-reportes {
-    min-width: 500px;
-    font-size: 11px;
-  }
-
-  .tabla-reportes th,
-  .tabla-reportes td {
-    padding: 8px 10px;
+    padding: 16px;
+    margin-bottom: 16px;
+    overflow-x: hidden;
   }
 
   /* Chat flotante */
@@ -818,14 +811,20 @@ body.light textarea {
   }
 
   /* Page header */
+  .page-header {
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+  }
+
   .page-header h2 {
-    font-size: 16px;
-    letter-spacing: 3px;
+    font-size: 14px;
+    letter-spacing: 2px;
   }
 
   /* Grid detalle reporte */
   div[style*="grid-template-columns: 1fr 1fr"] {
-    display: block !important;
+    display: flex !important;
+    flex-direction: column !important;
   }
 }
 
@@ -844,6 +843,135 @@ body.light textarea {
   .btn-primary {
     font-size: 12px;
     letter-spacing: 2px;
+  }
+}
+
+/* =================== MEJORAS MÓVIL =================== */
+@media (max-width: 768px) {
+
+  /* Membresías: una columna en móvil */
+  .stats-grid[style*="repeat(3"] {
+    grid-template-columns: 1fr !important;
+    gap: 16px;
+  }
+
+  /* SIEM: grid de filtros/gráfica en una columna */
+  div[style*="grid-template-columns: 1fr 1fr"] {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 16px;
+  }
+
+  /* Reducir padding general en móvil */
+  .main-content {
+    padding: 12px !important;
+  }
+
+  .form-card {
+    padding: 16px;
+    margin-bottom: 16px;
+  }
+
+  .page-header {
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+  }
+
+  .page-header h2 {
+    font-size: 14px;
+    letter-spacing: 2px;
+  }
+
+  /* Stats más compactas */
+  .stat-card {
+    padding: 16px;
+    gap: 12px;
+  }
+
+  .stat-info h3 {
+    font-size: 20px;
+  }
+
+  .stat-info p {
+    font-size: 9px;
+  }
+
+  /* Skeleton detalle reporte: forzar columna */
+  #skeleton-detalle,
+  #contenido-detalle {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 16px;
+  }
+
+  /* Ocultar columnas innecesarias en tablas */
+  .tabla-reportes th:nth-child(3),
+  .tabla-reportes td:nth-child(3) {
+    display: none;
+  }
+
+  /* Panel admin SIEM risk scores */
+  #riskScores > div {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  #riskScores > div > div:first-child {
+    width: 100%;
+  }
+
+  /* Chat IA flotante más pequeño en móvil */
+  #ia-flotante {
+    bottom: 80px;
+    right: 12px;
+  }
+
+  #ia-ventana {
+    width: calc(100vw - 24px) !important;
+    height: 60vh !important;
+  }
+
+  /* Autoevaluación: preguntas en columna */
+  .pregunta-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .pregunta-item p {
+    padding-right: 0;
+  }
+
+  /* Botones más grandes para touch */
+  .toggle-btn {
+    padding: 10px 20px;
+    font-size: 12px;
+  }
+
+  .btn-primary,
+  .btn-secondary {
+    padding: 14px;
+    font-size: 12px;
+  }
+
+  /* Sidebar: ocultar toggle de modo en móvil para ahorrar espacio */
+  .sidebar > div:last-child {
+    display: none;
+  }
+}
+
+/* Tablet */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .main-content {
+    padding: 24px;
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .stat-info h3 {
+    font-size: 28px;
   }
 }
 /* TRANSICIONES */
@@ -901,4 +1029,71 @@ input:focus, select:focus, textarea:focus {
 .skeleton-stat {
   height: 80px;
   border-radius: 4px;
+}
+
+/* =================== TABLAS COMO CARDS EN MÓVIL =================== */
+@media (max-width: 768px) {
+
+  /* Ocultar headers de tabla */
+  .tabla-reportes thead {
+    display: none;
+  }
+
+  /* Cada fila es una card */
+  .tabla-reportes tr {
+    display: block;
+    background: rgba(13,6,24,0.8);
+    border: 1px solid var(--borde);
+    border-radius: 4px;
+    margin-bottom: 12px;
+    padding: 12px 16px;
+  }
+
+  .tabla-reportes tr:hover td {
+    background: transparent;
+  }
+
+  /* Cada celda en su propia línea con label */
+  .tabla-reportes td {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 0;
+    border-bottom: 1px solid rgba(26,10,46,0.3);
+    font-size: 12px;
+  }
+
+  .tabla-reportes td:last-child {
+    border-bottom: none;
+  }
+
+  /* Label antes de cada celda via data-label */
+  .tabla-reportes td::before {
+    content: attr(data-label);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 9px;
+    color: var(--texto-suave);
+    letter-spacing: 1px;
+    flex-shrink: 0;
+    margin-right: 12px;
+  }
+
+  /* Skeleton rows en móvil */
+  .skeleton-tabla {
+    display: block;
+    margin-bottom: 12px;
+  }
+
+  .skeleton-tabla td {
+    display: block;
+    border: none;
+    padding: 0;
+  }
+}
+
+/* =================== OCULTAR EN MÓVIL =================== */
+@media (max-width: 768px) {
+  .ocultar-movil {
+    display: none !important;
+  }
 }
