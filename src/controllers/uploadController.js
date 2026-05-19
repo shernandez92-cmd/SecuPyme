@@ -29,7 +29,7 @@ const subirArchivo = async (req, res) => {
       const stream = cloudinary.uploader.upload_stream(
         {
           folder: 'secupyme',
-          resource_type: 'auto'
+          resource_type: req.file.mimetype === 'application/pdf' ? 'raw' : 'image'
         },
         (error, result) => {
           if (error) reject(error);

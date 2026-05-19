@@ -13,14 +13,14 @@ const http = require('http');
 router.get("/descargar", async (req, res) => {
   const { url, nombre } = req.query;
   if (!url) return res.status(400).json({ mensaje: 'URL requerida' });
-  
-  res.setHeader('Content-Disposition', `attachment; filename="${nombre || 'archivo.pdf'}"`);
-  res.setHeader('Content-Type', 'application/pdf');
-  
-  const client = url.startsWith('https') ? https : http;
-  client.get(url, (stream) => {
-    stream.pipe(res);
-  }).on('error', () => {
-    res.status(500).json({ mensaje: 'Error descargando archivo' });
-  });
+
+  try {
+    const axios = require('axios');
+    const response = await axios.get(url, { responseType: 'stream' });
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `inline; filename="${nombre || 'archivo.pdf'}"`);
+    response.data.pipe(res);
+  } catch (err) {
+    res.status(500).json({ mensaje: 'Error descargando archivo', error: err.message, stack: err.stack });
+  }
 });
