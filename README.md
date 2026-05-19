@@ -2,7 +2,7 @@
 
 Plataforma de ciberseguridad diseñada para pequeñas y medianas empresas (PYMES) colombianas. Permite reportar incidentes de seguridad, realizar autoevaluaciones, monitorear el nivel de riesgo en tiempo real y recibir asistencia especializada con inteligencia artificial.
 
-**Proyecto de Grado — Análisis y Desarrollo de Software, SENA 2026**  
+**Proyecto Productivo — Análisis y Desarrollo de Software, SENA 2026**  
 **Deploy:** https://secupyme.onrender.com
 
 ---
