@@ -102,14 +102,16 @@
     </main>
   </div>
 
+  <script src="/toast.js"></script>
   <script src="sidebar.js"></script>
   <script>
     const token = localStorage.getItem('token');
     if (!token) window.location.href = '/';
 
+    function inicializarChat() {}
     cargarSidebar('autoevaluacion');
 
-    const respuestas = {};
+    var respuestas = {};
 
     function seleccionar(btn, campo, valor) {
       const grupo = btn.parentElement;
@@ -126,33 +128,46 @@
         return;
       }
 
-      const response = await fetch('/api/autoevaluaciones', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'authorization': token
-        },
-        body: JSON.stringify({ respuestas })
-      });
+      try {
+        const response = await fetch('/api/autoevaluaciones', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'authorization': token
+          },
+          body: JSON.stringify({ respuestas })
+        });
 
-      const data = await response.json();
-      const resultado = document.getElementById('resultado');
-      resultado.className = 'resultado-card ' + data.nivelRiesgo;
-      resultado.style.display = 'block';
+        if (!response.ok) {
+          const err = await response.json().catch(() => ({}));
+          mostrarToast(err.message || `Error ${response.status}`, 'error');
+          return;
+        }
 
-      const nivelTexto = document.getElementById('nivelTexto');
-      nivelTexto.textContent = 'RIESGO ' + data.nivelRiesgo.toUpperCase();
-      nivelTexto.className = 'resultado-nivel ' + data.nivelRiesgo;
+        const data = await response.json();
+        const resultado = document.getElementById('resultado');
+        resultado.className = 'resultado-card ' + data.nivelRiesgo;
+        resultado.style.display = 'block';
 
-      document.getElementById('puntajeTexto').textContent = `PUNTAJE: ${data.puntaje} / 20`;
+        const nivelTexto = document.getElementById('nivelTexto');
+        nivelTexto.textContent = 'RIESGO ' + data.nivelRiesgo.toUpperCase();
+        nivelTexto.className = 'resultado-nivel ' + data.nivelRiesgo;
 
-      const lista = document.getElementById('recomendacionesLista');
-      lista.innerHTML = '';
-      data.recomendaciones.forEach(r => {
-        lista.innerHTML += `<li>${r}</li>`;
-      });
+        document.getElementById('puntajeTexto').textContent = `PUNTAJE: ${data.puntaje} / 20`;
 
-      resultado.scrollIntoView({ behavior: 'smooth' });
+        const lista = document.getElementById('recomendacionesLista');
+        lista.innerHTML = '';
+        data.recomendaciones.forEach(r => {
+          lista.innerHTML += `<li>${r}</li>`;
+        });
+
+        mostrarToast('Evaluación guardada correctamente', 'success');
+        resultado.scrollIntoView({ behavior: 'smooth' });
+
+      } catch (err) {
+        console.error('Error en autoevaluación:', err);
+        mostrarToast('Error al enviar la evaluación', 'error');
+      }
     }
   </script>
   <script src="/inactividad.js"></script>
