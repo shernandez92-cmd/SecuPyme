@@ -23,4 +23,11 @@ router.put('/usuarios/:id/rol', verificarToken, verificarAdmin, async (req, res)
     res.json({ mensaje: 'Rol actualizado' });
   } catch (e) { res.status(500).json({ mensaje: 'Error', e }); }
 });
+router.delete('/usuarios/:id', verificarToken, verificarAdmin, async (req, res) => {
+  try {
+    await require('../models/Usuario').findByIdAndDelete(req.params.id);
+    res.json({ mensaje: 'Usuario eliminado' });
+  } catch (e) { res.status(500).json({ mensaje: 'Error', e }); }
+});
+
 module.exports = router;

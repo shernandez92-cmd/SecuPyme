@@ -76,6 +76,8 @@
       if (response.ok) {
         tokenTemporal = data.token;
         localStorage.setItem('token', tokenTemporal);
+        localStorage.setItem('nombre', document.getElementById('nombre').value);
+        localStorage.setItem('empresa', document.getElementById('empresa').value);
         await mostrarModal2FA();
       } else {
         mostrarError(data.mensaje || 'Error al registrarse');

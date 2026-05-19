@@ -73,6 +73,7 @@
                 <option value="cliente" ${u.rol === 'cliente' ? 'selected' : ''}>CLIENTE</option>
                 <option value="admin" ${u.rol === 'admin' ? 'selected' : ''}>ADMIN</option>
               </select>
+              <button onclick="eliminarUsuario('${u._id}')" style="font-size: 10px; padding: 4px 8px; margin-left: 4px; background:#ef4444; border:none; color:white; font-family:'Share Tech Mono',monospace; cursor:pointer; border-radius:2px;">✕</button>
             </td>
           </tr>
         `;
@@ -95,6 +96,16 @@
         body: JSON.stringify({ rol })
       });
       cargarUsuarios();
+    }
+
+    async function eliminarUsuario(userId) {
+      if (!confirm('¿Eliminar esta cuenta? Esta acción no se puede deshacer.')) return;
+      const res = await fetch(`/api/auth/usuarios/${userId}`, {
+        method: 'DELETE',
+        headers: { 'authorization': token }
+      });
+      if (res.ok) cargarUsuarios();
+      else alert('Error al eliminar usuario');
     }
 
     cargarUsuarios();
