@@ -95,7 +95,7 @@
         </div>
       </div>
 
-      <div class="form-card" style="margin-top: 24px;">
+      <div class="form-card ocultar-movil" style="margin-top: 24px;">
         <h3>REPORTES POR TIPO DE VULNERABILIDAD</h3>
         <canvas id="graficaReportes" style="max-height: 300px;"></canvas>
 
@@ -165,10 +165,10 @@
             const badgeClass = r.estado === 'abierto' ? 'badge-abierto' : r.estado === 'en proceso' ? 'badge-proceso' : 'badge-resuelto';
             tbody.innerHTML += `
               <tr style="cursor:pointer;" onclick="window.location.href='/reporte-detalle.html?id=${r._id}'">
-                <td>${r.empresa || '—'}</td>
-                <td>${r.tipoVulnerabilidad || '—'}</td>
-                <td><span class="badge ${badgeClass}">${r.estado.toUpperCase()}</span></td>
-                <td style="font-size: 11px; color: var(--texto-suave);">${fecha}</td>
+                <td data-label="EMPRESA">${r.empresa || '—'}</td>
+                <td data-label="TIPO">${r.tipoVulnerabilidad || '—'}</td>
+                <td data-label="ESTADO"><span class="badge ${badgeClass}">${r.estado.toUpperCase()}</span></td>
+                <td data-label="FECHA" style="font-size: 11px; color: var(--texto-suave);">${fecha}</td>
               </tr>
             `;
           });

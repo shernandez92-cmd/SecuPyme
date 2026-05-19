@@ -99,10 +99,10 @@ evaluaciones.reverse().forEach(e => {
         const badgeClass = e.nivelRiesgo === 'alto' ? 'badge-abierto' : e.nivelRiesgo === 'medio' ? 'badge-proceso' : 'badge-resuelto';
         tbody.innerHTML += `
           <tr>
-            <td>${fecha}</td>
-            <td style="font-family: 'Share Tech Mono', monospace; color: var(--acento);">${e.puntaje}/20</td>
-            <td><span class="badge ${badgeClass}">${e.nivelRiesgo.toUpperCase()}</span></td>
-            <td style="color: var(--texto-suave); font-size: 12px;">${e.recomendaciones.length} recomendaciones</td>
+            <td data-label="FECHA">${fecha}</td>
+            <td data-label="PUNTAJE" style="font-family: 'Share Tech Mono', monospace; color: var(--acento);">${e.puntaje}/20</td>
+            <td data-label="NIVEL"><span class="badge ${badgeClass}">${e.nivelRiesgo.toUpperCase()}</span></td>
+            <td data-label="RECOMENDACIONES" style="color: var(--texto-suave); font-size: 12px;">${e.recomendaciones.length} recomendaciones</td>
           </tr>
         `;
       });

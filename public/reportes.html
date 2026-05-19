@@ -237,11 +237,11 @@
           : '<td></td>';
         tbody.innerHTML += `
           <tr style="cursor:pointer;" onclick="window.location.href='/reporte-detalle.html?id=${r._id}'">
-            <td>${r.empresa}</td>
-            <td>${r.tipoVulnerabilidad}</td>
-            <td>${r.descripcion.substring(0, 50)}...</td>
-            <td><span class="badge ${badgeClass}">${r.estado.toUpperCase()}</span></td>
-            <td>${fecha}</td>
+            <td data-label="EMPRESA">${r.empresa}</td>
+            <td data-label="TIPO">${r.tipoVulnerabilidad}</td>
+            <td data-label="DESCRIPCIÓN">${r.descripcion.substring(0, 50)}...</td>
+            <td data-label="ESTADO"><span class="badge ${badgeClass}">${r.estado.toUpperCase()}</span></td>
+            <td data-label="FECHA">${fecha}</td>
             ${btnEliminar}
           </tr>
         `;

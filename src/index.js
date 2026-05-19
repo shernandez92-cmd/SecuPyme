@@ -17,7 +17,7 @@ app.use(helmet({ contentSecurityPolicy: false }));
 app.use(express.static('public'));
 app.use(express.json());
 
-const limiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 100 });
+const limiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 500 });
 const loginLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 5, message: { mensaje: 'Demasiados intentos' } });
 app.use(limiter);
 app.use('/api/auth/login', loginLimiter);

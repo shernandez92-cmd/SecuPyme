@@ -69,12 +69,12 @@
         const fecha = new Date(u.fechaRegistro).toLocaleDateString('es-CO');
         tbody.innerHTML += `
           <tr>
-            <td>${u.empresa}</td>
-            <td style="font-size: 11px; color: var(--texto-suave);">${u.email}</td>
-            <td><span class="badge ${u.rol === 'admin' ? 'badge-resuelto' : 'badge-proceso'}">${u.rol.toUpperCase()}</span></td>
-            <td><span class="badge badge-proceso">${(u.plan || 'free').toUpperCase()}</span></td>
-            <td style="font-size: 11px; color: var(--texto-suave);">${fecha}</td>
-            <td>
+            <td data-label="EMPRESA">${u.empresa}</td>
+            <td data-label="EMAIL" style="font-size: 11px; color: var(--texto-suave);">${u.email}</td>
+            <td data-label="ROL"><span class="badge ${u.rol === 'admin' ? 'badge-resuelto' : 'badge-proceso'}">${u.rol.toUpperCase()}</span></td>
+            <td data-label="PLAN"><span class="badge badge-proceso">${(u.plan || 'free').toUpperCase()}</span></td>
+            <td data-label="REGISTRO" style="font-size: 11px; color: var(--texto-suave);">${fecha}</td>
+            <td data-label="ACCIONES">
               <select onchange="cambiarPlan('${u._id}', this.value)" style="font-size: 10px; padding: 4px 8px; margin-right: 4px;">
                 <option value="free" ${u.plan === 'free' ? 'selected' : ''}>FREE</option>
                 <option value="basico" ${u.plan === 'basico' ? 'selected' : ''}>BÁSICO</option>
