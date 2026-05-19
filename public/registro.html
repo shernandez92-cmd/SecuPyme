@@ -35,7 +35,25 @@
     </div>
   </div>
 
+  <!-- Modal 2FA -->
+  <div id="modal2fa" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:1000; display:none; align-items:center; justify-content:center;">
+    <div style="background:#0d0618; border:1px solid #7c3aed; border-radius:8px; padding:40px; max-width:420px; width:90%; text-align:center;">
+      <h2 style="color:#e2d9f3; font-family:'Share Tech Mono',monospace; letter-spacing:3px; margin-bottom:8px;">ACTIVAR 2FA</h2>
+      <p style="color:#6b5a8a; font-size:12px; margin-bottom:24px;">Escanea el código QR con Google Authenticator o una app similar para proteger tu cuenta.</p>
+      <img id="qrImg" src="" style="width:180px; height:180px; border:2px solid #7c3aed; border-radius:4px; margin-bottom:24px;">
+      <div class="form-group" style="text-align:left;">
+        <label>CÓDIGO DE VERIFICACIÓN</label>
+        <input type="text" id="codigo2fa" placeholder="000000" maxlength="6" style="letter-spacing:8px; text-align:center;">
+      </div>
+      <button class="btn-primary" onclick="activar2FA()" style="margin-bottom:12px;">ACTIVAR Y CONTINUAR</button>
+      <br>
+      <button onclick="omitir2FA()" style="background:none; border:none; color:#6b5a8a; font-family:'Share Tech Mono',monospace; font-size:11px; cursor:pointer; letter-spacing:2px;">OMITIR POR AHORA →</button>
+    </div>
+  </div>
+
   <script>
+    let tokenTemporal = null;
+
     async function registrar() {
       const nombre = document.getElementById('nombre').value;
       const email = document.getElementById('email').value;
@@ -43,8 +61,7 @@
       const empresa = document.getElementById('empresa').value;
 
       if (!nombre || !email || !password || !empresa) {
-        document.getElementById('error').style.display = 'block';
-        document.getElementById('error').textContent = 'Todos los campos son obligatorios';
+        mostrarError('Todos los campos son obligatorios');
         return;
       }
 
@@ -54,13 +71,55 @@
         body: JSON.stringify({ nombre, email, contraseña: password, empresa, rol: 'cliente' })
       });
 
+      const data = await response.json();
+
       if (response.ok) {
-        window.location.href = '/';
+        tokenTemporal = data.token;
+        localStorage.setItem('token', tokenTemporal);
+        await mostrarModal2FA();
       } else {
-        const data = await response.json();
-        document.getElementById('error').style.display = 'block';
-        document.getElementById('error').textContent = data.mensaje || 'Error al registrarse';
+        mostrarError(data.mensaje || 'Error al registrarse');
       }
+    }
+
+    async function mostrarModal2FA() {
+      const res = await fetch('/api/auth/2fa/setup', {
+        method: 'POST',
+        headers: { 'authorization': tokenTemporal }
+      });
+      if (!res.ok) { omitir2FA(); return; }
+      const data = await res.json();
+      document.getElementById('qrImg').src = data.qrCode;
+      document.getElementById('modal2fa').style.display = 'flex';
+    }
+
+    async function activar2FA() {
+      const codigo = document.getElementById('codigo2fa').value.trim();
+      if (codigo.length !== 6) { mostrarError('Ingresa el código de 6 dígitos'); return; }
+
+      const res = await fetch('/api/auth/2fa/verify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'authorization': tokenTemporal },
+        body: JSON.stringify({ token: codigo })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        localStorage.setItem('token', data.token);
+        localStorage.setItem('onboardingVisto', '1');
+        window.location.href = '/dashboard.html';
+      } else {
+        mostrarError(data.mensaje || 'Código incorrecto');
+      }
+    }
+
+    function omitir2FA() {
+      window.location.href = '/dashboard.html';
+    }
+
+    function mostrarError(msg) {
+      const el = document.getElementById('error');
+      el.textContent = msg;
+      el.style.display = 'block';
     }
   </script>
 </body>

@@ -14,7 +14,12 @@ const registro = async (req, res) => {
     const contraseñaEncriptada = await bcrypt.hash(contraseña, salt);
     const usuario = new Usuario({ nombre, email, contraseña: contraseñaEncriptada, empresa, rol });
     await usuario.save();
-    res.status(201).json({ mensaje: 'Usuario registrado exitosamente' });
+    const tokenTemporal = jwt.sign(
+      { id: usuario._id, rol: usuario.rol },
+      process.env.JWT_SECRET,
+      { expiresIn: '1h' }
+    );
+    res.status(201).json({ mensaje: 'Usuario registrado exitosamente', token: tokenTemporal });
   } catch (error) {
     res.status(500).json({ mensaje: 'Error en el servidor', error });
   }
