@@ -15,7 +15,7 @@ const registro = async (req, res) => {
     const usuario = new Usuario({ nombre, email, contraseña: contraseñaEncriptada, empresa, rol });
     await usuario.save();
     const tokenTemporal = jwt.sign(
-      { id: usuario._id, rol: usuario.rol },
+      { id: usuario._id, rol: usuario.rol, empresa: usuario.empresa, plan: usuario.plan },
       process.env.JWT_SECRET,
       { expiresIn: '1h' }
     );
@@ -31,48 +31,48 @@ const login = async (req, res) => {
     const usuario = await Usuario.findOne({ email });
     if (!usuario) {
       await registrarEvento('login_fallido', `Intento fallido: ${email}`, 'high', null, req.ip);
-      const { actualizarRisk } = require("./riskController");
-      await actualizarRisk(null, "login_fallido");
+      const { actualizarRisk } = require('./riskController');
+      await actualizarRisk(null, 'login_fallido');
       return res.status(400).json({ mensaje: 'Credenciales incorrectas' });
     }
     const contraseñaValida = await bcrypt.compare(contraseña, usuario.contraseña);
     if (!contraseñaValida) {
-      await registrarEvento("login_fallido", `Contraseña incorrecta: ${email}`, "high", usuario._id, req.ip);
-      const { actualizarRisk: ar2 } = require("./riskController");
-      await ar2(usuario._id, "login_fallido");
-      const intentosRecientes = await require("../models/SecurityEvent").countDocuments({
+      await registrarEvento('login_fallido', `Contraseña incorrecta: ${email}`, 'high', usuario._id, req.ip);
+      const { actualizarRisk: ar2 } = require('./riskController');
+      await ar2(usuario._id, 'login_fallido');
+      const intentosRecientes = await require('../models/SecurityEvent').countDocuments({
         userId: usuario._id,
-        type: "login_fallido",
+        type: 'login_fallido',
         timestamp: { $gte: new Date(Date.now() - 15 * 60 * 1000) }
       });
       if (intentosRecientes >= 3) {
-        await registrarEvento("bloqueo_automatico", `Múltiples intentos fallidos: ${email}`, "high", usuario._id, req.ip);
-        const RiskScore = require("../models/RiskScore");
+        await registrarEvento('bloqueo_automatico', `Múltiples intentos fallidos: ${email}`, 'high', usuario._id, req.ip);
+        const RiskScore = require('../models/RiskScore');
         await RiskScore.findOneAndUpdate(
           { empresaId: usuario._id },
           { bloqueado: true, bloqueoHasta: new Date(Date.now() + 15 * 60 * 1000) },
           { upsert: true }
         );
       }
-      return res.status(400).json({ mensaje: "Credenciales incorrectas" });
+      return res.status(400).json({ mensaje: 'Credenciales incorrectas' });
     }
     if (usuario.twoFactorEnabled) {
       const tempToken = jwt.sign(
         { id: usuario._id, requires2FA: true },
         process.env.JWT_SECRET,
-        { expiresIn: "10m" }
+        { expiresIn: '10m' }
       );
       return res.json({ requires2FA: true, tempToken });
     }
     const token = jwt.sign(
-      { id: usuario._id, rol: usuario.rol },
+      { id: usuario._id, rol: usuario.rol, empresa: usuario.empresa, plan: usuario.plan, nombre: usuario.nombre },
       process.env.JWT_SECRET,
-      { expiresIn: "8h" }
+      { expiresIn: '8h' }
     );
-    await registrarEvento("login_exitoso", `Login de ${usuario.email}`, "low", usuario._id, req.ip);
-      const { actualizarRisk: ar } = require("./riskController");
-      await ar(usuario._id, "login_exitoso");
-    res.json({ token, rol: usuario.rol, nombre: usuario.nombre });
+    await registrarEvento('login_exitoso', `Login de ${usuario.email}`, 'low', usuario._id, req.ip);
+    const { actualizarRisk: ar } = require('./riskController');
+    await ar(usuario._id, 'login_exitoso');
+    res.json({ token, rol: usuario.rol, nombre: usuario.nombre, empresa: usuario.empresa, plan: usuario.plan });
   } catch (error) {
     res.status(500).json({ mensaje: 'Error en el servidor', error });
   }

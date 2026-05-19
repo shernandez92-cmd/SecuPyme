@@ -10,7 +10,7 @@ const Conversation = require('./models/Conversation');
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
-  cors: { origin: '*' }
+  cors: { origin: process.env.CLIENT_URL || '*' }
 });
 
 app.use(helmet({ contentSecurityPolicy: false }));

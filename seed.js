@@ -397,7 +397,7 @@ async function seed() {
   console.log('  Mensajes de chat        : ' + conteo.mensajes);
   console.log('══════════════════════════════════════════════════════════');
   console.log('\n  Credenciales clientes: <email> / 123456');
-  console.log('  Admin: sebastian@secupyme.com / 123456 (sin cambios)\n');
+  console.log('  Consulta el documento de credenciales para acceso.\n');
 
   await mongoose.disconnect();
   process.exit(0);

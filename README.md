@@ -1,200 +1,295 @@
 # SecuPyme
 
-**Plataforma de ciberseguridad simplificada para pymes colombianas**
+Plataforma de ciberseguridad diseñada para pequeñas y medianas empresas (PYMES) colombianas. Permite reportar incidentes de seguridad, realizar autoevaluaciones, monitorear el nivel de riesgo en tiempo real y recibir asistencia especializada con inteligencia artificial.
 
-> Proyecto de Grado — SENA, Análisis y Desarrollo de Software
-> Desarrollador: Sebastián Hernández
-> Deploy: [secupyme.onrender.com](https://secupyme.onrender.com)
-
----
-
-## Descripción
-
-SecuPyme es una plataforma SaaS de ciberseguridad diseñada específicamente para pequeñas y medianas empresas colombianas que no cuentan con equipos técnicos especializados. Traduce conceptos complejos de ciberseguridad a acciones concretas y comprensibles.
-
----
-
-## Stack Tecnológico
-
-| Capa | Tecnología |
-|------|-----------|
-| Backend | Node.js + Express |
-| Base de datos | MongoDB Atlas |
-| Tiempo real | Socket.IO |
-| Frontend | Vanilla JS |
-| IA | Groq LLaMA 3.3 70B |
-| Archivos | Cloudinary |
-| Integraciones | Shodan API + VirusTotal API |
-| Auth | JWT + bcrypt + speakeasy 2FA |
-| Deploy | Render |
+**Proyecto de Grado — Análisis y Desarrollo de Software, SENA 2026**  
+**Deploy:** https://secupyme.onrender.com
 
 ---
 
 ## Funcionalidades
 
-### Autenticación
-- Login seguro con JWT 8h de expiración
-- Autenticación de dos factores 2FA con Google Authenticator
-- Rate limiting máximo 5 intentos de login por 15 minutos
-- Cierre de sesión automático por inactividad 10 minutos
-- Roles admin y cliente
+### Para empresas clientes
+- Registro e inicio de sesión con JWT y autenticación de doble factor (2FA)
+- Reporte de incidentes de seguridad con seguimiento de estado
+- Autoevaluación de seguridad con puntaje automático y recomendaciones
+- Historial de evaluaciones para visualizar evolución en el tiempo
+- Dashboard con score de riesgo en tiempo real
+- Chat en tiempo real con el equipo de seguridad
+- Descarga de reportes en PDF
+- Centro de notificaciones por categorías
 
-### Dashboard
-- Resumen de reportes por estado
-- Reportes de las últimas 72 horas
-- Gráfica de vulnerabilidades por tipo
-
-### Gestión de Incidentes
-- Crear editar y eliminar reportes de incidentes
-- Estados abierto en proceso resuelto
-- Prioridades alta media baja
-- Tipos phishing malware acceso no autorizado fuga de datos
-- Notas del admin con notificación por correo al cliente
-- Exportar reportes a PDF
-
-### Autoevaluación
-- 10 preguntas con puntaje ponderado 0-20
-- Niveles de riesgo bajo medio alto
-- Recomendaciones automáticas por área de mejora
-- Historial con evolución del puntaje
-- Exportar historial a PDF
-- Alerta por correo si riesgo es alto
-
-### SIEM alineado con NIST SP 800-61
-
-Preparación
-- Sistema de logs centralizado
-- Gestión de usuarios y roles
-- Rate limiting y hardening básico
-
-Detección y Análisis
-- Timeline de eventos en tiempo real
-- Login exitoso y fallido
-- Cambio de rol
-- Detección de anomalías 3 intentos fallidos bloqueo automático
-- Integración con Shodan puertos críticos
-- Integración con VirusTotal archivos maliciosos
-- Risk score dinámico por empresa 0-100
-- Clasificación de severidad baja media alta
-- Dashboard visual con gráficas
-
-Contención
-- Bloqueo temporal automático score mayor a 80
-- Bloqueo manual desde panel admin
-- Desbloqueo manual
-
-Post-Incidente
-- Historial de eventos por empresa
-- Exportar reportes
-- Resumen semanal IA
-
-### Risk Score Dinámico
-
-| Evento | Cambio |
-|--------|--------|
-| Login fallido | +15 |
-| Login exitoso | -2 |
-| Reporte phishing | +20 |
-| Reporte malware | +25 |
-| Reporte acceso no autorizado | +20 |
-| Reporte fuga de datos | +30 |
-| Autoevaluación alto riesgo | +30 |
-| Autoevaluación medio riesgo | +10 |
-| Autoevaluación bajo riesgo | -10 |
-| Shodan puerto crítico | +10 |
-| VirusTotal malicioso | +40 |
-
-Umbrales
-- 0-30 Normal
-- 31-60 Monitoreo
-- 61-80 Alerta
-- 81-100 Crítico bloqueo automático
-
-### Inteligencia Artificial Groq LLaMA 3.3 70B
-- Asistente flotante chat de ciberseguridad en todas las páginas
-- Explicador de eventos traduce eventos técnicos a lenguaje simple
-- Análisis de risk score diagnóstico y recomendaciones
-- Resumen semanal informe ejecutivo automático
-
-### Chat Multiempresa
-- Conversaciones aisladas admin empresa
-- Mensajes en tiempo real via Socket.IO
-- Contador de mensajes no leídos por conversación
-- Subir imágenes y PDFs via Cloudinary
-- Sonido de notificación
-- Historial persistente
-
-### Integraciones Externas
-- Shodan consulta de IPs detección de puertos críticos
-- VirusTotal análisis de hashes de archivos maliciosos
-
-### Panel Admin
-- Gestión de usuarios y roles
-- Cambio de planes free básico premium
-- Ver todas las conversaciones
-- SIEM completo
-- Desbloqueo de empresas
-
-### Planes
-
-| Plan | Reportes | Precio |
-|------|----------|--------|
-| Free | 3 | Gratis |
-| Básico | 20 | 29900 mes |
-| Premium | Ilimitados | 79900 mes |
+### Para administradores
+- Panel de gestión de usuarios (cambiar plan, rol, eliminar)
+- Panel SIEM con eventos de seguridad en tiempo real
+- Monitor de risk scores de todas las empresas
+- Bloqueo y desbloqueo manual de empresas
+- Chat con cada empresa de forma independiente
+- Integración con Shodan y VirusTotal
+- Resumen semanal generado con IA
 
 ---
 
-## Variables de Entorno
+## Stack tecnológico
 
-PORT
-MONGODB_URI
-JWT_SECRET
-EMAIL_USER
-EMAIL_PASS
-SHODAN_KEY
-VIRUSTOTAL_KEY
-CLOUDINARY_CLOUD_NAME
-CLOUDINARY_API_KEY
-CLOUDINARY_API_SECRET
-GROQ_API_KEY
+| Capa | Tecnología |
+|------|------------|
+| Backend | Node.js + Express |
+| Base de datos | MongoDB Atlas + Mongoose |
+| Autenticación | JWT + bcryptjs + speakeasy (2FA) |
+| Frontend | HTML5 + CSS3 + Vanilla JS |
+| Tiempo real | Socket.IO |
+| IA | Groq (llama-3.3-70b-versatile) |
+| Archivos | Cloudinary (imágenes y PDFs) |
+| PDF | PDFKit |
+| Correos | Nodemailer + Gmail |
+| Seguridad | Helmet + express-rate-limit |
+| Deploy | Render.com |
 
 ---
 
-## Instalación Local
+## Estructura del proyecto
 
+```
+secupyme/
+├── src/
+│   ├── index.js                    # Entrada del servidor + Socket.IO
+│   ├── controllers/                # Lógica de negocio
+│   │   ├── authController.js       # Registro, login, usuarios
+│   │   ├── riskController.js       # Cálculo y gestión de risk score
+│   │   ├── siemController.js       # Registro de eventos de seguridad
+│   │   ├── iaController.js         # Integración con Groq
+│   │   ├── autoevaluacionController.js
+│   │   ├── reporteController.js
+│   │   ├── chatController.js
+│   │   ├── uploadController.js     # Cloudinary
+│   │   ├── pdfController.js        # Generación de PDFs
+│   │   ├── twoFactorController.js  # 2FA con speakeasy
+│   │   └── integracionController.js
+│   ├── models/                     # Schemas de MongoDB
+│   │   ├── Usuario.js
+│   │   ├── Reporte.js
+│   │   ├── Autoevaluacion.js
+│   │   ├── RiskScore.js
+│   │   ├── SecurityEvent.js
+│   │   ├── ChatGeneral.js
+│   │   └── Conversation.js
+│   ├── routes/                     # Endpoints de la API
+│   └── middleware/
+│       ├── auth.js                 # verificarToken, verificarAdmin
+│       └── checkPlan.js            # Límites por plan
+├── public/                         # Frontend
+│   ├── index.html                  # Landing / login
+│   ├── dashboard.html              # Dashboard cliente
+│   ├── admin.html                  # Panel administrador
+│   ├── siem.html                   # Panel SIEM
+│   ├── autoevaluacion.html
+│   ├── reportes.html
+│   ├── historial.html
+│   ├── sidebar.js                  # Sidebar compartido + Socket.IO
+│   ├── chat.js                     # Chat en tiempo real
+│   ├── notifications.js            # Centro de notificaciones
+│   └── styles.css
+├── seed.js                         # Script de datos demo
+├── package.json
+├── .env                            # Variables de entorno (no commitear)
+├── TECHNICAL-DOCS.md
+└── DEPLOYMENT-RENDER.md
+```
+
+---
+
+## Instalación local
+
+### Requisitos
+- Node.js 18 o superior
+- Cuenta en MongoDB Atlas
+- Cuenta en Cloudinary
+- Cuenta en Groq (para IA)
+- Gmail con contraseña de aplicación
+
+### Pasos
+
+```bash
+# 1. Clonar el repositorio
 git clone https://github.com/shernandez92-cmd/SecuPyme.git
 cd SecuPyme
+
+# 2. Instalar dependencias
 npm install
-node src/index.js
+
+# 3. Crear archivo .env con las variables necesarias
+
+# 4. Iniciar el servidor
+npm start
+
+# 5. Opcional: poblar con datos demo
+node seed.js
+```
+
+El servidor queda disponible en http://localhost:3000
 
 ---
 
-## Credenciales de Prueba
+## Variables de entorno
 
-| Rol | Email | Contraseña |
-|-----|-------|------------|
-| Admin | sebastian@secupyme.com | 123456 |
-| Cliente | demo@empresa.com | 123456 |
+Crear un archivo `.env` en la raíz con:
 
-El admin tiene 2FA activo usar Google Authenticator.
-
----
-
-## Trabajo Futuro
-
-- Bloqueo por IP
-- Refresh tokens
-- App móvil nativa
-- Backups automáticos
-- Monitoreo con health checks
-- Centro de notificaciones con categorías
-- Onboarding para nuevas empresas
-- 2FA obligatorio en registro
-- Pagos reales Wompi PSE
+```
+PORT=3000
+MONGODB_URI=mongodb+srv://usuario:password@cluster.mongodb.net/secupyme
+JWT_SECRET=clave_secreta_minimo_32_caracteres
+EMAIL_USER=tucorreo@gmail.com
+EMAIL_PASS=contraseña_de_aplicacion_gmail
+CLOUDINARY_CLOUD_NAME=tu_cloud_name
+CLOUDINARY_API_KEY=tu_api_key
+CLOUDINARY_API_SECRET=tu_api_secret
+GROQ_API_KEY=tu_groq_api_key
+SHODAN_KEY=tu_shodan_key
+VIRUSTOTAL_KEY=tu_virustotal_key
+CLIENT_URL=https://secupyme.onrender.com
+```
 
 ---
 
-## Licencia
+## API — Endpoints principales
 
-Proyecto académico SENA 2026
+### Autenticación
+```
+POST   /api/auth/registro              Registrar usuario
+POST   /api/auth/login                 Iniciar sesión
+POST   /api/auth/2fa/setup             Configurar 2FA
+POST   /api/auth/2fa/verify            Verificar y activar 2FA
+POST   /api/auth/2fa/login             Login con código 2FA
+GET    /api/auth/usuarios              Listar usuarios (admin)
+PUT    /api/auth/usuarios/:id/plan     Cambiar plan (admin)
+PUT    /api/auth/usuarios/:id/rol      Cambiar rol (admin)
+DELETE /api/auth/usuarios/:id          Eliminar usuario (admin)
+```
+
+### Reportes
+```
+POST   /api/reportes                   Crear reporte
+GET    /api/reportes                   Listar reportes
+GET    /api/reportes/:id               Ver reporte
+PUT    /api/reportes/:id               Actualizar reporte (admin)
+PUT    /api/reportes/:id/estado        Cambiar estado (admin)
+DELETE /api/reportes/:id               Eliminar reporte
+```
+
+### Risk Score
+```
+GET    /api/risk                       Ver todos los scores (admin)
+GET    /api/risk/mi-score              Ver score propio
+PUT    /api/risk/desbloquear/:id       Desbloquear empresa (admin)
+```
+
+### SIEM
+```
+GET    /api/siem/events                Ver eventos de seguridad (admin)
+GET    /api/siem/estadisticas          Estadísticas SIEM (admin)
+PUT    /api/siem/bloquear/:id          Bloquear empresa (admin)
+PUT    /api/siem/desbloquear/:id       Desbloquear empresa (admin)
+```
+
+### Inteligencia Artificial
+```
+POST   /api/ia/explicar                Explicar evento de seguridad
+POST   /api/ia/analizar-risk           Analizar risk score
+POST   /api/ia/asistente               Asistente de ciberseguridad
+GET    /api/ia/resumen-semanal         Resumen semanal automático
+```
+
+### Otros
+```
+POST   /api/autoevaluaciones           Enviar autoevaluación
+GET    /api/autoevaluaciones           Ver historial
+GET    /api/chat                       Obtener mensajes
+POST   /api/chat                       Enviar mensaje
+POST   /api/upload                     Subir archivo (Cloudinary)
+GET    /api/upload/descargar           Proxy de descarga PDF
+GET    /api/pdf/reportes               Exportar PDF consolidado
+GET    /api/pdf/reportes/:id           Exportar reporte individual
+GET    /api/integraciones/shodan/:ip   Consultar Shodan
+GET    /api/integraciones/virustotal/:hash  Consultar VirusTotal
+```
+
+---
+
+## Modelo de riesgo
+
+El risk score (0-100) se calcula automáticamente según eventos:
+
+| Evento | Impacto |
+|--------|---------|
+| Login fallido | +15 |
+| Reporte de fuga de datos | +30 |
+| Archivo malicioso (VirusTotal) | +40 |
+| Reporte de malware | +25 |
+| Reporte de phishing | +20 |
+| Autoevaluación nivel alto | +30 |
+| Login exitoso | -2 |
+| Autoevaluación nivel bajo | -10 |
+
+| Rango | Nivel |
+|-------|-------|
+| 0 – 30 | Normal |
+| 31 – 60 | Monitoreo |
+| 61 – 80 | Alerta |
+| 81 – 100 | Crítico (bloqueo automático) |
+
+---
+
+## Datos demo
+
+Para poblar la base de datos con 6 empresas ficticias colombianas realistas:
+
+```bash
+node seed.js
+```
+
+Crea usuarios, reportes, autoevaluaciones, risk scores, eventos SIEM y conversaciones de chat con fechas distribuidas en los últimos 60 días.
+
+---
+
+## Seguridad implementada
+
+- Contraseñas hasheadas con bcryptjs (salt 10)
+- Autenticación JWT con expiración de 8 horas
+- Doble factor de autenticación (TOTP con speakeasy)
+- Rate limiting: 500 req/15min general, 5 req/15min en login
+- Helmet para headers de seguridad HTTP
+- Bloqueo automático por score de riesgo mayor a 80
+- Verificación de rol en todos los endpoints protegidos
+- Límites de uso por plan (free: 3 reportes, básico: 20, premium: ilimitado)
+
+---
+
+## Planes disponibles
+
+| Plan | Reportes | Funcionalidades |
+|------|----------|-----------------|
+| Free | 3 | Básico |
+| Básico | 20 | + Historial, Chat |
+| Premium | Ilimitado | + SIEM, IA, Integraciones |
+
+---
+
+## Despliegue
+
+Ver [DEPLOYMENT-RENDER.md](./DEPLOYMENT-RENDER.md) para instrucciones detalladas.
+
+**URL de producción:** https://secupyme.onrender.com
+
+---
+
+## Autor
+
+**Sebastián Hernández Erazo**  
+Tecnólogo en Análisis y Desarrollo de Software  
+SENA — Centro de Gestión de Mercados, Logística y TI  
+Bogotá, Colombia · 2026
+
+---
+
+*SecuPyme — Ciberseguridad accesible para las PYMES colombianas.*

@@ -1,15 +1,16 @@
 const express = require('express');
 const router = express.Router();
 const apiKeyAuth = require('../middleware/apiKey');
+const { verificarToken } = require('../middleware/auth');
 const Reporte = require('../models/Reporte');
 const Autoevaluacion = require('../models/Autoevaluacion');
 const crypto = require('crypto');
 const Usuario = require('../models/Usuario');
 
-router.post('/apikey', async (req, res) => {
+router.post('/apikey', verificarToken, async (req, res) => {
   try {
     const usuario = await Usuario.findByIdAndUpdate(
-      req.body.userId,
+      req.usuario.id,
       { apiKey: crypto.randomUUID() },
       { new: true }
     );
