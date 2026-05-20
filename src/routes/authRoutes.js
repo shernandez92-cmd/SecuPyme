@@ -5,6 +5,8 @@ const { setup2FA, verify2FA, loginCon2FA } = require('../controllers/twoFactorCo
 const { verificarToken, verificarAdmin, revocarToken } = require('../middleware/auth');
 const { registrarAudit } = require('../controllers/auditController');
 const Usuario = require('../models/Usuario');
+const validate = require('../middleware/validate');
+const s = require('../validators/schemas');
 
 router.post('/registro', validate(s.registro), registro);
 router.post('/login', validate(s.login), login);

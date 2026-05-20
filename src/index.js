@@ -203,7 +203,7 @@ mongoose.connect(process.env.MONGODB_URI)
     require('./models/TokenBlacklist');
     logger.info('TokenBlacklist TTL index activo');
     seedPreguntas();
-    server.listen(process.env.PORT || 3000, () => {
+    if (process.env.NODE_ENV !== 'test') server.listen(process.env.PORT || 3000, () => {
       logger.info(`Servidor corriendo en puerto ${process.env.PORT || 3000}`);
     });
   })

@@ -9,6 +9,9 @@ const {
   obtenerAutoevaluaciones
 } = require('../controllers/autoevaluacionController');
 const { verificarToken, verificarAdmin } = require('../middleware/auth');
+const checkPlan = require('../middleware/checkPlan');
+const validate = require('../middleware/validate');
+const s = require('../validators/schemas');
 
 router.get('/preguntas',              verificarToken, obtenerPreguntas);
 router.get('/preguntas/todas',        verificarToken, verificarAdmin, obtenerTodasPreguntas);
