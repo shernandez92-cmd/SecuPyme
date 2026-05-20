@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { obtenerEventos, obtenerEstadisticas, recibirEventoExterno } = require('../controllers/siemController');
+const { obtenerEventos, obtenerEstadisticas, recibirEventoExterno, cronMonitoreo } = require('../controllers/siemController');
 const { verificarToken, verificarAdmin } = require('../middleware/auth');
 const apiKeyAuth = require('../middleware/apiKey');
 const { desbloquearEmpresa } = require('../controllers/riskController');
@@ -11,6 +11,9 @@ router.get('/estadisticas', verificarToken, verificarAdmin, obtenerEstadisticas)
 
 // Endpoint externo — protegido por API key, no por JWT
 router.post('/external/events', apiKeyAuth, recibirEventoExterno);
+
+// Endpoint para cron externo (cron-job.org) — protegido por CRON_SECRET
+router.post('/cron/monitoreo', cronMonitoreo);
 
 router.put('/bloquear/:empresaId', verificarToken, verificarAdmin, async (req, res) => {
   try {

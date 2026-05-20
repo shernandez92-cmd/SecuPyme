@@ -88,4 +88,18 @@ const obtenerEstadisticas = async (req, res) => {
   }
 };
 
-module.exports = { registrarEvento, recibirEventoExterno, obtenerEventos, obtenerEstadisticas };
+const cronMonitoreo = async (req, res) => {
+  try {
+    const secret = req.headers['x-cron-secret'];
+    if (!secret || secret !== process.env.CRON_SECRET) {
+      return res.status(401).json({ mensaje: 'No autorizado' });
+    }
+    const { ejecutarMonitoreo } = require('../jobs/monitoreoIPs');
+    await ejecutarMonitoreo();
+    res.json({ mensaje: 'Monitoreo ejecutado correctamente', timestamp: new Date() });
+  } catch (error) {
+    res.status(500).json({ mensaje: 'Error en monitoreo', error: error.message });
+  }
+};
+
+module.exports = { registrarEvento, recibirEventoExterno, obtenerEventos, obtenerEstadisticas, cronMonitoreo };
