@@ -52,8 +52,10 @@ app.use("/api/upload", uploadRoutes);
 const auditRoutes = require("./routes/auditRoutes");
 app.use("/api/audit", auditRoutes);
 
-const { iniciarMonitoreo } = require("./jobs/monitoreoIPs");
-iniciarMonitoreo();
+if (process.env.NODE_ENV !== 'test') {
+  const { iniciarMonitoreo } = require("./jobs/monitoreoIPs");
+  iniciarMonitoreo();
+}
 
 app.use((req, res) => {
   const path = require('path');
@@ -190,3 +192,4 @@ mongoose.connect(process.env.MONGODB_URI)
   .catch((error) => {
     console.log('Error de conexión:', error);
   });
+module.exports = app;

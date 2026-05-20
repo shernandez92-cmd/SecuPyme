@@ -5,11 +5,11 @@
   "main": "index.js",
   "scripts": {
     "start": "node src/index.js",
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "jest --forceExit --detectOpenHandles",
     "seed": "node seed.js"
   },
   "keywords": [],
-  "author": "Sebastián Hernández Erazo",
+  "author": "Sebasti\u00e1n Hern\u00e1ndez Erazo",
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
@@ -31,5 +31,14 @@
     "qrcode": "^1.5.4",
     "socket.io": "^4.8.3",
     "speakeasy": "^2.0.0"
+  },
+  "devDependencies": {
+    "jest": "^30.4.2",
+    "mongodb-memory-server": "^11.1.0",
+    "supertest": "^7.2.2"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "testTimeout": 30000
   }
 }
