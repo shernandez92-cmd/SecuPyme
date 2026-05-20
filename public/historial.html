@@ -72,7 +72,7 @@
     cargarSidebar('historial');
 
     async function cargarHistorial() {
-      const response = await fetch('/api/autoevaluaciones', {
+      const response = await apiFetch('/api/autoevaluaciones', {
         headers: { 'authorization': token }
       });
       const evaluaciones = await response.json();
@@ -119,7 +119,7 @@ evaluaciones.reverse().forEach(e => {
       const token = localStorage.getItem("token");
       mostrarToast("Generando resumen...", "info", 3000);
       try {
-        const r = await fetch("/api/ia/resumen-semanal", { headers: { "authorization": token } });
+        const r = await apiFetch("/api/ia/resumen-semanal", { headers: { "authorization": token } });
         const d = await r.json();
         const m = document.createElement("div");
         m.style.cssText = "position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:99999;display:flex;align-items:center;justify-content:center;padding:24px;";

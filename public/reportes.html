@@ -167,7 +167,7 @@
         return;
       }
       if (!confirm('¿Confirmas el envío de este reporte de seguridad?')) return;
-      const response = await fetch('/api/reportes', {
+      const response = await apiFetch('/api/reportes', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'authorization': token },
         body: JSON.stringify({ tipoVulnerabilidad, descripcion })
@@ -199,7 +199,7 @@
         mostrarToast('Por favor responde todas las preguntas', 'warning');
         return;
       }
-      const response = await fetch('/api/autoevaluaciones', {
+      const response = await apiFetch('/api/autoevaluaciones', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'authorization': token },
         body: JSON.stringify({ respuestas })
@@ -220,7 +220,7 @@
     }
 
     async function cargarReportes() {
-      const response = await fetch('/api/reportes', { headers: { 'authorization': token } });
+      const response = await apiFetch('/api/reportes', { headers: { 'authorization': token } });
       const reportes = await response.json();
       const tbody = document.getElementById('tablaBody');
       tbody.innerHTML = '';
@@ -251,7 +251,7 @@
 
     async function eliminarReporte(id) {
       if (!confirm('¿Eliminar este reporte?')) return;
-      await fetch(`/api/reportes/${id}`, {
+      await apiFetch(`/api/reportes/${id}`, {
         method: 'DELETE',
         headers: { 'authorization': token }
       });

@@ -343,7 +343,7 @@ async function enviarPreguntaIA() {
   input.value = '';
 
   try {
-    const response = await fetch('/api/ia/asistente', {
+    const response = await apiFetch('/api/ia/asistente', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'authorization': token },
       body: JSON.stringify({ pregunta, contexto: `Usuario rol: ${localStorage.getItem('rol')}` })

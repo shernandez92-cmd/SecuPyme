@@ -111,7 +111,7 @@
 
     async function cargarRiskScore() {
       try {
-        const res = await fetch('/api/risk/mi-score', { headers: { 'authorization': token } });
+        const res = await apiFetch('/api/risk/mi-score', { headers: { 'authorization': token } });
         if (!res.ok) return;
         const data = await res.json();
         const score = data.score ?? 0;
@@ -133,7 +133,7 @@
 
     async function cargarTodo() {
       try {
-        const response = await fetch('/api/reportes', { headers: { 'authorization': token } });
+        const response = await apiFetch('/api/reportes', { headers: { 'authorization': token } });
         if (!response.ok) throw new Error('Error');
         const reportes = await response.json();
 
@@ -339,7 +339,7 @@
     async function iniciarSetup2FA() {
       const token = localStorage.getItem('token');
       try {
-        const res = await fetch('/api/auth/2fa/setup', {
+        const res = await apiFetch('/api/auth/2fa/setup', {
           method: 'POST',
           headers: { 'authorization': token }
         });
@@ -376,7 +376,7 @@
       errDiv.style.display = 'none';
 
       try {
-        const res = await fetch('/api/auth/2fa/verify', {
+        const res = await apiFetch('/api/auth/2fa/verify', {
           method: 'POST',
           headers: { 'authorization': token, 'Content-Type': 'application/json' },
           body: JSON.stringify({ token: codigo })
@@ -472,7 +472,7 @@
       document.getElementById('modalRiskHistorial').style.display = 'none';
 
       try {
-        const res = await fetch('/api/risk/mi-historial', {
+        const res = await apiFetch('/api/risk/mi-historial', {
           headers: { 'authorization': localStorage.getItem('token') }
         });
         const data = await res.json();

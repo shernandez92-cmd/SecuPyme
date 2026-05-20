@@ -156,7 +156,7 @@
     }
 
     async function cargarEmpresas() {
-      const response = await fetch("/api/auth/usuarios", { headers: { "authorization": token } });
+      const response = await apiFetch("/api/auth/usuarios", { headers: { "authorization": token } });
       const usuarios = await response.json();
       const select = document.getElementById("filtroEmpresa");
       usuarios.filter(u => u.rol === "cliente").forEach(u => {
@@ -167,7 +167,7 @@
     async function cargarRiskEmpresa() {
       const empresaId = document.getElementById("filtroEmpresa").value;
       if (!empresaId) return cargarRiskScores();
-      const response = await fetch("/api/risk", { headers: { "authorization": token } });
+      const response = await apiFetch("/api/risk", { headers: { "authorization": token } });
       const scores = await response.json();
       const filtrado = scores.filter(s => s.empresaId?._id === empresaId);
       // Reusar cargarRiskScores con datos filtrados
@@ -176,7 +176,7 @@
     let graficaSeveridad = null;
 
     async function cargarEstadisticas() {
-      const response = await fetch('/api/siem/estadisticas', { headers: { 'authorization': token } });
+      const response = await apiFetch('/api/siem/estadisticas', { headers: { 'authorization': token } });
       const data = await response.json();
       ['skeleton-siem-1','skeleton-siem-2','skeleton-siem-3','skeleton-siem-4'].forEach(id => {
         const el = document.getElementById(id);
@@ -189,7 +189,7 @@
     }
 
     async function cargarRiskScores() {
-      const response = await fetch('/api/risk', { headers: { 'authorization': token } });
+      const response = await apiFetch('/api/risk', { headers: { 'authorization': token } });
       const scores = await response.json();
 
       const enRiesgo = scores.filter(s => s.nivel !== 'normal').length;
@@ -230,7 +230,7 @@
       const empresa = document.getElementById("filtroEmpresa") ? document.getElementById("filtroEmpresa").value : "";
       let urlGrafica = "/api/siem/events";
       if (empresa) urlGrafica += `?userId=${empresa}`;
-      const evResponse = await fetch(urlGrafica, { headers: { "authorization": token } });
+      const evResponse = await apiFetch(urlGrafica, { headers: { "authorization": token } });
       const eventos = await evResponse.json();
 
       const ctx = document.getElementById("graficaSeveridad").getContext("2d");
@@ -261,7 +261,7 @@
     }
 
     async function desbloquear(empresaId) {
-      await fetch(`/api/risk/desbloquear/${empresaId}`, {
+      await apiFetch(`/api/risk/desbloquear/${empresaId}`, {
         method: 'PUT',
         headers: { 'authorization': token }
       });
@@ -280,7 +280,7 @@
       if (empresa) params.push(`userId=${empresa}`);
       if (params.length) url += '?' + params.join('&');
 
-      const response = await fetch(url, { headers: { 'authorization': token } });
+      const response = await apiFetch(url, { headers: { 'authorization': token } });
       const eventos = await response.json();
 
       document.getElementById('conteoEventos').textContent = `(${eventos.length} eventos)`;
@@ -350,7 +350,7 @@
       const token = localStorage.getItem("token");
       mostrarToast("Consultando IA...", "info", 2000);
       try {
-        const r = await fetch("/api/ia/explicar", {
+        const r = await apiFetch("/api/ia/explicar", {
           method: "POST",
           headers: { "Content-Type": "application/json", "authorization": token },
           body: JSON.stringify({ tipo, descripcion: tipo, severidad })

@@ -156,7 +156,7 @@
     }
 
     async function cargarUsuarios() {
-      const response = await fetch('/api/auth/usuarios', {
+      const response = await apiFetch('/api/auth/usuarios', {
         headers: { 'authorization': token }
       });
       const usuarios = await response.json();
@@ -191,7 +191,7 @@
     }
 
     async function cambiarPlan(userId, plan) {
-      await fetch(`/api/auth/usuarios/${userId}/plan`, {
+      await apiFetch(`/api/auth/usuarios/${userId}/plan`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json', 'authorization': token },
         body: JSON.stringify({ plan })
@@ -202,7 +202,7 @@
     }
 
     async function cambiarRol(userId, rol) {
-      await fetch(`/api/auth/usuarios/${userId}/rol`, {
+      await apiFetch(`/api/auth/usuarios/${userId}/rol`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json', 'authorization': token },
         body: JSON.stringify({ rol })
@@ -218,7 +218,7 @@
         ? '⚠️ ATENCIÓN: ' + nombre + ' es administrador.\n\n¿Estás seguro de que deseas eliminar esta cuenta? Esta acción no se puede deshacer.'
         : '¿Estás seguro de que deseas eliminar a ' + nombre + '?\n\nEsta acción no se puede deshacer.';
       if (!confirm(mensaje)) return;
-      const res = await fetch(`/api/auth/usuarios/${userId}`, {
+      const res = await apiFetch(`/api/auth/usuarios/${userId}`, {
         method: 'DELETE',
         headers: { 'authorization': token }
       });
@@ -255,7 +255,7 @@
       if (accion) params.append('accion', accion);
 
       try {
-        const res = await fetch(`/api/audit?${params}`, { headers: { 'authorization': token } });
+        const res = await apiFetch(`/api/audit?${params}`, { headers: { 'authorization': token } });
         const data = await res.json();
         const tbody = document.getElementById('tablaAudit');
         tbody.innerHTML = '';
@@ -294,7 +294,7 @@
   
     async function cargarPreguntas() {
       try {
-        const res = await fetch('/api/autoevaluaciones/preguntas/todas', { headers: { 'authorization': token } });
+        const res = await apiFetch('/api/autoevaluaciones/preguntas/todas', { headers: { 'authorization': token } });
         const preguntas = await res.json();
         const tbody = document.getElementById('tablaPreguntas');
         tbody.innerHTML = '';
@@ -322,7 +322,7 @@
       const accion = activa ? 'desactivar' : 'activar';
       if (!confirm(`¿Seguro que deseas ${accion} esta pregunta?`)) return;
       try {
-        const res = await fetch(`/api/autoevaluaciones/preguntas/${id}/toggle`, {
+        const res = await apiFetch(`/api/autoevaluaciones/preguntas/${id}/toggle`, {
           method: 'PUT',
           headers: { 'authorization': token }
         });
@@ -344,7 +344,7 @@
       }
 
       try {
-        const res = await fetch('/api/autoevaluaciones/preguntas', {
+        const res = await apiFetch('/api/autoevaluaciones/preguntas', {
           method: 'POST',
           headers: { 'authorization': token, 'Content-Type': 'application/json' },
           body: JSON.stringify({ texto, campo, categoria, peso, recomendacion })

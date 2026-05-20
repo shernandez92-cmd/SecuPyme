@@ -146,7 +146,7 @@
     const reporteId = params.get('id');
 
     async function cargarReporte() {
-      const response = await fetch(`/api/reportes/${reporteId}`, {
+      const response = await apiFetch(`/api/reportes/${reporteId}`, {
         headers: { 'authorization': token }
       });
       const r = await response.json();
@@ -166,7 +166,7 @@
 async function consultarShodan() {
   const ip = document.getElementById('ipShodan').value;
   if (!ip) return;
-  const response = await fetch(`/api/integraciones/shodan/${ip}`, {
+  const response = await apiFetch(`/api/integraciones/shodan/${ip}`, {
     headers: { 'authorization': token }
   });
   const data = await response.json();
@@ -187,7 +187,7 @@ async function consultarShodan() {
 async function consultarVirusTotal() {
   const hash = document.getElementById('hashVT').value;
   if (!hash) return;
-  const response = await fetch(`/api/integraciones/virustotal/${hash}`, {
+  const response = await apiFetch(`/api/integraciones/virustotal/${hash}`, {
     headers: { 'authorization': token }
   });
   const data = await response.json();
@@ -208,7 +208,7 @@ async function consultarVirusTotal() {
 }
 async function eliminarReporte() {
   if (!confirm('¿Eliminar este reporte? Esta acción no se puede deshacer.')) return;
-  await fetch(`/api/reportes/${reporteId}`, {
+  await apiFetch(`/api/reportes/${reporteId}`, {
     method: 'DELETE',
     headers: { 'authorization': token }
   });
@@ -217,7 +217,7 @@ async function eliminarReporte() {
 
 async function archivarReporte() {
   if (!confirm('¿Archivar este reporte?')) return;
-  await fetch(`/api/reportes/${reporteId}/archivar`, {
+  await apiFetch(`/api/reportes/${reporteId}/archivar`, {
     method: 'PUT',
     headers: { 'authorization': token }
   });
@@ -228,7 +228,7 @@ async function archivarReporte() {
       const prioridad = document.getElementById('prioridad').value;
       const notasAdmin = document.getElementById('notasAdmin').value;
 
-      const response = await fetch(`/api/reportes/${reporteId}`, {
+      const response = await apiFetch(`/api/reportes/${reporteId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -246,7 +246,7 @@ async function archivarReporte() {
     }
 
     async function cargarMensajes() {
-      const response = await fetch(`/api/mensajes/${reporteId}`, {
+      const response = await apiFetch(`/api/mensajes/${reporteId}`, {
         headers: { 'authorization': token }
       });
       const mensajes = await response.json();
@@ -272,7 +272,7 @@ async function archivarReporte() {
       const texto = document.getElementById('textoMensaje').value;
       if (!texto) return;
 
-      await fetch(`/api/mensajes/${reporteId}`, {
+      await apiFetch(`/api/mensajes/${reporteId}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -78,7 +78,7 @@ function toggleChat() {
 async function cargarConversacionesAdmin() {
   const token = localStorage.getItem('token');
   try {
-    const response = await fetch('/api/conversations', { headers: { 'authorization': token } });
+    const response = await apiFetch('/api/conversations', { headers: { 'authorization': token } });
     const conversaciones = await response.json();
     const lista = document.getElementById('lista-conversaciones');
     if (!lista) return;
@@ -126,7 +126,7 @@ function actualizarBadge() {
 async function borrarChat() {
   if (!confirm('¿Borrar el historial de este chat?')) return;
   const token = localStorage.getItem('token');
-  await fetch('/api/chat/borrar', {
+  await apiFetch('/api/chat/borrar', {
     method: 'DELETE',
     headers: { 'authorization': token }
   });
@@ -136,7 +136,7 @@ async function borrarChat() {
 async function cargarReportesChat() {
   const token = localStorage.getItem('token');
   try {
-    const response = await fetch('/api/chat/reportes', { headers: { 'authorization': token } });
+    const response = await apiFetch('/api/chat/reportes', { headers: { 'authorization': token } });
     const reportes = await response.json();
     const select = document.getElementById('chat-reporte');
     if (!select) return;
@@ -161,7 +161,7 @@ async function cargarChatMensajes() {
       ? `/api/chat?conId=${empresaSeleccionada}`
       : '/api/chat';
 
-    const response = await fetch(url, { headers: { 'authorization': token } });
+    const response = await apiFetch(url, { headers: { 'authorization': token } });
     const mensajes = await response.json();
     const contenedor = document.getElementById('chat-mensajes');
     if (!contenedor) return;
@@ -212,7 +212,7 @@ async function enviarChatMensaje() {
     body.paraId = empresaSeleccionada;
   }
 
-  await fetch('/api/chat', {
+  await apiFetch('/api/chat', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'authorization': token },
     body: JSON.stringify(body)
@@ -287,7 +287,7 @@ async function subirArchivoChatFn() {
   const formData = new FormData();
   formData.append('archivo', file);
 
-  const uploadResponse = await fetch('/api/upload', {
+  const uploadResponse = await apiFetch('/api/upload', {
     method: 'POST',
     headers: { 'authorization': token },
     body: formData
@@ -308,7 +308,7 @@ async function subirArchivoChatFn() {
   const body = { texto, reporteRelacionado: null };
   if (rol === 'admin' && empresaSeleccionada) body.paraId = empresaSeleccionada;
 
-  await fetch('/api/chat', {
+  await apiFetch('/api/chat', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'authorization': token },
     body: JSON.stringify(body)
