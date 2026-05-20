@@ -149,6 +149,9 @@ app.set('io', io);
 mongoose.connect(process.env.MONGODB_URI)
   .then(() => {
     console.log('Conectado a MongoDB');
+    // El índice TTL de TokenBlacklist limpia tokens expirados automáticamente
+    require('./models/TokenBlacklist');
+    console.log('TokenBlacklist TTL index activo');
     server.listen(process.env.PORT || 3000, () => {
       console.log(`Servidor corriendo en puerto ${process.env.PORT || 3000}`);
     });
