@@ -46,6 +46,9 @@ function cargarSidebar(paginaActiva) {
       <div class="sidebar-user">
         <p>${nombre}</p>
         <span>${rol ? rol.toUpperCase() : ''}</span>
+        <button onclick="typeof abrirModal2FA === 'function' && abrirModal2FA()" style="margin-top:10px;width:100%;padding:8px;background:transparent;border:1px solid #7c3aed66;color:#7c3aed;font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:2px;cursor:pointer;border-radius:3px;transition:border-color 0.2s;" onmouseover="this.style.borderColor='#7c3aed'" onmouseout="this.style.borderColor='#7c3aed66'">
+          🔐 CONFIGURAR 2FA
+        </button>
       </div>
       <div style="padding: 12px 24px; border-top: 1px solid var(--borde); display: flex; align-items: center; gap: 8px;">
         <span style="font-size: 10px; color: var(--texto-suave); font-family: 'Share Tech Mono', monospace;">MODO</span>

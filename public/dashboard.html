@@ -239,6 +239,209 @@
     mostrarOnboarding();
     cargarTodo();
   </script>
+
+  <!-- ═══════════════════════════════════════════════════════════
+       MODAL 2FA — Setup, QR, Verificación y Backup Codes
+  ═══════════════════════════════════════════════════════════ -->
+  <div id="modal2FA" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.92);z-index:99998;align-items:center;justify-content:center;padding:24px;">
+    <div style="background:#0d0618;border:1px solid #7c3aed;border-radius:10px;padding:40px;max-width:480px;width:100%;position:relative;max-height:90vh;overflow-y:auto;">
+      <button onclick="cerrarModal2FA()" style="position:absolute;top:16px;right:16px;background:none;border:none;color:#94a3b8;font-size:20px;cursor:pointer;">✕</button>
+
+      <!-- PASO 1: intro -->
+      <div id="paso2fa-1">
+        <p style="font-family:'Share Tech Mono',monospace;font-size:10px;color:#a855f7;letter-spacing:4px;margin-bottom:16px;">SEGURIDAD</p>
+        <h3 style="color:#e2d9f3;font-size:1.3rem;margin-bottom:12px;">Autenticación en dos pasos</h3>
+        <p style="color:#94a3b8;font-size:13px;line-height:1.7;margin-bottom:24px;">
+          Cada vez que inicies sesión, necesitarás tu contraseña <strong style="color:#e2d9f3;">y</strong> un código temporal de tu app autenticadora (Google Authenticator, Authy, etc).
+        </p>
+        <p style="color:#94a3b8;font-size:12px;margin-bottom:32px;">
+          También recibirás <strong style="color:#7c3aed;">10 códigos de respaldo</strong> de un solo uso, por si pierdes acceso a tu app.
+        </p>
+        <button onclick="iniciarSetup2FA()" style="width:100%;padding:14px;background:#7c3aed;border:none;color:#fff;font-family:'Share Tech Mono',monospace;font-size:12px;letter-spacing:3px;cursor:pointer;border-radius:4px;">
+          CONFIGURAR 2FA →
+        </button>
+      </div>
+
+      <!-- PASO 2: QR -->
+      <div id="paso2fa-2" style="display:none;">
+        <p style="font-family:'Share Tech Mono',monospace;font-size:10px;color:#a855f7;letter-spacing:4px;margin-bottom:16px;">PASO 1 DE 2</p>
+        <h3 style="color:#e2d9f3;font-size:1.1rem;margin-bottom:12px;">Escanea el código QR</h3>
+        <p style="color:#94a3b8;font-size:12px;margin-bottom:20px;">Abre tu app autenticadora y escanea este QR. Si no puedes escanearlo, ingresa la clave manual.</p>
+        <div style="text-align:center;margin-bottom:16px;">
+          <img id="qrImg" src="" alt="QR 2FA" style="width:200px;height:200px;border:2px solid #7c3aed;border-radius:8px;"/>
+        </div>
+        <div style="background:#1a0a2e;border:1px solid #7c3aed33;border-radius:6px;padding:12px;margin-bottom:24px;text-align:center;">
+          <p style="color:#94a3b8;font-size:10px;margin-bottom:4px;">CLAVE MANUAL</p>
+          <p id="secretoManual" style="color:#7c3aed;font-family:'Share Tech Mono',monospace;font-size:13px;word-break:break-all;"></p>
+        </div>
+        <button onclick="mostrarPasoVerificacion()" style="width:100%;padding:14px;background:#7c3aed;border:none;color:#fff;font-family:'Share Tech Mono',monospace;font-size:12px;letter-spacing:3px;cursor:pointer;border-radius:4px;">
+          YA LO ESCANEÉ →
+        </button>
+      </div>
+
+      <!-- PASO 3: verificar código -->
+      <div id="paso2fa-3" style="display:none;">
+        <p style="font-family:'Share Tech Mono',monospace;font-size:10px;color:#a855f7;letter-spacing:4px;margin-bottom:16px;">PASO 2 DE 2</p>
+        <h3 style="color:#e2d9f3;font-size:1.1rem;margin-bottom:12px;">Confirma el código</h3>
+        <p style="color:#94a3b8;font-size:12px;margin-bottom:20px;">Ingresa el código de 6 dígitos que muestra tu app para confirmar la configuración.</p>
+        <input id="codigo2FA" type="text" maxlength="6" placeholder="000000"
+          style="width:100%;background:#1a0a2e;border:1px solid #7c3aed66;border-radius:6px;color:#e2d9f3;font-family:'Share Tech Mono',monospace;font-size:1.5rem;padding:14px;text-align:center;letter-spacing:8px;margin-bottom:16px;outline:none;"
+          oninput="this.value=this.value.replace(/[^0-9]/g,'')"
+        />
+        <div id="error2FA" style="color:#f87171;font-size:12px;margin-bottom:12px;display:none;"></div>
+        <button id="btnVerificar2FA" onclick="verificarCodigo2FA()" style="width:100%;padding:14px;background:#7c3aed;border:none;color:#fff;font-family:'Share Tech Mono',monospace;font-size:12px;letter-spacing:3px;cursor:pointer;border-radius:4px;">
+          ACTIVAR 2FA
+        </button>
+      </div>
+
+      <!-- PASO 4: backup codes -->
+      <div id="paso2fa-4" style="display:none;">
+        <p style="font-family:'Share Tech Mono',monospace;font-size:10px;color:#4ade80;letter-spacing:4px;margin-bottom:16px;">✓ 2FA ACTIVADO</p>
+        <h3 style="color:#e2d9f3;font-size:1.1rem;margin-bottom:12px;">Guarda tus códigos de respaldo</h3>
+        <div style="background:#7f1d1d22;border:1px solid #dc2626;border-radius:6px;padding:12px;margin-bottom:20px;">
+          <p style="color:#fca5a5;font-size:12px;line-height:1.6;">
+            ⚠ <strong>Estos códigos solo se muestran una vez.</strong> Guárdalos en un lugar seguro. Cada uno sirve para iniciar sesión una sola vez si pierdes tu autenticador.
+          </p>
+        </div>
+        <div id="listaCodigos" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:20px;"></div>
+        <button onclick="copiarCodigos()" style="width:100%;padding:12px;background:#1a0a2e;border:1px solid #7c3aed;color:#7c3aed;font-family:'Share Tech Mono',monospace;font-size:11px;letter-spacing:2px;cursor:pointer;border-radius:4px;margin-bottom:10px;">
+          📋 COPIAR TODOS
+        </button>
+        <button onclick="cerrarModal2FA()" style="width:100%;padding:14px;background:#7c3aed;border:none;color:#fff;font-family:'Share Tech Mono',monospace;font-size:12px;letter-spacing:3px;cursor:pointer;border-radius:4px;">
+          LISTO, LOS GUARDÉ
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    // ─── Estado global 2FA ───────────────────────────────────────────────────
+    let _secreto2FA = '';
+    let _backupCodes = [];
+
+    function abrirModal2FA() {
+      const modal = document.getElementById('modal2FA');
+      modal.style.display = 'flex';
+      // Resetear al paso 1
+      ['paso2fa-1','paso2fa-2','paso2fa-3','paso2fa-4'].forEach(id => {
+        document.getElementById(id).style.display = 'none';
+      });
+      document.getElementById('paso2fa-1').style.display = 'block';
+      document.getElementById('codigo2FA').value = '';
+      document.getElementById('error2FA').style.display = 'none';
+    }
+
+    function cerrarModal2FA() {
+      document.getElementById('modal2FA').style.display = 'none';
+    }
+
+    function mostrarPaso(id) {
+      ['paso2fa-1','paso2fa-2','paso2fa-3','paso2fa-4'].forEach(p => {
+        document.getElementById(p).style.display = 'none';
+      });
+      document.getElementById(id).style.display = 'block';
+    }
+
+    async function iniciarSetup2FA() {
+      const token = localStorage.getItem('token');
+      try {
+        const res = await fetch('/api/auth/2fa/setup', {
+          method: 'POST',
+          headers: { 'authorization': token }
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.mensaje);
+        _secreto2FA = data.secret;
+        document.getElementById('qrImg').src = data.qrCode;
+        document.getElementById('secretoManual').textContent = data.secret;
+        mostrarPaso('paso2fa-2');
+      } catch (e) {
+        alert('Error al configurar 2FA: ' + e.message);
+      }
+    }
+
+    function mostrarPasoVerificacion() {
+      mostrarPaso('paso2fa-3');
+      document.getElementById('codigo2FA').focus();
+    }
+
+    async function verificarCodigo2FA() {
+      const token = localStorage.getItem('token');
+      const codigo = document.getElementById('codigo2FA').value.trim();
+      const btn = document.getElementById('btnVerificar2FA');
+      const errDiv = document.getElementById('error2FA');
+
+      if (codigo.length !== 6) {
+        errDiv.textContent = 'El código debe tener 6 dígitos.';
+        errDiv.style.display = 'block';
+        return;
+      }
+
+      btn.disabled = true;
+      btn.textContent = 'VERIFICANDO...';
+      errDiv.style.display = 'none';
+
+      try {
+        const res = await fetch('/api/auth/2fa/verify', {
+          method: 'POST',
+          headers: { 'authorization': token, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ token: codigo })
+        });
+        const data = await res.json();
+
+        if (!res.ok) {
+          errDiv.textContent = data.mensaje || 'Código incorrecto.';
+          errDiv.style.display = 'block';
+          btn.disabled = false;
+          btn.textContent = 'ACTIVAR 2FA';
+          return;
+        }
+
+        // Actualizar token con el nuevo que tiene twoFactorEnabled: true
+        localStorage.setItem('token', data.token);
+        _backupCodes = data.backupCodes;
+
+        // Mostrar backup codes
+        const lista = document.getElementById('listaCodigos');
+        lista.innerHTML = '';
+        _backupCodes.forEach(code => {
+          lista.innerHTML += `
+            <div style="background:#1a0a2e;border:1px solid #7c3aed33;border-radius:4px;padding:8px;text-align:center;font-family:'Share Tech Mono',monospace;font-size:12px;color:#7c3aed;letter-spacing:2px;">
+              ${code}
+            </div>
+          `;
+        });
+
+        mostrarPaso('paso2fa-4');
+
+      } catch (e) {
+        errDiv.textContent = 'Error de conexión.';
+        errDiv.style.display = 'block';
+        btn.disabled = false;
+        btn.textContent = 'ACTIVAR 2FA';
+      }
+    }
+
+    function copiarCodigos() {
+      const texto = _backupCodes.join('\n');
+      navigator.clipboard.writeText(texto).then(() => {
+        const btn = event.target;
+        btn.textContent = '✓ COPIADOS';
+        setTimeout(() => { btn.textContent = '📋 COPIAR TODOS'; }, 2000);
+      });
+    }
+
+    // Enter en el input de código dispara verificación
+    document.addEventListener('DOMContentLoaded', () => {
+      const input = document.getElementById('codigo2FA');
+      if (input) {
+        input.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') verificarCodigo2FA();
+        });
+      }
+    });
+  </script>
   <script src="/inactividad.js"></script>
 </body>
 </html>
