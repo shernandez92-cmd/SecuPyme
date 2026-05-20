@@ -12,9 +12,9 @@ const { verificarToken, verificarAdmin } = require('../middleware/auth');
 
 router.get('/preguntas',              verificarToken, obtenerPreguntas);
 router.get('/preguntas/todas',        verificarToken, verificarAdmin, obtenerTodasPreguntas);
-router.post('/preguntas',             verificarToken, verificarAdmin, crearPregunta);
+router.post('/preguntas',             verificarToken, verificarAdmin, validate(s.crearPregunta), crearPregunta);
 router.put('/preguntas/:id/toggle',   verificarToken, verificarAdmin, togglePregunta);
-router.post('/',                      verificarToken, checkPlan('autoevaluaciones'), crearAutoevaluacion);
+router.post('/',                      verificarToken, checkPlan('autoevaluaciones'), validate(s.respuestas), crearAutoevaluacion);
 router.get('/',                       verificarToken, obtenerAutoevaluaciones);
 
 module.exports = router;
