@@ -245,7 +245,7 @@ function agregarMensajeDOM(m) {
     return;
   }
   const esYo = m.usuario._id === empresaIdActual || m.usuario.id === empresaIdActual;
-  const fecha = new Date(m.fecha).toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' });
+  const fecha = formatHora(m.fecha);
   contenedor.innerHTML += `
     <div style="margin-bottom: 10px; text-align: ${esYo ? 'right' : 'left'};">
       <span style="font-size: 9px; color: #6b5a8a;">${m.usuario.nombre} · ${fecha}</span>

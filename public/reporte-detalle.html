@@ -126,6 +126,7 @@
     </main>
   </div>
 
+  <script src="/utils.js"></script>
   <script src="/toast.js"></script>
   <script src="/chat.js"></script>
   <script src="sidebar.js"></script>
@@ -157,7 +158,7 @@
       document.getElementById('emailUsuario').textContent = r.usuario.email;
       document.getElementById('tipoVulnerabilidad').textContent = r.tipoVulnerabilidad.toUpperCase();
       document.getElementById('descripcion').textContent = r.descripcion;
-      document.getElementById('fechaReporte').textContent = new Date(r.fecha).toLocaleDateString('es-CO');
+      document.getElementById('fechaReporte').textContent = formatFecha(r.fecha);
       document.getElementById('estado').value = r.estado;
       document.getElementById('prioridad').value = r.prioridad;
       document.getElementById('notasAdmin').value = r.notasAdmin;
@@ -254,7 +255,7 @@ async function archivarReporte() {
 
       mensajes.forEach(m => {
         const esYo = m.usuario.rol === rol;
-        const fecha = new Date(m.fecha).toLocaleTimeString('es-CO');
+        const fecha = formatHora(m.fecha);
         contenedor.innerHTML += `
           <div style="margin-bottom: 12px; text-align: ${esYo ? 'right' : 'left'};">
             <span style="font-size: 10px; color: var(--texto-suave); letter-spacing: 1px;">${m.usuario.nombre} · ${fecha}</span>

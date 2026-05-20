@@ -130,6 +130,7 @@
     </main>
   </div>
 
+  <script src="/utils.js"></script>
   <script src="/toast.js"></script>
   <script src="/chat.js"></script>
   <script src="/notifications.js"></script>
@@ -296,7 +297,7 @@
       document.querySelectorAll('.skeleton-tabla').forEach(r => r.remove());
 
       eventos.forEach(e => {
-        const fecha = new Date(e.timestamp).toLocaleString('es-CO');
+        const fecha = formatFechaHora(e.timestamp);
         const badgeClass = e.severity === 'high' ? 'badge-abierto' : e.severity === 'medium' ? 'badge-proceso' : 'badge-resuelto';
         const usuario = e.userId ? e.userId.nombre : '—';
         tbody.innerHTML += `

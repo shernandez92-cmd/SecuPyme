@@ -62,6 +62,7 @@
     </main>
   </div>
 
+  <script src="/utils.js"></script>
   <script src="/toast.js"></script>
   <script src="/chat.js"></script>
   <script src="sidebar.js"></script>
@@ -95,7 +96,7 @@ if (evaluaciones.length === 0) {
   return;
 }
 evaluaciones.reverse().forEach(e => {
-        const fecha = new Date(e.fecha).toLocaleDateString('es-CO');
+        const fecha = formatFecha(e.fecha);
         const badgeClass = e.nivelRiesgo === 'alto' ? 'badge-abierto' : e.nivelRiesgo === 'medio' ? 'badge-proceso' : 'badge-resuelto';
         tbody.innerHTML += `
           <tr>

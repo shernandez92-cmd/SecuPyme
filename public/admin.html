@@ -138,6 +138,7 @@
     </main>
   </div>
 
+  <script src="/utils.js"></script>
   <script src="/toast.js"></script>
   <script src="/chat.js"></script>
   <script src="/notifications.js"></script>
@@ -164,7 +165,7 @@
       document.querySelectorAll('.skeleton-tabla').forEach(r => r.remove());
 
       usuarios.forEach(u => {
-        const fecha = new Date(u.fechaRegistro).toLocaleDateString('es-CO');
+        const fecha = formatFecha(u.fechaRegistro);
         tbody.innerHTML += `
           <tr>
             <td data-label="EMPRESA">${u.empresa}</td>
@@ -267,7 +268,7 @@
 
         data.logs.forEach(log => {
           const badge = AUDIT_BADGE[log.accion] || { color: '#94a3b8', bg: '#94a3b822', label: log.accion };
-          const fecha = new Date(log.timestamp).toLocaleString('es-CO');
+          const fecha = formatFechaHora(log.timestamp);
           tbody.innerHTML += `
             <tr>
               <td style="font-size:11px;color:#6b5a8a;">${fecha}</td>

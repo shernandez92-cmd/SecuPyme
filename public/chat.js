@@ -181,7 +181,7 @@ async function cargarChatMensajes() {
 
     mensajes.forEach(m => {
       const esYo = m.usuario._id === myId || m.usuario.id === myId;
-      const fecha = new Date(m.fecha).toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' });
+      const fecha = formatHora(m.fecha);
       contenedor.innerHTML += `
         <div style="margin-bottom: 10px; text-align: ${esYo ? 'right' : 'left'};">
           <span style="font-size: 9px; color: #6b5a8a;">${m.usuario.nombre} · ${fecha}</span>
@@ -238,7 +238,7 @@ function recibirMensajeSocket(mensaje) {
 
   const contenedor = document.getElementById('chat-mensajes');
   if (contenedor && chatAbierto) {
-    const fecha = new Date(mensaje.fecha).toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' });
+    const fecha = formatHora(mensaje.fecha);
     contenedor.innerHTML += `
       <div style="margin-bottom: 10px; text-align: ${esYo ? 'right' : 'left'};">
         <span style="font-size: 9px; color: #6b5a8a;">${mensaje.usuario.nombre} · ${fecha}</span>

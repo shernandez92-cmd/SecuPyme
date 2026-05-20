@@ -2,6 +2,19 @@ const Groq = require('groq-sdk');
 
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
+// ─── Contexto normativo colombiano ───────────────────────────────────────────
+const CONTEXTO_NORMATIVO = `
+Marco normativo colombiano relevante (referenciar cuando aplique):
+- Ley 1581 de 2012: protección de datos personales (habeas data). Obliga a las empresas a
+  proteger los datos de clientes y empleados, registrar bases de datos y tener política de
+  tratamiento de datos.
+- Ley 1273 de 2009: delitos informáticos. Tipifica acceso abusivo a sistemas, interceptación
+  de datos, daño informático y suplantación de sitios web. Penas de hasta 8 años de prisión.
+- CONPES 3995 de 2020: Política Nacional de Confianza y Seguridad Digital. Define lineamientos
+  para que empresas colombianas gestionen riesgos digitales y adopten buenas prácticas.
+Menciona la norma específica solo si es directamente relevante para el tema tratado.
+`.trim();
+
 const chat = async (prompt) => {
   const completion = await groq.chat.completions.create({
     messages: [{ role: 'user', content: prompt }],
@@ -16,6 +29,8 @@ const explicarEvento = async (req, res) => {
     const { tipo, descripcion, severidad } = req.body;
     const prompt = `Eres un experto en ciberseguridad explicando a pequeñas empresas colombianas.
 
+${CONTEXTO_NORMATIVO}
+
 Evento detectado:
 - Tipo: ${tipo}
 - Descripción: ${descripcion}
@@ -23,7 +38,7 @@ Evento detectado:
 
 Explica en 3 párrafos cortos:
 1. Qué significa en palabras simples
-2. Por qué es peligroso para la empresa
+2. Por qué es peligroso para la empresa y qué norma colombiana podría verse afectada
 3. Qué debe hacer ahora mismo
 
 Sin jerga técnica. Directo y práctico.`;
@@ -42,6 +57,8 @@ const analizarRisk = async (req, res) => {
 
     const prompt = `Eres analista de ciberseguridad para pymes colombianas.
 
+${CONTEXTO_NORMATIVO}
+
 Estado de seguridad:
 - Risk Score: ${score}/100
 - Nivel: ${nivel}
@@ -49,8 +66,8 @@ Estado de seguridad:
 ${eventos || 'Sin eventos recientes'}
 
 En 2 párrafos:
-1. Diagnóstico simple de la situación
-2. Las 3 acciones más importantes HOY
+1. Diagnóstico simple de la situación y riesgos de incumplimiento normativo si aplica
+2. Las 3 acciones más importantes HOY, indicando si alguna es obligatoria por ley colombiana
 
 En español simple y directo.`;
 
@@ -67,10 +84,13 @@ const asistente = async (req, res) => {
 
     const prompt = `Eres el asistente de ciberseguridad de SecuPyme para pymes colombianas.
 
+${CONTEXTO_NORMATIVO}
+
 Contexto: ${contexto || 'Pequeña empresa colombiana'}
 Pregunta: ${pregunta}
 
-Responde en máximo 150 palabras, español simple y directo. Solo temas de ciberseguridad.`;
+Responde en máximo 150 palabras, español simple y directo. Solo temas de ciberseguridad.
+Si la pregunta tiene relación con alguna norma colombiana, menciónala brevemente.`;
 
     const respuesta = await chat(prompt);
     res.json({ respuesta });
@@ -98,6 +118,8 @@ const resumenSemanal = async (req, res) => {
 
     const prompt = `Eres analista de seguridad de SecuPyme.
 
+${CONTEXTO_NORMATIVO}
+
 Semana de seguridad:
 - Total eventos: ${eventos.length}
 - Risk score: ${riskDoc?.score || 0}/100
@@ -107,8 +129,8 @@ ${resumenEventos || 'Sin eventos'}
 
 Resumen ejecutivo semanal en 3 párrafos:
 1. Lo más importante de la semana
-2. Estado actual de seguridad  
-3. Recomendaciones para próxima semana
+2. Estado actual de seguridad y cumplimiento normativo colombiano si aplica
+3. Recomendaciones para próxima semana, indicando obligaciones legales si corresponde
 
 En español simple para una pyme colombiana.`;
 

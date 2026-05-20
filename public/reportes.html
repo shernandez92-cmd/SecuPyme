@@ -147,6 +147,7 @@
     </main>
   </div>
 
+  <script src="/utils.js"></script>
   <script src="/toast.js"></script>
   <script src="/chat.js"></script>
   <script src="sidebar.js"></script>
@@ -229,7 +230,7 @@
         return;
       }
       reportes.forEach(r => {
-        const fecha = new Date(r.fecha).toLocaleDateString('es-CO');
+        const fecha = formatFecha(r.fecha);
         const badgeClass = r.estado === 'abierto' ? 'badge-abierto' : r.estado === 'en proceso' ? 'badge-proceso' : 'badge-resuelto';
         const puedeEliminar = rol === 'admin' || r.usuario === JSON.parse(atob(token.split('.')[1])).id;
         const btnEliminar = puedeEliminar

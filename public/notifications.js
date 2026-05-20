@@ -81,7 +81,7 @@ const Notificaciones = (() => {
     lista.innerHTML = filtradas.map(n => {
       const cat = CATEGORIAS[n.categoria];
       const diff = Math.floor((new Date() - new Date(n.fecha)) / 1000);
-      const fecha = diff < 60 ? 'Ahora' : diff < 3600 ? `Hace ${Math.floor(diff/60)} min` : diff < 86400 ? `Hace ${Math.floor(diff/3600)} h` : new Date(n.fecha).toLocaleDateString('es-CO', {day:'2-digit',month:'short'});
+      const fecha = diff < 60 ? 'Ahora' : diff < 3600 ? `Hace ${Math.floor(diff/60)} min` : diff < 86400 ? `Hace ${Math.floor(diff/3600)} h` : formatFecha(n.fecha);
       return `
         <div onclick="Notificaciones.marcarLeida(${n.id})" style="padding:12px 16px;border-bottom:1px solid rgba(107,90,138,0.15);cursor:pointer;background:${n.leida ? 'transparent' : 'rgba(124,58,237,0.07)'};">
           <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
