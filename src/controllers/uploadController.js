@@ -22,7 +22,7 @@ const upload = multer({
   }
 });
 
-const subirArchivo = async (req, res) => {
+const subirArchivo = async (req, res, next) => {
   try {
     if (!req.file) return res.status(400).json({ mensaje: 'No se envió archivo' });
 
@@ -47,7 +47,7 @@ const subirArchivo = async (req, res) => {
       tamaño: req.file.size
     });
   } catch (error) {
-    res.status(500).json({ mensaje: 'Error subiendo archivo', error: error.message });
+    next(error);
   }
 };
 

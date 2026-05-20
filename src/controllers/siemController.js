@@ -7,11 +7,11 @@ const registrarEvento = async (type, description, severity, userId, ip) => {
     await new SecurityEvent({ type, description, severity, userId, ip, source: 'internal' }).save();
     logger.info(`[SIEM] ${severity.toUpperCase()} — ${type}: ${description}`);
   } catch (e) {
-    logger.info('Error SIEM:', e.message);
+    logger.error('Error SIEM:', e.message);
   }
 };
 
-const recibirEventoExterno = async (req, res) => {
+const recibirEventoExterno = async (req, res, next) => {
   try {
     const { type, description, severity, ip, timestamp } = req.body;
 
@@ -51,11 +51,11 @@ const recibirEventoExterno = async (req, res) => {
       timestamp: evento.timestamp
     });
   } catch (error) {
-    res.status(500).json({ mensaje: 'Error registrando evento', error: error.message });
+    next(error);
   }
 };
 
-const obtenerEventos = async (req, res) => {
+const obtenerEventos = async (req, res, next) => {
   try {
     const { tipo, severidad, userId } = req.query;
     let filtro = {};
@@ -75,11 +75,11 @@ const obtenerEventos = async (req, res) => {
 
     res.json({ eventos, total, page, pages: Math.ceil(total / limit) });
   } catch (error) {
-    res.status(500).json({ mensaje: 'Error', error });
+    next(error);
   }
 };
 
-const obtenerEstadisticas = async (req, res) => {
+const obtenerEstadisticas = async (req, res, next) => {
   try {
     const total = await SecurityEvent.countDocuments();
     const altos = await SecurityEvent.countDocuments({ severity: 'high' });
@@ -91,11 +91,11 @@ const obtenerEstadisticas = async (req, res) => {
     ]);
     res.json({ total, altos, hoy: hoyCount, porTipo });
   } catch (error) {
-    res.status(500).json({ mensaje: 'Error', error });
+    next(error);
   }
 };
 
-const cronMonitoreo = async (req, res) => {
+const cronMonitoreo = async (req, res, next) => {
   try {
     const secret = req.headers['x-cron-secret'];
     if (!secret || secret !== process.env.CRON_SECRET) {
@@ -105,7 +105,7 @@ const cronMonitoreo = async (req, res) => {
     await ejecutarMonitoreo();
     res.json({ mensaje: 'Monitoreo ejecutado correctamente', timestamp: new Date() });
   } catch (error) {
-    res.status(500).json({ mensaje: 'Error en monitoreo', error: error.message });
+    next(error);
   }
 };
 

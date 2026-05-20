@@ -6,7 +6,7 @@ const axios = require('axios');
 
 router.post('/', verificarToken, upload.single('archivo'), subirArchivo);
 
-router.get('/descargar', async (req, res) => {
+router.get('/descargar', async (req, res, next) => {
   const { url, nombre } = req.query;
   if (!url) return res.status(400).json({ mensaje: 'URL requerida' });
   try {
@@ -15,7 +15,7 @@ router.get('/descargar', async (req, res) => {
     res.setHeader('Content-Disposition', `inline; filename="${nombre || 'archivo.pdf'}"`);
     response.data.pipe(res);
   } catch (err) {
-    res.status(500).json({ mensaje: 'Error descargando archivo', error: err.message });
+    next(err);
   }
 });
 

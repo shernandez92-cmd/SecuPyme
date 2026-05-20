@@ -14,7 +14,7 @@ const transporter = nodemailer.createTransport({
   }
 });
 
-const registro = async (req, res) => {
+const registro = async (req, res, next) => {
   try {
     const { nombre, email, contraseña, empresa, rol } = req.body;
     const usuarioExiste = await Usuario.findOne({ email });
@@ -32,11 +32,11 @@ const registro = async (req, res) => {
     );
     res.status(201).json({ mensaje: 'Usuario registrado exitosamente', token: tokenTemporal });
   } catch (error) {
-    res.status(500).json({ mensaje: 'Error en el servidor', error });
+    next(error);
   }
 };
 
-const login = async (req, res) => {
+const login = async (req, res, next) => {
   try {
     const { email, contraseña } = req.body;
     const usuario = await Usuario.findOne({ email });
@@ -85,20 +85,20 @@ const login = async (req, res) => {
     await ar(usuario._id, 'login_exitoso');
     res.json({ token, rol: usuario.rol, nombre: usuario.nombre, empresa: usuario.empresa, plan: usuario.plan });
   } catch (error) {
-    res.status(500).json({ mensaje: 'Error en el servidor', error });
+    next(error);
   }
 };
 
-const obtenerUsuarios = async (req, res) => {
+const obtenerUsuarios = async (req, res, next) => {
   try {
     const usuarios = await Usuario.find().select('-contraseña');
     res.json(usuarios);
   } catch (error) {
-    res.status(500).json({ mensaje: 'Error en el servidor', error });
+    next(error);
   }
 };
 
-const forgotPassword = async (req, res) => {
+const forgotPassword = async (req, res, next) => {
   try {
     const { email } = req.body;
     if (!email) {
@@ -137,11 +137,11 @@ const forgotPassword = async (req, res) => {
     res.json(respuestaGenerica);
   } catch (error) {
     logger.error('forgotPassword error:', error);
-    res.status(500).json({ mensaje: 'Error en el servidor', error });
+    next(error);
   }
 };
 
-const resetPassword = async (req, res) => {
+const resetPassword = async (req, res, next) => {
   try {
     const { token, nuevaContraseña } = req.body;
     if (!token || !nuevaContraseña) {
@@ -166,7 +166,7 @@ const resetPassword = async (req, res) => {
     res.json({ mensaje: 'Contraseña actualizada correctamente. Ya puedes iniciar sesión.' });
   } catch (error) {
     logger.error('resetPassword error:', error);
-    res.status(500).json({ mensaje: 'Error en el servidor', error });
+    next(error);
   }
 };
 

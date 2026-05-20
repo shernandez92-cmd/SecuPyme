@@ -22,7 +22,7 @@ const registrarAudit = async ({ adminId, adminNombre, accion, targetUserId, targ
 };
 
 // GET /api/audit — solo admin
-const obtenerLogs = async (req, res) => {
+const obtenerLogs = async (req, res, next) => {
   try {
     const { accion, adminId, desde, hasta, limit = 50, page = 1 } = req.query;
     const filtro = {};
@@ -42,7 +42,7 @@ const obtenerLogs = async (req, res) => {
 
     res.json({ logs, total, page: Number(page), pages: Math.ceil(total / limit) });
   } catch (error) {
-    res.status(500).json({ mensaje: 'Error', error });
+    next(error);
   }
 };
 

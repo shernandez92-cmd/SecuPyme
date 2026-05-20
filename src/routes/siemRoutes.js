@@ -15,7 +15,7 @@ router.post('/external/events', apiKeyAuth, recibirEventoExterno);
 // Endpoint para cron externo (cron-job.org) — protegido por CRON_SECRET
 router.post('/cron/monitoreo', cronMonitoreo);
 
-router.put('/bloquear/:empresaId', verificarToken, verificarAdmin, async (req, res) => {
+router.put('/bloquear/:empresaId', verificarToken, verificarAdmin, async (req, res, next) => {
   try {
     const { empresaId } = req.params;
     const { minutos = 15 } = req.body;
@@ -30,7 +30,7 @@ router.put('/bloquear/:empresaId', verificarToken, verificarAdmin, async (req, r
     );
     res.json({ mensaje: `Empresa bloqueada por ${minutos} minutos` });
   } catch (error) {
-    res.status(500).json({ mensaje: 'Error', error });
+    next(error);
   }
 });
 router.put('/desbloquear/:empresaId', verificarToken, verificarAdmin, desbloquearEmpresa);

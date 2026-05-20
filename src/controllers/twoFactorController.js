@@ -28,19 +28,19 @@ const generarBackupCodes = async () => {
 };
 
 // ─── Setup: genera secret y QR ───────────────────────────────────────────────
-const setup2FA = async (req, res) => {
+const setup2FA = async (req, res, next) => {
   try {
     const secret = speakeasy.generateSecret({ name: `Secupyme (${req.usuario.id})` });
     await Usuario.findByIdAndUpdate(req.usuario.id, { twoFactorSecret: secret.base32 });
     const qrUrl = await qrcode.toDataURL(secret.otpauth_url);
     res.json({ qrCode: qrUrl, secret: secret.base32 });
   } catch (error) {
-    res.status(500).json({ mensaje: 'Error configurando 2FA', error });
+    next(error);
   }
 };
 
 // ─── Verify: activa 2FA y devuelve los 10 backup codes (solo esta vez) ───────
-const verify2FA = async (req, res) => {
+const verify2FA = async (req, res, next) => {
   try {
     const { token } = req.body;
     const usuario = await Usuario.findById(req.usuario.id);
@@ -76,12 +76,12 @@ const verify2FA = async (req, res) => {
       advertencia: 'Guarda estos códigos en un lugar seguro. No se volverán a mostrar.'
     });
   } catch (error) {
-    res.status(500).json({ mensaje: 'Error verificando 2FA', error });
+    next(error);
   }
 };
 
 // ─── Login con 2FA: acepta TOTP o backup code ────────────────────────────────
-const loginCon2FA = async (req, res) => {
+const loginCon2FA = async (req, res, next) => {
   try {
     const { token: code, tempToken } = req.body;
 
@@ -126,7 +126,7 @@ const loginCon2FA = async (req, res) => {
     return res.status(400).json({ mensaje: 'Código incorrecto' });
 
   } catch (error) {
-    res.status(500).json({ mensaje: 'Error en el servidor', error });
+    next(error);
   }
 };
 

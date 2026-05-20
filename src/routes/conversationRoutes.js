@@ -5,7 +5,7 @@ const Conversation = require('../models/Conversation');
 const { verificarToken } = require('../middleware/auth');
 
 // GET todas las conversaciones del usuario (admin: todas sus, empresa: la suya)
-router.get('/', verificarToken, async (req, res) => {
+router.get('/', verificarToken, async (req, res, next) => {
   try {
     const rol = req.usuario.rol;
     const userId = req.usuario.id;
@@ -22,12 +22,12 @@ router.get('/', verificarToken, async (req, res) => {
     
     res.json(conversations);
   } catch (error) {
-    res.status(500).json({ mensaje: 'Error obteniendo conversaciones', error });
+    next(error);
   }
 });
 
 // GET conversación actual (crea si no existe)
-router.get('/actual', verificarToken, async (req, res) => {
+router.get('/actual', verificarToken, async (req, res, next) => {
   try {
     const rol = req.usuario.rol;
     const userId = req.usuario.id;
@@ -93,7 +93,7 @@ router.get('/actual', verificarToken, async (req, res) => {
 });
 
 // POST crear o encontrar conversación (solo admin)
-router.post('/', verificarToken, async (req, res) => {
+router.post('/', verificarToken, async (req, res, next) => {
   try {
     const rol = req.usuario.rol;
     if (rol !== 'admin') {
@@ -132,7 +132,7 @@ router.post('/', verificarToken, async (req, res) => {
     
     res.json(conversation);
   } catch (error) {
-    res.status(500).json({ mensaje: 'Error', error });
+    next(error);
   }
 });
 

@@ -25,7 +25,7 @@ const chat = async (prompt) => {
   return completion.choices[0].message.content;
 };
 
-const explicarEvento = async (req, res) => {
+const explicarEvento = async (req, res, next) => {
   try {
     const { tipo, descripcion, severidad } = req.body;
     const prompt = `Eres un experto en ciberseguridad explicando a pequeñas empresas colombianas.
@@ -47,11 +47,11 @@ Sin jerga técnica. Directo y práctico.`;
     const explicacion = await chat(prompt);
     res.json({ explicacion });
   } catch (error) {
-    res.status(500).json({ mensaje: 'Error con IA', error: error.message });
+    next(error);
   }
 };
 
-const analizarRisk = async (req, res) => {
+const analizarRisk = async (req, res, next) => {
   try {
     const { score, nivel, historial } = req.body;
     const eventos = (historial || []).slice(-5).map(h => `${h.evento}: ${h.cambio > 0 ? '+' : ''}${h.cambio}`).join('\n');
@@ -75,11 +75,11 @@ En español simple y directo.`;
     const analisis = await chat(prompt);
     res.json({ analisis });
   } catch (error) {
-    res.status(500).json({ mensaje: 'Error con IA', error: error.message });
+    next(error);
   }
 };
 
-const asistente = async (req, res) => {
+const asistente = async (req, res, next) => {
   try {
     const { pregunta, contexto } = req.body;
 
@@ -96,11 +96,11 @@ Si la pregunta tiene relación con alguna norma colombiana, menciónala brevemen
     const respuesta = await chat(prompt);
     res.json({ respuesta });
   } catch (error) {
-    res.status(500).json({ mensaje: 'Error con IA', error: error.message });
+    next(error);
   }
 };
 
-const resumenSemanal = async (req, res) => {
+const resumenSemanal = async (req, res, next) => {
   try {
     const SecurityEvent = require('../models/SecurityEvent');
     const RiskScore = require('../models/RiskScore');
@@ -138,7 +138,7 @@ En español simple para una pyme colombiana.`;
     const resumen = await chat(prompt);
     res.json({ resumen });
   } catch (error) {
-    res.status(500).json({ mensaje: 'Error con IA', error: error.message });
+    next(error);
   }
 };
 

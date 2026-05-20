@@ -38,27 +38,27 @@ const calcularPuntaje = (respuestas, preguntas) => {
 };
 
 // ─── GET preguntas activas (para el formulario) ───────────────────────────────
-const obtenerPreguntas = async (req, res) => {
+const obtenerPreguntas = async (req, res, next) => {
   try {
     const preguntas = await Pregunta.find({ activa: true }).sort({ orden: 1, fechaCreacion: 1 });
     res.json(preguntas);
   } catch (error) {
-    res.status(500).json({ mensaje: 'Error obteniendo preguntas', error });
+    next(error);
   }
 };
 
 // ─── GET todas las preguntas (admin) ─────────────────────────────────────────
-const obtenerTodasPreguntas = async (req, res) => {
+const obtenerTodasPreguntas = async (req, res, next) => {
   try {
     const preguntas = await Pregunta.find().sort({ orden: 1, fechaCreacion: 1 });
     res.json(preguntas);
   } catch (error) {
-    res.status(500).json({ mensaje: 'Error', error });
+    next(error);
   }
 };
 
 // ─── POST pregunta nueva (admin) ──────────────────────────────────────────────
-const crearPregunta = async (req, res) => {
+const crearPregunta = async (req, res, next) => {
   try {
     const { texto, campo, categoria, peso, recomendacion, orden } = req.body;
     if (!texto || !campo || !peso) {
@@ -70,12 +70,12 @@ const crearPregunta = async (req, res) => {
     const pregunta = await Pregunta.create({ texto, campo, categoria, peso, recomendacion, orden: orden || 0 });
     res.status(201).json({ mensaje: 'Pregunta creada', pregunta });
   } catch (error) {
-    res.status(500).json({ mensaje: 'Error', error });
+    next(error);
   }
 };
 
 // ─── PUT activar/desactivar pregunta (admin) ─────────────────────────────────
-const togglePregunta = async (req, res) => {
+const togglePregunta = async (req, res, next) => {
   try {
     const pregunta = await Pregunta.findById(req.params.id);
     if (!pregunta) return res.status(404).json({ mensaje: 'Pregunta no encontrada' });
@@ -83,12 +83,12 @@ const togglePregunta = async (req, res) => {
     await pregunta.save();
     res.json({ mensaje: `Pregunta ${pregunta.activa ? 'activada' : 'desactivada'}`, pregunta });
   } catch (error) {
-    res.status(500).json({ mensaje: 'Error', error });
+    next(error);
   }
 };
 
 // ─── POST autoevaluación ──────────────────────────────────────────────────────
-const crearAutoevaluacion = async (req, res) => {
+const crearAutoevaluacion = async (req, res, next) => {
   try {
     const { respuestas } = req.body;
     const preguntas = await Pregunta.find({ activa: true }).sort({ orden: 1, fechaCreacion: 1 });
@@ -129,12 +129,12 @@ const crearAutoevaluacion = async (req, res) => {
 
     res.status(201).json({ mensaje: 'Autoevaluación completada', puntaje, nivelRiesgo, recomendaciones });
   } catch (error) {
-    res.status(500).json({ mensaje: 'Error en el servidor', error });
+    next(error);
   }
 };
 
 // ─── GET historial ────────────────────────────────────────────────────────────
-const obtenerAutoevaluaciones = async (req, res) => {
+const obtenerAutoevaluaciones = async (req, res, next) => {
   try {
     const page  = Math.max(1, parseInt(req.query.page)  || 1);
     const limit = Math.min(100, parseInt(req.query.limit) || 20);
@@ -150,7 +150,7 @@ const obtenerAutoevaluaciones = async (req, res) => {
 
     res.json({ autoevaluaciones, total, page, pages: Math.ceil(total / limit) });
   } catch (error) {
-    res.status(500).json({ mensaje: 'Error en el servidor', error });
+    next(error);
   }
 };
 

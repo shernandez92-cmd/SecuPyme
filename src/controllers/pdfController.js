@@ -41,7 +41,7 @@ const crearSeccion = (doc, titulo) => {
   doc.moveDown(0.3);
 };
 
-const exportarReporteIndividual = async (req, res) => {
+const exportarReporteIndividual = async (req, res, next) => {
   try {
     const rol = req.usuario.rol;
     const usuarioId = req.usuario.id || req.usuario._id;
@@ -127,12 +127,12 @@ const exportarReporteIndividual = async (req, res) => {
   } catch (error) {
     logger.error('Error en exportarReporteIndividual:', error);
     if (!res.headersSent) {
-      res.status(500).json({ mensaje: 'Error generando PDF', error: error.message });
+      next(error);
     }
   }
 };
 
-const exportarReportes = async (req, res) => {
+const exportarReportes = async (req, res, next) => {
   try {
     const rol = req.usuario.rol;
     const usuarioId = req.usuario.id || req.usuario._id;
@@ -207,11 +207,11 @@ const exportarReportes = async (req, res) => {
   } catch (error) {
     logger.error('Error en exportarReportes:', error);
     if (!res.headersSent) {
-      res.status(500).json({ mensaje: 'Error generando PDF', error: error.message });
+      next(error);
     }
   }
 };
-const exportarAutoevaluaciones = async (req, res) => {
+const exportarAutoevaluaciones = async (req, res, next) => {
   try {
     const Autoevaluacion = require('../models/Autoevaluacion');
     const evaluaciones = await Autoevaluacion.find({ usuario: req.usuario.id })
@@ -250,7 +250,7 @@ const exportarAutoevaluaciones = async (req, res) => {
     doc.fontSize(8).fillColor(colors.textoSuave).text('Secupyme © 2026 - Documento Confidencial', { align: 'center' });
     doc.end();
   } catch (error) {
-    if (!res.headersSent) res.status(500).json({ mensaje: 'Error generando PDF', error: error.message });
+    if (!res.headersSent) next(error);
   }
 };
 

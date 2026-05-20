@@ -65,28 +65,28 @@ const actualizarRisk = async (empresaId, tipoEvento, io = null) => {
   }
 };
 
-const obtenerRiskScores = async (req, res) => {
+const obtenerRiskScores = async (req, res, next) => {
   try {
     const scores = await RiskScore.find()
       .populate('empresaId', 'nombre empresa email rol')
       .sort({ score: -1 });
     res.json(scores);
   } catch (error) {
-    res.status(500).json({ mensaje: 'Error', error });
+    next(error);
   }
 };
 
-const obtenerRiskEmpresa = async (req, res) => {
+const obtenerRiskEmpresa = async (req, res, next) => {
   try {
     const userId = req.usuario.id;
     const score = await RiskScore.findOne({ empresaId: userId });
     res.json(score || { score: 0, nivel: 'normal' });
   } catch (error) {
-    res.status(500).json({ mensaje: 'Error', error });
+    next(error);
   }
 };
 
-const desbloquearEmpresa = async (req, res) => {
+const desbloquearEmpresa = async (req, res, next) => {
   try {
     const { empresaId } = req.params;
     const { registrarAudit } = require('./auditController');
@@ -109,11 +109,11 @@ const desbloquearEmpresa = async (req, res) => {
 
     res.json({ mensaje: 'Empresa desbloqueada' });
   } catch (error) {
-    res.status(500).json({ mensaje: 'Error', error });
+    next(error);
   }
 };
 
-const bloquearEmpresa = async (req, res) => {
+const bloquearEmpresa = async (req, res, next) => {
   try {
     const { empresaId } = req.params;
     const { registrarAudit } = require('./auditController');
@@ -137,12 +137,12 @@ const bloquearEmpresa = async (req, res) => {
 
     res.json({ mensaje: 'Empresa bloqueada' });
   } catch (error) {
-    res.status(500).json({ mensaje: 'Error', error });
+    next(error);
   }
 };
 
 
-const obtenerHistorialEmpresa = async (req, res) => {
+const obtenerHistorialEmpresa = async (req, res, next) => {
   try {
     const userId = req.usuario.id;
     const score = await RiskScore.findOne({ empresaId: userId });
@@ -186,7 +186,7 @@ const obtenerHistorialEmpresa = async (req, res) => {
       historial: historialOrdenado
     });
   } catch (error) {
-    res.status(500).json({ mensaje: 'Error', error });
+    next(error);
   }
 };
 module.exports = { actualizarRisk, obtenerRiskScores, obtenerRiskEmpresa, desbloquearEmpresa, bloquearEmpresa, obtenerHistorialEmpresa };

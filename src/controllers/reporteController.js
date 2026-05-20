@@ -10,7 +10,7 @@ const transporter = nodemailer.createTransport({
   }
 });
 
-const crearReporte = async (req, res) => {
+const crearReporte = async (req, res, next) => {
   try {
     const { tipoVulnerabilidad, descripcion } = req.body;
     const usuario = await require('../models/Usuario').findById(req.usuario.id);
@@ -46,11 +46,11 @@ await registrarEvento('nuevo_reporte', `Nuevo reporte de ${empresa}`, 'medium', 
     res.status(201).json({ mensaje: 'Reporte creado exitosamente', reporte });
 
   } catch (error) {
-    res.status(500).json({ mensaje: 'Error en el servidor', error });
+    next(error);
   }
 };
 
-const obtenerReportes = async (req, res) => {
+const obtenerReportes = async (req, res, next) => {
   try {
     const page  = Math.max(1, parseInt(req.query.page)  || 1);
     const limit = Math.min(100, parseInt(req.query.limit) || 20);
@@ -67,11 +67,11 @@ const obtenerReportes = async (req, res) => {
     res.json({ reportes, total, page, pages: Math.ceil(total / limit) });
 
   } catch (error) {
-    res.status(500).json({ mensaje: 'Error en el servidor', error });
+    next(error);
   }
 };
 
-const obtenerReporte = async (req, res) => {
+const obtenerReporte = async (req, res, next) => {
   try {
     const reporte = await Reporte.findById(req.params.id).populate('usuario', 'nombre email empresa');
 
@@ -82,11 +82,11 @@ const obtenerReporte = async (req, res) => {
     res.json(reporte);
 
   } catch (error) {
-    res.status(500).json({ mensaje: 'Error en el servidor', error });
+    next(error);
   }
 };
 
-const actualizarReporte = async (req, res) => {
+const actualizarReporte = async (req, res, next) => {
   try {
     const { estado, prioridad, notasAdmin } = req.body;
 
@@ -112,11 +112,11 @@ const actualizarReporte = async (req, res) => {
     res.json({ mensaje: 'Reporte actualizado', reporte });
 
   } catch (error) {
-    res.status(500).json({ mensaje: 'Error en el servidor', error });
+    next(error);
   }
 };
 
-const actualizarEstado = async (req, res) => {
+const actualizarEstado = async (req, res, next) => {
   try {
     const { id } = req.params;
     const { estado } = req.body;
@@ -134,10 +134,10 @@ const actualizarEstado = async (req, res) => {
     res.json({ mensaje: 'Estado actualizado', reporte });
 
   } catch (error) {
-    res.status(500).json({ mensaje: 'Error en el servidor', error });
+    next(error);
   }
 };
-const eliminarReporte = async (req, res) => {
+const eliminarReporte = async (req, res, next) => {
   try {
     const reporte = await Reporte.findById(req.params.id);
     if (!reporte) return res.status(404).json({ mensaje: "Reporte no encontrado" });
@@ -147,7 +147,7 @@ const eliminarReporte = async (req, res) => {
     await Reporte.findByIdAndDelete(req.params.id);
     res.json({ mensaje: "Reporte eliminado" });
   } catch (error) {
-    res.status(500).json({ mensaje: "Error en el servidor", error });
+    next(error);
   }
 };
 module.exports = { crearReporte, obtenerReportes, obtenerReporte, actualizarReporte, actualizarEstado, eliminarReporte };

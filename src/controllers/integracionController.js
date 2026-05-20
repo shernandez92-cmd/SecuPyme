@@ -3,7 +3,7 @@ const { actualizarRisk } = require("./riskController");
 const { registrarEvento } = require("./siemController");
 const Usuario = require("../models/Usuario");
 
-const checkShodan = async (req, res) => {
+const checkShodan = async (req, res, next) => {
   try {
     const { ip } = req.params;
     const response = await fetch(`https://api.shodan.io/shodan/host/${ip}?key=${process.env.SHODAN_KEY}`);
@@ -53,11 +53,11 @@ const checkShodan = async (req, res) => {
 
     res.json(resultado);
   } catch (error) {
-    res.status(500).json({ mensaje: 'Error consultando Shodan', error: error.message });
+    next(error);
   }
 };
 
-const checkVirusTotal = async (req, res) => {
+const checkVirusTotal = async (req, res, next) => {
   try {
     const { hash } = req.params;
     const response = await fetch(`https://www.virustotal.com/api/v3/files/${hash}`, {
@@ -90,7 +90,7 @@ const checkVirusTotal = async (req, res) => {
 
     res.json(resultado);
   } catch (error) {
-    res.status(500).json({ mensaje: 'Error consultando VirusTotal', error: error.message });
+    next(error);
   }
 };
 

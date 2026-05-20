@@ -1,3 +1,14 @@
+
+process.on('uncaughtException', (err) => {
+  require('./utils/logger').error('uncaughtException:', { message: err.message, stack: err.stack });
+  process.exit(1);
+});
+
+process.on('unhandledRejection', (reason) => {
+  require('./utils/logger').error('unhandledRejection:', { reason: String(reason) });
+  process.exit(1);
+});
+const { errorHandler } = require('./middleware/errorHandler');
 const logger = require('./utils/logger');
 const express = require('express');
 const mongoose = require('mongoose');
@@ -199,4 +210,7 @@ mongoose.connect(process.env.MONGODB_URI)
   .catch((error) => {
     logger.info('Error de conexión:', error);
   });
+
+app.use(errorHandler);
+
 module.exports = app;

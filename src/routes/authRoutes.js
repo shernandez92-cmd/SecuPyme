@@ -15,14 +15,14 @@ router.post('/2fa/setup', verificarToken, setup2FA);
 router.post('/2fa/verify', verificarToken, verify2FA);
 router.post('/2fa/login', loginCon2FA);
 
-router.post('/logout', verificarToken, async (req, res) => {
+router.post('/logout', verificarToken, async (req, res, next) => {
   try {
     await revocarToken(req.headers['authorization']);
     res.json({ mensaje: 'Sesión cerrada correctamente' });
-  } catch (e) { res.status(500).json({ mensaje: 'Error', e }); }
+  } catch (e) { next(e); }
 });
 
-router.put('/usuarios/:id/plan', verificarToken, verificarAdmin, async (req, res) => {
+router.put('/usuarios/:id/plan', verificarToken, verificarAdmin, async (req, res, next) => {
   try {
     const target = await Usuario.findByIdAndUpdate(
       req.params.id,
@@ -41,10 +41,10 @@ router.put('/usuarios/:id/plan', verificarToken, verificarAdmin, async (req, res
     });
 
     res.json({ mensaje: 'Plan actualizado' });
-  } catch (e) { res.status(500).json({ mensaje: 'Error', e }); }
+  } catch (e) { next(e); }
 });
 
-router.put('/usuarios/:id/rol', verificarToken, verificarAdmin, async (req, res) => {
+router.put('/usuarios/:id/rol', verificarToken, verificarAdmin, async (req, res, next) => {
   try {
     const target = await Usuario.findByIdAndUpdate(
       req.params.id,
@@ -67,10 +67,10 @@ router.put('/usuarios/:id/rol', verificarToken, verificarAdmin, async (req, res)
     });
 
     res.json({ mensaje: 'Rol actualizado. El usuario deberá iniciar sesión nuevamente.' });
-  } catch (e) { res.status(500).json({ mensaje: 'Error', e }); }
+  } catch (e) { next(e); }
 });
 
-router.delete('/usuarios/:id', verificarToken, verificarAdmin, async (req, res) => {
+router.delete('/usuarios/:id', verificarToken, verificarAdmin, async (req, res, next) => {
   try {
     if (req.params.id === req.usuario.id) {
       return res.status(403).json({ mensaje: 'No puedes eliminar tu propia cuenta' });
@@ -87,7 +87,7 @@ router.delete('/usuarios/:id', verificarToken, verificarAdmin, async (req, res) 
     });
 
     res.json({ mensaje: 'Usuario eliminado' });
-  } catch (e) { res.status(500).json({ mensaje: 'Error', e }); }
+  } catch (e) { next(e); }
 });
 
 module.exports = router;
