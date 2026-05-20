@@ -9,6 +9,10 @@ const usuarioSchema = new mongoose.Schema({
   plan: { type: String, enum: ['free', 'basico', 'premium'], default: 'free' },
   twoFactorSecret: { type: String, default: null },
   twoFactorEnabled: { type: Boolean, default: false },
+  backupCodes: [{
+    code: { type: String },
+    used: { type: Boolean, default: false }
+  }],
   fechaRegistro: { type: Date, default: Date.now },
   resetToken: { type: String, default: null },
   resetTokenExpiry: { type: Date, default: null }
