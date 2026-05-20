@@ -56,7 +56,7 @@
             <p>RESUELTOS</p>
           </div>
         </div>
-        <div class="stat-card" id="riskScoreCard" style="cursor:default;">
+        <div class="stat-card" id="riskScoreCard" style="cursor:pointer;" onclick="abrirModalRisk()">
           <div class="stat-icon" id="riskIcono">🛡</div>
           <div class="stat-info">
             <h3 id="riskScoreValor">--</h3>
@@ -86,13 +86,6 @@
         </table>
 
 
-        <div class="stat-card" id="riskScoreCard" style="cursor:default;">
-          <div class="stat-icon" id="riskIcono">🛡</div>
-          <div class="stat-info">
-            <h3 id="riskScoreValor">--</h3>
-            <p id="riskScoreNivel">RISK SCORE</p>
-          </div>
-        </div>
       </div>
 
       <div class="form-card ocultar-movil" style="margin-top: 24px;">
@@ -443,5 +436,96 @@
     });
   </script>
   <script src="/inactividad.js"></script>
+
+  <!-- MODAL RISK SCORE DESGLOSE -->
+  <div id="modalRisk" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.92);z-index:99997;align-items:center;justify-content:center;padding:24px;">
+    <div style="background:#0d0618;border:1px solid #7c3aed;border-radius:10px;padding:40px;max-width:520px;width:100%;position:relative;max-height:85vh;overflow-y:auto;">
+      <button onclick="cerrarModalRisk()" style="position:absolute;top:16px;right:16px;background:none;border:none;color:#94a3b8;font-size:20px;cursor:pointer;">✕</button>
+
+      <p style="font-family:'Share Tech Mono',monospace;font-size:10px;color:#a855f7;letter-spacing:4px;margin-bottom:16px;">DESGLOSE</p>
+      <h3 style="color:#e2d9f3;font-size:1.2rem;margin-bottom:4px;">Risk Score</h3>
+      <div style="display:flex;align-items:baseline;gap:12px;margin-bottom:24px;">
+        <span id="modalRiskValor" style="font-family:'Share Tech Mono',monospace;font-size:2.5rem;color:#7c3aed;font-weight:800;">--</span>
+        <span style="color:#94a3b8;font-size:13px;">/100</span>
+        <span id="modalRiskNivel" style="font-family:'Share Tech Mono',monospace;font-size:11px;letter-spacing:3px;padding:4px 10px;border-radius:4px;background:#7c3aed22;color:#a855f7;">--</span>
+      </div>
+
+      <div id="modalRiskCargando" style="text-align:center;padding:32px;color:#94a3b8;font-size:13px;">
+        Cargando historial...
+      </div>
+
+      <div id="modalRiskHistorial" style="display:none;">
+        <p style="font-family:'Share Tech Mono',monospace;font-size:10px;color:#6b5a8a;letter-spacing:3px;margin-bottom:12px;">EVENTOS RECIENTES</p>
+        <div id="listaHistorial" style="display:flex;flex-direction:column;gap:8px;"></div>
+        <p id="sinHistorial" style="display:none;color:#94a3b8;font-size:13px;text-align:center;padding:24px;">
+          Sin eventos registrados aún.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    async function abrirModalRisk() {
+      const modal = document.getElementById('modalRisk');
+      modal.style.display = 'flex';
+      document.getElementById('modalRiskCargando').style.display = 'block';
+      document.getElementById('modalRiskHistorial').style.display = 'none';
+
+      try {
+        const res = await fetch('/api/risk/mi-historial', {
+          headers: { 'authorization': localStorage.getItem('token') }
+        });
+        const data = await res.json();
+
+        const colores = { normal: '#22c55e', monitoreo: '#eab308', alerta: '#f97316', critico: '#ef4444' };
+        const nivel = data.nivel || 'normal';
+
+        document.getElementById('modalRiskValor').textContent = data.score ?? 0;
+        document.getElementById('modalRiskNivel').textContent = nivel.toUpperCase();
+        document.getElementById('modalRiskNivel').style.color = colores[nivel] || '#a855f7';
+        document.getElementById('modalRiskNivel').style.background = (colores[nivel] || '#7c3aed') + '22';
+
+        document.getElementById('modalRiskCargando').style.display = 'none';
+        document.getElementById('modalRiskHistorial').style.display = 'block';
+
+        const lista = document.getElementById('listaHistorial');
+        const sinHistorial = document.getElementById('sinHistorial');
+        lista.innerHTML = '';
+
+        if (!data.historial || data.historial.length === 0) {
+          sinHistorial.style.display = 'block';
+        } else {
+          sinHistorial.style.display = 'none';
+          data.historial.forEach(h => {
+            const fecha = new Date(h.fecha).toLocaleString('es-CO', {
+              day: '2-digit', month: '2-digit', year: 'numeric',
+              hour: '2-digit', minute: '2-digit'
+            });
+            const esBaja = h.cambio < 0;
+            const colorCambio = esBaja ? '#22c55e' : '#ef4444';
+            const signo = esBaja ? '' : '+';
+            lista.innerHTML += `
+              <div style="display:flex;align-items:center;gap:12px;padding:12px;background:#1a0a2e;border:1px solid #7c3aed22;border-radius:6px;">
+                <span style="font-size:18px;flex-shrink:0;">${h.icono}</span>
+                <div style="flex:1;min-width:0;">
+                  <p style="color:#e2d9f3;font-size:13px;margin:0 0 4px;">${h.label}</p>
+                  <p style="color:#6b5a8a;font-size:11px;font-family:'Share Tech Mono',monospace;margin:0;">${fecha}</p>
+                </div>
+                <span style="font-family:'Share Tech Mono',monospace;font-size:14px;font-weight:800;color:${colorCambio};flex-shrink:0;">
+                  ${signo}${h.cambio}
+                </span>
+              </div>
+            `;
+          });
+        }
+      } catch(e) {
+        document.getElementById('modalRiskCargando').textContent = 'Error cargando historial.';
+      }
+    }
+
+    function cerrarModalRisk() {
+      document.getElementById('modalRisk').style.display = 'none';
+    }
+  </script>
 </body>
 </html>

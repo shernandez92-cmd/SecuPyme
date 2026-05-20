@@ -140,4 +140,52 @@ const bloquearEmpresa = async (req, res) => {
   }
 };
 
-module.exports = { actualizarRisk, obtenerRiskScores, obtenerRiskEmpresa, desbloquearEmpresa, bloquearEmpresa };
+
+const obtenerHistorialEmpresa = async (req, res) => {
+  try {
+    const userId = req.usuario.id;
+    const score = await RiskScore.findOne({ empresaId: userId });
+    if (!score) return res.json({ score: 0, nivel: 'normal', historial: [] });
+
+    const etiquetas = {
+      login_fallido:                      { label: 'Intento de login fallido',           icono: '🔐' },
+      login_exitoso:                      { label: 'Login exitoso',                      icono: '✅' },
+      nuevo_reporte_phishing:             { label: 'Reporte de phishing',                icono: '🎣' },
+      nuevo_reporte_malware:              { label: 'Reporte de malware',                 icono: '🦠' },
+      nuevo_reporte_acceso_no_autorizado: { label: 'Acceso no autorizado reportado',     icono: '🚨' },
+      nuevo_reporte_fuga_de_datos:        { label: 'Fuga de datos reportada',            icono: '💧' },
+      autoevaluacion_alto:                { label: 'Autoevaluacion - riesgo alto',        icono: '📋' },
+      autoevaluacion_medio:               { label: 'Autoevaluacion - riesgo medio',       icono: '📋' },
+      autoevaluacion_bajo:                { label: 'Autoevaluacion - riesgo bajo',        icono: '📋' },
+      shodan_puerto_critico:              { label: 'Puerto critico detectado (Shodan)',   icono: '🔍' },
+      virustotal_malicioso:               { label: 'Archivo malicioso detectado (VT)',    icono: '☣' },
+      cambio_rol:                         { label: 'Cambio de rol de usuario',            icono: '👤' },
+      bloqueo_automatico:                 { label: 'Bloqueo automatico del sistema',      icono: '🔒' }
+    };
+
+    const historialOrdenado = [...score.historial]
+      .sort((a, b) => new Date(b.fecha) - new Date(a.fecha))
+      .slice(0, 50)
+      .map(h => {
+        const meta = etiquetas[h.evento] || { label: h.evento, icono: '📌' };
+        return {
+          evento: h.evento,
+          label: meta.label,
+          icono: meta.icono,
+          cambio: h.cambio,
+          fecha: h.fecha
+        };
+      });
+
+    res.json({
+      score: score.score,
+      nivel: score.nivel,
+      bloqueado: score.bloqueado,
+      ultimaActualizacion: score.ultimaActualizacion,
+      historial: historialOrdenado
+    });
+  } catch (error) {
+    res.status(500).json({ mensaje: 'Error', error });
+  }
+};
+module.exports = { actualizarRisk, obtenerRiskScores, obtenerRiskEmpresa, desbloquearEmpresa, bloquearEmpresa, obtenerHistorialEmpresa };
