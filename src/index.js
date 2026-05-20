@@ -52,6 +52,9 @@ app.use("/api/upload", uploadRoutes);
 const auditRoutes = require("./routes/auditRoutes");
 app.use("/api/audit", auditRoutes);
 
+const { iniciarMonitoreo } = require("./jobs/monitoreoIPs");
+iniciarMonitoreo();
+
 app.use((req, res) => {
   const path = require('path');
   res.status(404).sendFile(path.resolve(__dirname, '../public/404.html'));

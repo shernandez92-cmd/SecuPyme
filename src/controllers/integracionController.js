@@ -1,11 +1,14 @@
 const { actualizarRisk } = require("./riskController");
 const { registrarEvento } = require("./siemController");
+const Usuario = require("../models/Usuario");
+
 const checkShodan = async (req, res) => {
   try {
     const { ip } = req.params;
     const response = await fetch(`https://api.shodan.io/shodan/host/${ip}?key=${process.env.SHODAN_KEY}`);
     const data = await response.json();
     if (data.error) return res.status(400).json({ mensaje: data.error });
+
     const resultado = {
       ip: data.ip_str,
       paises: data.country_name,
@@ -15,6 +18,11 @@ const checkShodan = async (req, res) => {
       ultimaActualizacion: data.last_update,
       vulnerabilidades: data.vulns || []
     };
+
+    // Guardar IP en el perfil del usuario para monitoreo automático
+    await Usuario.findByIdAndUpdate(req.usuario.id, {
+      $addToSet: { ipsMonitoreadas: ip }
+    });
 
     const puertosCriticos = [22, 23, 3389, 445, 139, 21, 3306, 5432];
     const puertosPeligrosos = (data.ports || []).filter(p => puertosCriticos.includes(p));
@@ -56,6 +64,7 @@ const checkVirusTotal = async (req, res) => {
     });
     const data = await response.json();
     if (data.error) return res.status(400).json({ mensaje: data.error.message });
+
     const stats = data.data.attributes.last_analysis_stats;
     const resultado = {
       nombre: data.data.attributes.meaningful_name || hash,

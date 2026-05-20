@@ -15,7 +15,8 @@ const usuarioSchema = new mongoose.Schema({
   }],
   fechaRegistro: { type: Date, default: Date.now },
   resetToken: { type: String, default: null },
-  resetTokenExpiry: { type: Date, default: null }
+  resetTokenExpiry: { type: Date, default: null },
+  ipsMonitoreadas: { type: [String], default: [] }
 });
 
 module.exports = mongoose.model('Usuario', usuarioSchema);
