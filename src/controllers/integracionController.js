@@ -1,3 +1,4 @@
+const logger = require('../utils/logger');
 const { actualizarRisk } = require("./riskController");
 const { registrarEvento } = require("./siemController");
 const Usuario = require("../models/Usuario");

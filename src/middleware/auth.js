@@ -1,3 +1,4 @@
+const logger = require('../utils/logger');
 const jwt = require('jsonwebtoken');
 const TokenBlacklist = require('../models/TokenBlacklist');
 
@@ -44,7 +45,7 @@ const revocarToken = async (token) => {
     }
   } catch (e) {
     // ignore duplicate key errors — el token ya estaba revocado
-    if (e.code !== 11000) console.error('revocarToken error:', e.message);
+    if (e.code !== 11000) logger.error('revocarToken error:', e.message);
   }
 };
 

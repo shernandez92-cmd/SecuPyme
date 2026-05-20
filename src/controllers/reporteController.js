@@ -1,3 +1,4 @@
+const logger = require('../utils/logger');
 const Reporte = require('../models/Reporte');
 const nodemailer = require('nodemailer');
 
@@ -51,15 +52,19 @@ await registrarEvento('nuevo_reporte', `Nuevo reporte de ${empresa}`, 'medium', 
 
 const obtenerReportes = async (req, res) => {
   try {
-    let reportes;
+    const page  = Math.max(1, parseInt(req.query.page)  || 1);
+    const limit = Math.min(100, parseInt(req.query.limit) || 20);
+    const skip  = (page - 1) * limit;
 
-    if (req.usuario.rol === 'admin') {
-      reportes = await Reporte.find().populate('usuario', 'nombre email empresa');
-    } else {
-      reportes = await Reporte.find({ usuario: req.usuario.id });
-    }
+    const filtro = req.usuario.rol === 'admin' ? {} : { usuario: req.usuario.id };
 
-    res.json(reportes);
+    const [reportes, total] = await Promise.all([
+      Reporte.find(filtro).populate('usuario', 'nombre email empresa')
+        .sort({ fecha: -1 }).skip(skip).limit(limit),
+      Reporte.countDocuments(filtro)
+    ]);
+
+    res.json({ reportes, total, page, pages: Math.ceil(total / limit) });
 
   } catch (error) {
     res.status(500).json({ mensaje: 'Error en el servidor', error });

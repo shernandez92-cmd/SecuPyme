@@ -1,12 +1,13 @@
+const logger = require('../utils/logger');
 const SecurityEvent = require('../models/SecurityEvent');
 const { actualizarRisk } = require('./riskController');
 
 const registrarEvento = async (type, description, severity, userId, ip) => {
   try {
     await new SecurityEvent({ type, description, severity, userId, ip, source: 'internal' }).save();
-    console.log(`[SIEM] ${severity.toUpperCase()} — ${type}: ${description}`);
+    logger.info(`[SIEM] ${severity.toUpperCase()} — ${type}: ${description}`);
   } catch (e) {
-    console.log('Error SIEM:', e.message);
+    logger.info('Error SIEM:', e.message);
   }
 };
 
@@ -62,11 +63,17 @@ const obtenerEventos = async (req, res) => {
     if (severidad) filtro.severity = severidad;
     if (userId) filtro.userId = userId;
 
-    const eventos = await SecurityEvent.find(filtro)
-      .populate('userId', 'nombre email empresa')
-      .sort({ timestamp: -1 })
-      .limit(200);
-    res.json(eventos);
+    const page  = Math.max(1, parseInt(req.query.page)  || 1);
+    const limit = Math.min(200, parseInt(req.query.limit) || 50);
+    const skip  = (page - 1) * limit;
+
+    const [eventos, total] = await Promise.all([
+      SecurityEvent.find(filtro).populate('userId', 'nombre email empresa')
+        .sort({ timestamp: -1 }).skip(skip).limit(limit),
+      SecurityEvent.countDocuments(filtro)
+    ]);
+
+    res.json({ eventos, total, page, pages: Math.ceil(total / limit) });
   } catch (error) {
     res.status(500).json({ mensaje: 'Error', error });
   }

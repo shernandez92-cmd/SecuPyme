@@ -1,3 +1,4 @@
+const logger = require('../utils/logger');
 const RiskScore = require('../models/RiskScore');
 const SecurityEvent = require('../models/SecurityEvent');
 
@@ -60,7 +61,7 @@ const actualizarRisk = async (empresaId, tipoEvento, io = null) => {
     if (io) io.emit('riskUpdate', { empresaId, score: riskDoc.score, nivel: riskDoc.nivel });
     return riskDoc;
   } catch (e) {
-    console.log('Error actualizando risk:', e.message);
+    logger.info('Error actualizando risk:', e.message);
   }
 };
 

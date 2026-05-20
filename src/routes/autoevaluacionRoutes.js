@@ -14,7 +14,7 @@ router.get('/preguntas',              verificarToken, obtenerPreguntas);
 router.get('/preguntas/todas',        verificarToken, verificarAdmin, obtenerTodasPreguntas);
 router.post('/preguntas',             verificarToken, verificarAdmin, crearPregunta);
 router.put('/preguntas/:id/toggle',   verificarToken, verificarAdmin, togglePregunta);
-router.post('/',                      verificarToken, crearAutoevaluacion);
+router.post('/',                      verificarToken, checkPlan('autoevaluaciones'), crearAutoevaluacion);
 router.get('/',                       verificarToken, obtenerAutoevaluaciones);
 
 module.exports = router;

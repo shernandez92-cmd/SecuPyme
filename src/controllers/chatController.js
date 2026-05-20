@@ -1,3 +1,4 @@
+const logger = require('../utils/logger');
 const ChatGeneral = require('../models/ChatGeneral');
 const Reporte = require('../models/Reporte');
 const Conversation = require('../models/Conversation');

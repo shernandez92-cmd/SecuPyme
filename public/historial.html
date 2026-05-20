@@ -72,12 +72,13 @@
     cargarSidebar('historial');
 
     async function cargarHistorial() {
-      const response = await apiFetch('/api/autoevaluaciones', {
+      const response = await apiFetch('/api/autoevaluaciones?limit=100', {
         headers: { 'authorization': token }
       });
-      const evaluaciones = await response.json();
+      const data = await response.json();
+      const evaluaciones = data.autoevaluaciones || data;
 
-      document.getElementById('totalEvaluaciones').textContent = evaluaciones.length;
+      document.getElementById('totalEvaluaciones').textContent = data.total ?? evaluaciones.length;
 
       if (evaluaciones.length > 0) {
         const mejorPuntaje = Math.max(...evaluaciones.map(e => e.puntaje));

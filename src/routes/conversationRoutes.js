@@ -1,3 +1,4 @@
+const logger = require('../utils/logger');
 const express = require('express');
 const router = express.Router();
 const Conversation = require('../models/Conversation');
@@ -68,7 +69,7 @@ router.get('/actual', verificarToken, async (req, res) => {
             }
           }
         } catch (createError) {
-          console.log('Error al crear conversación:', createError.message);
+          logger.error('Error al crear conversación:', createError.message);
           // Retornar null si falla (fallback frontend)
           return res.json({ _id: null });
         }
@@ -85,7 +86,7 @@ router.get('/actual', verificarToken, async (req, res) => {
     } : { _id: null });
     
   } catch (error) {
-    console.log('Error en /actual:', error.message);
+    logger.error('Error en /actual:', error.message);
     // Fallback: retornar null para que frontend siga en modo legacy
     res.json({ _id: null });
   }

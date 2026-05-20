@@ -231,7 +231,8 @@
       let urlGrafica = "/api/siem/events";
       if (empresa) urlGrafica += `?userId=${empresa}`;
       const evResponse = await apiFetch(urlGrafica, { headers: { "authorization": token } });
-      const eventos = await evResponse.json();
+      const evData = await evResponse.json();
+      const eventos = evData.eventos || evData;
 
       const ctx = document.getElementById("graficaSeveridad").getContext("2d");
       const conteos = [
@@ -281,9 +282,10 @@
       if (params.length) url += '?' + params.join('&');
 
       const response = await apiFetch(url, { headers: { 'authorization': token } });
-      const eventos = await response.json();
+      const resData = await response.json();
+      const eventos = resData.eventos || resData;
 
-      document.getElementById('conteoEventos').textContent = `(${eventos.length} eventos)`;
+      document.getElementById('conteoEventos').textContent = `(${resData.total ?? eventos.length} eventos)`;
       const altosNuevos = eventos.filter(e => e.severity === 'high');
       if (altosNuevos.length > 0 && typeof Notificaciones !== 'undefined') {
         const previo = parseInt(sessionStorage.getItem('siem_altos') || '0');

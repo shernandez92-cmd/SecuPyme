@@ -1,3 +1,4 @@
+const logger = require('./utils/logger');
 const express = require('express');
 const mongoose = require('mongoose');
 const http = require('http');
@@ -15,11 +16,17 @@ const io = new Server(server, {
 
 app.use(helmet({ contentSecurityPolicy: false }));
 app.use(express.static('public'));
+app.use(require('./middleware/httpLogger'));
 app.use(express.json());
 
 const limiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 500 });
 const loginLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 5, message: { mensaje: 'Demasiados intentos' } });
 app.use(limiter);
+
+app.get('/api/health', (req, res) => {
+  res.json({ status: 'ok', timestamp: new Date().toISOString() });
+});
+
 app.use('/api/auth/login', loginLimiter);
 
 const authRoutes = require('./routes/authRoutes');
@@ -66,7 +73,7 @@ app.use((req, res) => {
 const usuariosConectados = {};
 
 io.on('connection', (socket) => {
-  console.log('Usuario conectado:', socket.id);
+  logger.info('Usuario conectado:', socket.id);
 
   socket.on('identificar', async (data) => {
     usuariosConectados[socket.id] = data;
@@ -93,7 +100,7 @@ io.on('connection', (socket) => {
                 { ultimaActividad: new Date() },
                 { upsert: true, new: true }
               );
-              console.log("Conversacion creada para empresa:", empresaId);
+              logger.info("Conversacion creada para empresa:", empresaId);
               const adminSockets = Object.entries(usuariosConectados)
                 .filter(([, u]) => u.userId === admin._id.toString())
                 .map(([socketId]) => socketId);
@@ -102,7 +109,7 @@ io.on('connection', (socket) => {
                 if (s) s.join("conv:" + conversation._id);
               });
             } catch (e) {
-              if (e.code !== 11000) console.log("Error creando conversacion:", e.message);
+              if (e.code !== 11000) logger.info("Error creando conversacion:", e.message);
               conversation = await Conversation.findOne({ empresaId });
             }
           }
@@ -112,7 +119,7 @@ io.on('connection', (socket) => {
         }
       }
     } catch (e) {
-      console.log('Error al unir a rooms de conversación:', e.message);
+      logger.info('Error al unir a rooms de conversación:', e.message);
     }
     
     io.emit('usuariosOnline', Object.values(usuariosConectados).length);
@@ -141,7 +148,7 @@ io.on('connection', (socket) => {
         io.emit('nuevoMensaje', populado);
       }
     } catch (e) {
-      console.log('Error socket mensaje:', e.message);
+      logger.info('Error socket mensaje:', e.message);
     }
   });
 
@@ -175,21 +182,21 @@ const seedPreguntas = async () => {
   ];
 
   await Pregunta.insertMany(preguntas);
-  console.log('Preguntas de autoevaluación inicializadas (' + preguntas.length + ')');
+  logger.info('Preguntas de autoevaluación inicializadas (' + preguntas.length + ')');
 };
 
 mongoose.connect(process.env.MONGODB_URI)
   .then(() => {
-    console.log('Conectado a MongoDB');
+    logger.info('Conectado a MongoDB');
     // El índice TTL de TokenBlacklist limpia tokens expirados automáticamente
     require('./models/TokenBlacklist');
-    console.log('TokenBlacklist TTL index activo');
+    logger.info('TokenBlacklist TTL index activo');
     seedPreguntas();
     server.listen(process.env.PORT || 3000, () => {
-      console.log(`Servidor corriendo en puerto ${process.env.PORT || 3000}`);
+      logger.info(`Servidor corriendo en puerto ${process.env.PORT || 3000}`);
     });
   })
   .catch((error) => {
-    console.log('Error de conexión:', error);
+    logger.info('Error de conexión:', error);
   });
 module.exports = app;

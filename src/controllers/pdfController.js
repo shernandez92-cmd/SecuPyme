@@ -1,4 +1,5 @@
 
+const logger = require('../utils/logger');
 const PDFDocument = require('pdfkit');
 const Reporte = require('../models/Reporte');
 
@@ -124,7 +125,7 @@ const exportarReporteIndividual = async (req, res) => {
 
     doc.end();
   } catch (error) {
-    console.error('Error en exportarReporteIndividual:', error);
+    logger.error('Error en exportarReporteIndividual:', error);
     if (!res.headersSent) {
       res.status(500).json({ mensaje: 'Error generando PDF', error: error.message });
     }
@@ -204,7 +205,7 @@ const exportarReportes = async (req, res) => {
 
     doc.end();
   } catch (error) {
-    console.error('Error en exportarReportes:', error);
+    logger.error('Error en exportarReportes:', error);
     if (!res.headersSent) {
       res.status(500).json({ mensaje: 'Error generando PDF', error: error.message });
     }

@@ -9,12 +9,11 @@ const Usuario = require('../models/Usuario');
 
 router.post('/apikey', verificarToken, async (req, res) => {
   try {
-    const usuario = await Usuario.findByIdAndUpdate(
-      req.usuario.id,
-      { apiKey: crypto.randomUUID() },
-      { new: true }
-    );
-    res.json({ apiKey: usuario.apiKey });
+    const rawKey = crypto.randomUUID();
+    const hashedKey = crypto.createHash('sha256').update(rawKey).digest('hex');
+    await Usuario.findByIdAndUpdate(req.usuario.id, { apiKey: hashedKey });
+    // Retornar solo una vez — no se puede recuperar después
+    res.json({ apiKey: rawKey, nota: 'Guarda esta clave, no se mostrará de nuevo.' });
   } catch (e) {
     res.status(500).json({ mensaje: 'Error', e });
   }

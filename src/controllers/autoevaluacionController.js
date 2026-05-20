@@ -1,3 +1,4 @@
+const logger = require('../utils/logger');
 const Autoevaluacion = require('../models/Autoevaluacion');
 const Pregunta       = require('../models/Pregunta');
 const Usuario        = require('../models/Usuario');
@@ -135,13 +136,19 @@ const crearAutoevaluacion = async (req, res) => {
 // ─── GET historial ────────────────────────────────────────────────────────────
 const obtenerAutoevaluaciones = async (req, res) => {
   try {
-    let autoevaluaciones;
-    if (req.usuario.rol === 'admin') {
-      autoevaluaciones = await Autoevaluacion.find().populate('usuario', 'nombre email empresa');
-    } else {
-      autoevaluaciones = await Autoevaluacion.find({ usuario: req.usuario.id });
-    }
-    res.json(autoevaluaciones);
+    const page  = Math.max(1, parseInt(req.query.page)  || 1);
+    const limit = Math.min(100, parseInt(req.query.limit) || 20);
+    const skip  = (page - 1) * limit;
+
+    const filtro = req.usuario.rol === 'admin' ? {} : { usuario: req.usuario.id };
+
+    const [autoevaluaciones, total] = await Promise.all([
+      Autoevaluacion.find(filtro).populate('usuario', 'nombre email empresa')
+        .sort({ fecha: -1 }).skip(skip).limit(limit),
+      Autoevaluacion.countDocuments(filtro)
+    ]);
+
+    res.json({ autoevaluaciones, total, page, pages: Math.ceil(total / limit) });
   } catch (error) {
     res.status(500).json({ mensaje: 'Error en el servidor', error });
   }

@@ -1,3 +1,4 @@
+const logger = require('../utils/logger');
 const cron = require('node-cron');
 const fetch = require('node-fetch');
 const nodemailer = require('nodemailer');
@@ -40,7 +41,7 @@ const notificarPorCorreo = async (email, nombre, ip, hallazgos) => {
       `
     });
   } catch (e) {
-    console.log('[MONITOREO] Error enviando correo:', e.message);
+    logger.info('[MONITOREO] Error enviando correo:', e.message);
   }
 };
 
@@ -58,7 +59,7 @@ const consultarIPShodan = async (ip) => {
       os: data.os || ''
     };
   } catch (e) {
-    console.log(`[MONITOREO] Error consultando Shodan para ${ip}:`, e.message);
+    logger.info(`[MONITOREO] Error consultando Shodan para ${ip}:`, e.message);
     return null;
   }
 };
@@ -66,7 +67,7 @@ const consultarIPShodan = async (ip) => {
 const puertosCriticos = [22, 23, 3389, 445, 139, 21, 3306, 5432];
 
 const ejecutarMonitoreo = async () => {
-  console.log('[MONITOREO] Iniciando ciclo de monitoreo de IPs...');
+  logger.info('[MONITOREO] Iniciando ciclo de monitoreo de IPs...');
 
   try {
     // Traer solo usuarios con IPs monitoreadas
@@ -75,13 +76,13 @@ const ejecutarMonitoreo = async () => {
     }).select('nombre email empresa ipsMonitoreadas');
 
     if (usuarios.length === 0) {
-      console.log('[MONITOREO] No hay IPs registradas para monitorear.');
+      logger.info('[MONITOREO] No hay IPs registradas para monitorear.');
       return;
     }
 
     for (const usuario of usuarios) {
       for (const ip of usuario.ipsMonitoreadas) {
-        console.log(`[MONITOREO] Consultando ${ip} para ${usuario.empresa}...`);
+        logger.info(`[MONITOREO] Consultando ${ip} para ${usuario.empresa}...`);
 
         const resultado = await consultarIPShodan(ip);
         if (!resultado) continue;
@@ -118,9 +119,9 @@ const ejecutarMonitoreo = async () => {
         // Enviar correo solo si hay algo que reportar
         if (hallazgos.length > 0) {
           await notificarPorCorreo(usuario.email, usuario.nombre, ip, hallazgos);
-          console.log(`[MONITOREO] Alerta enviada a ${usuario.email} por IP ${ip}`);
+          logger.info(`[MONITOREO] Alerta enviada a ${usuario.email} por IP ${ip}`);
         } else {
-          console.log(`[MONITOREO] IP ${ip} sin novedades para ${usuario.empresa}`);
+          logger.info(`[MONITOREO] IP ${ip} sin novedades para ${usuario.empresa}`);
         }
 
         // Pausa entre consultas para no saturar la API de Shodan
@@ -128,9 +129,9 @@ const ejecutarMonitoreo = async () => {
       }
     }
 
-    console.log('[MONITOREO] Ciclo completado.');
+    logger.info('[MONITOREO] Ciclo completado.');
   } catch (e) {
-    console.log('[MONITOREO] Error en ciclo:', e.message);
+    logger.info('[MONITOREO] Error en ciclo:', e.message);
   }
 };
 
@@ -139,7 +140,7 @@ const iniciarMonitoreo = () => {
   cron.schedule('0 3 * * *', ejecutarMonitoreo, {
     timezone: 'America/Bogota'
   });
-  console.log('[MONITOREO] Cron de monitoreo de IPs activo — corre diariamente a las 3:00 AM (Bogotá)');
+  logger.info('[MONITOREO] Cron de monitoreo de IPs activo — corre diariamente a las 3:00 AM (Bogotá)');
 };
 
 module.exports = { iniciarMonitoreo, ejecutarMonitoreo };

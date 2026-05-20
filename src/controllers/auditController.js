@@ -1,3 +1,4 @@
+const logger = require('../utils/logger');
 const AuditLog = require('../models/AuditLog');
 const { registrarEvento } = require('./siemController');
 
@@ -16,7 +17,7 @@ const registrarAudit = async ({ adminId, adminNombre, accion, targetUserId, targ
       'panel-admin'
     );
   } catch (e) {
-    console.error('registrarAudit error:', e.message);
+    logger.error('registrarAudit error:', e.message);
   }
 };
 

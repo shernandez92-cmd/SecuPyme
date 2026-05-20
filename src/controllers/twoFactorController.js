@@ -1,3 +1,4 @@
+const logger = require('../utils/logger');
 const speakeasy = require('speakeasy');
 const qrcode = require('qrcode');
 const Usuario = require('../models/Usuario');

@@ -1,3 +1,4 @@
+const logger = require('../utils/logger');
 const { registrarEvento } = require('./siemController');
 const Usuario = require('../models/Usuario');
 const bcrypt = require('bcryptjs');
@@ -135,7 +136,7 @@ const forgotPassword = async (req, res) => {
     await registrarEvento('password_reset_solicitado', `Reset solicitado para ${email}`, 'medium', usuario._id, req.ip);
     res.json(respuestaGenerica);
   } catch (error) {
-    console.error('forgotPassword error:', error);
+    logger.error('forgotPassword error:', error);
     res.status(500).json({ mensaje: 'Error en el servidor', error });
   }
 };
@@ -164,7 +165,7 @@ const resetPassword = async (req, res) => {
     await registrarEvento('password_reset_exitoso', `Contraseña restablecida para ${usuario.email}`, 'medium', usuario._id, req.ip);
     res.json({ mensaje: 'Contraseña actualizada correctamente. Ya puedes iniciar sesión.' });
   } catch (error) {
-    console.error('resetPassword error:', error);
+    logger.error('resetPassword error:', error);
     res.status(500).json({ mensaje: 'Error en el servidor', error });
   }
 };

@@ -133,13 +133,14 @@
 
     async function cargarTodo() {
       try {
-        const response = await apiFetch('/api/reportes', { headers: { 'authorization': token } });
+        const response = await apiFetch('/api/reportes?limit=100', { headers: { 'authorization': token } });
         if (!response.ok) throw new Error('Error');
-        const reportes = await response.json();
+        const data = await response.json();
+        const reportes = data.reportes || data;
 
         document.getElementById('skeleton-stats').style.display = 'none';
         document.getElementById('contenido-stats').style.display = 'block';
-        document.getElementById('totalReportes').textContent = reportes.length;
+        document.getElementById('totalReportes').textContent = data.total ?? reportes.length;
         document.getElementById('reportesAbiertos').textContent = reportes.filter(r => r.estado === 'abierto').length;
         document.getElementById('reportesEnProceso').textContent = reportes.filter(r => r.estado === 'en proceso').length;
         document.getElementById('reportesResueltos').textContent = reportes.filter(r => r.estado === 'resuelto').length;
