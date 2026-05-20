@@ -1,46 +1,109 @@
 const Autoevaluacion = require('../models/Autoevaluacion');
-const Usuario = require('../models/Usuario');
-const nodemailer = require('nodemailer');
+const Pregunta       = require('../models/Pregunta');
+const Usuario        = require('../models/Usuario');
+const nodemailer     = require('nodemailer');
 
 const transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS }
 });
 
-const calcularPuntaje = (respuestas) => {
+// ─── Calcular puntaje dinámico según preguntas activas ───────────────────────
+const calcularPuntaje = (respuestas, preguntas) => {
   let puntaje = 0;
+  let puntajeMaximo = 0;
   const recomendaciones = [];
-  if (respuestas.contraseñasSeguras) puntaje += 3;
-  else recomendaciones.push('Implementar una política de contraseñas seguras en toda la empresa.');
-  if (respuestas.dobleAutenticacion) puntaje += 2;
-  else recomendaciones.push('Activar la verificación en dos pasos en todos los sistemas críticos.');
-  if (respuestas.equiposActualizados) puntaje += 2;
-  else recomendaciones.push('Mantener todos los equipos y sistemas operativos actualizados.');
-  if (respuestas.softwareLicenciado) puntaje += 1;
-  else recomendaciones.push('Usar únicamente software con licencias vigentes y legales.');
-  if (respuestas.copiasSeguridad) puntaje += 3;
-  else recomendaciones.push('Establecer copias de seguridad periódicas de toda la información crítica.');
-  if (respuestas.copiasEnLugarSeguro) puntaje += 2;
-  else recomendaciones.push('Almacenar las copias de seguridad en un lugar externo o en la nube.');
-  if (respuestas.capacitacionEmpleados) puntaje += 1;
-  else recomendaciones.push('Capacitar a todos los empleados en buenas prácticas de seguridad.');
-  if (respuestas.identificaPhishing) puntaje += 1;
-  else recomendaciones.push('Enseñar a los empleados a reconocer correos falsos que roban información.');
-  if (respuestas.firewallActivo) puntaje += 3;
-  else recomendaciones.push('Instalar y activar un programa que proteja la red de accesos no autorizados.');
-  if (respuestas.redProtegida) puntaje += 2;
-  else recomendaciones.push('Proteger la red WiFi con contraseña segura y acceso restringido.');
+
+  preguntas.forEach(p => {
+    puntajeMaximo += p.peso;
+    if (respuestas[p.campo] === true) {
+      puntaje += p.peso;
+    } else {
+      recomendaciones.push(p.recomendacion || `Mejorar: ${p.texto}`);
+    }
+  });
+
+  // Normalizar a escala 0-20 para mantener compatibilidad con historial
+  const puntajeNormalizado = puntajeMaximo > 0
+    ? Math.round((puntaje / puntajeMaximo) * 20)
+    : 0;
+
   let nivelRiesgo;
-  if (puntaje >= 16) nivelRiesgo = 'bajo';
-  else if (puntaje >= 10) nivelRiesgo = 'medio';
-  else nivelRiesgo = 'alto';
-  return { puntaje, nivelRiesgo, recomendaciones };
+  if (puntajeNormalizado >= 16)     nivelRiesgo = 'bajo';
+  else if (puntajeNormalizado >= 10) nivelRiesgo = 'medio';
+  else                               nivelRiesgo = 'alto';
+
+  return { puntaje: puntajeNormalizado, puntajeRaw: puntaje, puntajeMaximo, nivelRiesgo, recomendaciones };
 };
 
+// ─── GET preguntas activas (para el formulario) ───────────────────────────────
+const obtenerPreguntas = async (req, res) => {
+  try {
+    const preguntas = await Pregunta.find({ activa: true }).sort({ orden: 1, fechaCreacion: 1 });
+    res.json(preguntas);
+  } catch (error) {
+    res.status(500).json({ mensaje: 'Error obteniendo preguntas', error });
+  }
+};
+
+// ─── GET todas las preguntas (admin) ─────────────────────────────────────────
+const obtenerTodasPreguntas = async (req, res) => {
+  try {
+    const preguntas = await Pregunta.find().sort({ orden: 1, fechaCreacion: 1 });
+    res.json(preguntas);
+  } catch (error) {
+    res.status(500).json({ mensaje: 'Error', error });
+  }
+};
+
+// ─── POST pregunta nueva (admin) ──────────────────────────────────────────────
+const crearPregunta = async (req, res) => {
+  try {
+    const { texto, campo, categoria, peso, recomendacion, orden } = req.body;
+    if (!texto || !campo || !peso) {
+      return res.status(400).json({ mensaje: 'texto, campo y peso son requeridos' });
+    }
+    const existe = await Pregunta.findOne({ campo });
+    if (existe) return res.status(400).json({ mensaje: `El campo '${campo}' ya existe` });
+
+    const pregunta = await Pregunta.create({ texto, campo, categoria, peso, recomendacion, orden: orden || 0 });
+    res.status(201).json({ mensaje: 'Pregunta creada', pregunta });
+  } catch (error) {
+    res.status(500).json({ mensaje: 'Error', error });
+  }
+};
+
+// ─── PUT activar/desactivar pregunta (admin) ─────────────────────────────────
+const togglePregunta = async (req, res) => {
+  try {
+    const pregunta = await Pregunta.findById(req.params.id);
+    if (!pregunta) return res.status(404).json({ mensaje: 'Pregunta no encontrada' });
+    pregunta.activa = !pregunta.activa;
+    await pregunta.save();
+    res.json({ mensaje: `Pregunta ${pregunta.activa ? 'activada' : 'desactivada'}`, pregunta });
+  } catch (error) {
+    res.status(500).json({ mensaje: 'Error', error });
+  }
+};
+
+// ─── POST autoevaluación ──────────────────────────────────────────────────────
 const crearAutoevaluacion = async (req, res) => {
   try {
     const { respuestas } = req.body;
-    const { puntaje, nivelRiesgo, recomendaciones } = calcularPuntaje(respuestas);
+    const preguntas = await Pregunta.find({ activa: true }).sort({ orden: 1, fechaCreacion: 1 });
+
+    if (preguntas.length === 0) {
+      return res.status(400).json({ mensaje: 'No hay preguntas activas configuradas' });
+    }
+
+    const totalPreguntas = preguntas.length;
+    const respondidas = preguntas.filter(p => respuestas[p.campo] !== undefined).length;
+    if (respondidas < totalPreguntas) {
+      return res.status(400).json({ mensaje: `Por favor responde todas las preguntas (${respondidas}/${totalPreguntas})` });
+    }
+
+    const { puntaje, nivelRiesgo, recomendaciones } = calcularPuntaje(respuestas, preguntas);
+
     const autoevaluacion = new Autoevaluacion({
       usuario: req.usuario.id,
       respuestas,
@@ -49,8 +112,9 @@ const crearAutoevaluacion = async (req, res) => {
       recomendaciones
     });
     await autoevaluacion.save();
-      const { actualizarRisk } = require("./riskController");
-      await actualizarRisk(req.usuario.id, "autoevaluacion_" + nivelRiesgo);
+
+    const { actualizarRisk } = require('./riskController');
+    await actualizarRisk(req.usuario.id, `autoevaluacion_${nivelRiesgo}`);
 
     if (nivelRiesgo === 'alto') {
       const usuario = await Usuario.findById(req.usuario.id);
@@ -68,6 +132,7 @@ const crearAutoevaluacion = async (req, res) => {
   }
 };
 
+// ─── GET historial ────────────────────────────────────────────────────────────
 const obtenerAutoevaluaciones = async (req, res) => {
   try {
     let autoevaluaciones;
@@ -82,4 +147,11 @@ const obtenerAutoevaluaciones = async (req, res) => {
   }
 };
 
-module.exports = { crearAutoevaluacion, obtenerAutoevaluaciones };
+module.exports = {
+  obtenerPreguntas,
+  obtenerTodasPreguntas,
+  crearPregunta,
+  togglePregunta,
+  crearAutoevaluacion,
+  obtenerAutoevaluaciones
+};

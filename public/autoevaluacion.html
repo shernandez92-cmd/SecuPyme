@@ -18,13 +18,14 @@
 
       <div class="form-card">
         <h3>CUESTIONARIO</h3>
+        <div id="preguntasSkeleton">
+          <div class="skeleton skeleton-row" style="height:60px;margin-bottom:12px;border-radius:4px;"></div>
+          <div class="skeleton skeleton-row" style="height:60px;margin-bottom:12px;border-radius:4px;"></div>
+          <div class="skeleton skeleton-row" style="height:60px;margin-bottom:12px;border-radius:4px;"></div>
+        </div>
+        <div id="preguntasContainer" style="display:none;"></div>
 
-        <div class="pregunta-item">
-          <p>¿Su empresa usa contraseñas seguras en todos los sistemas?</p>
-          <div class="toggle-group">
-            <button class="toggle-btn" onclick="seleccionar(this, 'contraseñasSeguras', true)">SÍ</button>
-            <button class="toggle-btn" onclick="seleccionar(this, 'contraseñasSeguras', false)">NO</button>
-          </div>
+                </div>
         </div>
         <div class="pregunta-item">
           <p>¿Al iniciar sesión piden una segunda confirmación como un código al celular?</p>
@@ -110,8 +111,40 @@
 
     function inicializarChat() {}
     cargarSidebar('autoevaluacion');
+    cargarPreguntas();
 
     var respuestas = {};
+    var totalPreguntas = 0;
+
+    async function cargarPreguntas() {
+      try {
+        const res = await fetch('/api/autoevaluaciones/preguntas', {
+          headers: { 'authorization': token }
+        });
+        const preguntas = await res.json();
+        totalPreguntas = preguntas.length;
+
+        const container = document.getElementById('preguntasContainer');
+        container.innerHTML = '';
+
+        preguntas.forEach(p => {
+          container.innerHTML += `
+            <div class="pregunta-item" data-campo="${p.campo}">
+              <p>${p.texto}</p>
+              <div class="toggle-group">
+                <button class="toggle-btn" onclick="seleccionar(this, '${p.campo}', true)">SÍ</button>
+                <button class="toggle-btn" onclick="seleccionar(this, '${p.campo}', false)">NO</button>
+              </div>
+            </div>
+          `;
+        });
+
+        document.getElementById('preguntasSkeleton').style.display = 'none';
+        container.style.display = 'block';
+      } catch (e) {
+        mostrarToast('Error cargando preguntas', 'error');
+      }
+    }
 
     function seleccionar(btn, campo, valor) {
       const grupo = btn.parentElement;
@@ -123,8 +156,8 @@
     }
 
     async function enviarEvaluacion() {
-      if (Object.keys(respuestas).length < 10) {
-        mostrarToast('Por favor responde todas las preguntas', 'warning');
+      if (Object.keys(respuestas).length < totalPreguntas) {
+        mostrarToast(`Por favor responde todas las preguntas (${Object.keys(respuestas).length}/${totalPreguntas})`, 'warning');
         return;
       }
 

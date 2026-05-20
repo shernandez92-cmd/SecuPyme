@@ -38,6 +38,71 @@
         </table>
       </div>
     
+
+      <!-- ═══ PANEL PREGUNTAS AUTOEVALUACIÓN ═══ -->
+      <div class="form-card" style="margin-top:32px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
+          <h3>PREGUNTAS DE AUTOEVALUACIÓN</h3>
+          <button onclick="document.getElementById('formNuevaPregunta').style.display = document.getElementById('formNuevaPregunta').style.display === 'none' ? 'block' : 'none'"
+            style="background:#7c3aed;border:none;color:#fff;font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:2px;padding:8px 16px;cursor:pointer;border-radius:4px;">
+            + NUEVA PREGUNTA
+          </button>
+        </div>
+
+        <!-- Formulario nueva pregunta -->
+        <div id="formNuevaPregunta" style="display:none;background:#1a0a2e;border:1px solid #7c3aed33;border-radius:6px;padding:20px;margin-bottom:20px;">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+            <div style="grid-column:1/-1;">
+              <label style="font-size:10px;color:#94a3b8;letter-spacing:1px;">TEXTO DE LA PREGUNTA</label>
+              <input id="npTexto" type="text" placeholder="¿Su empresa...?" style="width:100%;background:#0d0618;border:1px solid #7c3aed44;color:#e2d9f3;font-family:'Share Tech Mono',monospace;font-size:12px;padding:8px;border-radius:4px;margin-top:4px;" />
+            </div>
+            <div>
+              <label style="font-size:10px;color:#94a3b8;letter-spacing:1px;">CAMPO (clave única)</label>
+              <input id="npCampo" type="text" placeholder="miCampoNuevo" style="width:100%;background:#0d0618;border:1px solid #7c3aed44;color:#e2d9f3;font-family:'Share Tech Mono',monospace;font-size:12px;padding:8px;border-radius:4px;margin-top:4px;" />
+            </div>
+            <div>
+              <label style="font-size:10px;color:#94a3b8;letter-spacing:1px;">CATEGORÍA</label>
+              <select id="npCategoria" style="width:100%;background:#0d0618;border:1px solid #7c3aed44;color:#e2d9f3;font-family:'Share Tech Mono',monospace;font-size:12px;padding:8px;border-radius:4px;margin-top:4px;">
+                <option value="general">General</option>
+                <option value="acceso">Acceso</option>
+                <option value="datos">Datos</option>
+                <option value="red">Red</option>
+                <option value="sistemas">Sistemas</option>
+                <option value="personas">Personas</option>
+                <option value="normativa">Normativa</option>
+              </select>
+            </div>
+            <div>
+              <label style="font-size:10px;color:#94a3b8;letter-spacing:1px;">PESO (puntos)</label>
+              <input id="npPeso" type="number" min="1" max="10" value="2" style="width:100%;background:#0d0618;border:1px solid #7c3aed44;color:#e2d9f3;font-family:'Share Tech Mono',monospace;font-size:12px;padding:8px;border-radius:4px;margin-top:4px;" />
+            </div>
+            <div style="grid-column:1/-1;">
+              <label style="font-size:10px;color:#94a3b8;letter-spacing:1px;">RECOMENDACIÓN SI RESPONDE NO</label>
+              <input id="npRecomendacion" type="text" placeholder="Implementar..." style="width:100%;background:#0d0618;border:1px solid #7c3aed44;color:#e2d9f3;font-family:'Share Tech Mono',monospace;font-size:12px;padding:8px;border-radius:4px;margin-top:4px;" />
+            </div>
+          </div>
+          <button onclick="crearPregunta()" style="background:#7c3aed;border:none;color:#fff;font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:2px;padding:10px 20px;cursor:pointer;border-radius:4px;">
+            GUARDAR PREGUNTA
+          </button>
+        </div>
+
+        <table class="tabla-reportes">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>PREGUNTA</th>
+              <th>CATEGORÍA</th>
+              <th>PESO</th>
+              <th>ESTADO</th>
+              <th>ACCIÓN</th>
+            </tr>
+          </thead>
+          <tbody id="tablaPreguntas">
+            <tr><td colspan="6" style="text-align:center;color:#6b5a8a;padding:24px;">Cargando...</td></tr>
+          </tbody>
+        </table>
+      </div>
+
       <!-- ═══ PANEL AUDITORÍA ═══ -->
       <div class="form-card" style="margin-top:32px;">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
@@ -132,6 +197,7 @@
       });
       cargarUsuarios();
     cargarAudit();
+    cargarPreguntas();
     }
 
     async function cambiarRol(userId, rol) {
@@ -142,6 +208,7 @@
       });
       cargarUsuarios();
     cargarAudit();
+    cargarPreguntas();
     }
 
     async function eliminarUsuario(userId, rol, nombre) {
@@ -157,6 +224,7 @@
       if (res.ok) {
         cargarUsuarios();
     cargarAudit();
+    cargarPreguntas();
       } else {
         const data = await res.json();
         alert(data.mensaje || 'Error al eliminar usuario');
@@ -165,6 +233,7 @@
 
     cargarUsuarios();
     cargarAudit();
+    cargarPreguntas();
   </script>
   
   <script src="/inactividad.js">
@@ -219,6 +288,75 @@
       } catch (e) {
         console.error('Error cargando audit:', e);
       }
+    }
+
+  
+    async function cargarPreguntas() {
+      try {
+        const res = await fetch('/api/autoevaluaciones/preguntas/todas', { headers: { 'authorization': token } });
+        const preguntas = await res.json();
+        const tbody = document.getElementById('tablaPreguntas');
+        tbody.innerHTML = '';
+        preguntas.forEach((p, i) => {
+          tbody.innerHTML += `
+            <tr>
+              <td style="color:#6b5a8a;font-size:11px;">${i + 1}</td>
+              <td style="font-size:12px;max-width:300px;">${p.texto}</td>
+              <td><span style="background:#7c3aed22;color:#a855f7;border:1px solid #7c3aed44;padding:2px 8px;border-radius:3px;font-size:10px;">${p.categoria}</span></td>
+              <td style="text-align:center;color:#7c3aed;font-weight:bold;">${p.peso}</td>
+              <td><span style="color:${p.activa ? '#4ade80' : '#ef4444'};font-size:11px;">${p.activa ? '● ACTIVA' : '○ INACTIVA'}</span></td>
+              <td>
+                <button onclick="togglePregunta('${p._id}', ${p.activa})"
+                  style="background:${p.activa ? '#ef444422' : '#4ade8022'};border:1px solid ${p.activa ? '#ef4444' : '#4ade80'};color:${p.activa ? '#ef4444' : '#4ade80'};font-family:'Share Tech Mono',monospace;font-size:9px;padding:4px 10px;cursor:pointer;border-radius:3px;">
+                  ${p.activa ? 'DESACTIVAR' : 'ACTIVAR'}
+                </button>
+              </td>
+            </tr>
+          `;
+        });
+      } catch (e) { console.error('Error cargando preguntas:', e); }
+    }
+
+    async function togglePregunta(id, activa) {
+      const accion = activa ? 'desactivar' : 'activar';
+      if (!confirm(`¿Seguro que deseas ${accion} esta pregunta?`)) return;
+      try {
+        const res = await fetch(`/api/autoevaluaciones/preguntas/${id}/toggle`, {
+          method: 'PUT',
+          headers: { 'authorization': token }
+        });
+        if (res.ok) { cargarPreguntas(); }
+        else { alert('Error al cambiar estado'); }
+      } catch (e) { alert('Error de conexión'); }
+    }
+
+    async function crearPregunta() {
+      const texto        = document.getElementById('npTexto').value.trim();
+      const campo        = document.getElementById('npCampo').value.trim();
+      const categoria    = document.getElementById('npCategoria').value;
+      const peso         = Number(document.getElementById('npPeso').value);
+      const recomendacion= document.getElementById('npRecomendacion').value.trim();
+
+      if (!texto || !campo || !peso) {
+        alert('Texto, campo y peso son requeridos');
+        return;
+      }
+
+      try {
+        const res = await fetch('/api/autoevaluaciones/preguntas', {
+          method: 'POST',
+          headers: { 'authorization': token, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ texto, campo, categoria, peso, recomendacion })
+        });
+        const data = await res.json();
+        if (res.ok) {
+          document.getElementById('formNuevaPregunta').style.display = 'none';
+          ['npTexto','npCampo','npRecomendacion'].forEach(id => document.getElementById(id).value = '');
+          cargarPreguntas();
+        } else {
+          alert(data.mensaje || 'Error al crear pregunta');
+        }
+      } catch (e) { alert('Error de conexión'); }
     }
 
   </script>

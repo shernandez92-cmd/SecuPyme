@@ -148,12 +148,38 @@ io.on('connection', (socket) => {
 
 app.set('io', io);
 
+
+// ─── Seed preguntas autoevaluación si la colección está vacía ────────────────
+const seedPreguntas = async () => {
+  const Pregunta = require('./models/Pregunta');
+  const count = await Pregunta.countDocuments();
+  if (count > 0) return;
+
+  const preguntas = [
+    { campo: 'contraseñasSeguras',    texto: '¿Su empresa usa contraseñas seguras en todos los sistemas?',                                    categoria: 'acceso',    peso: 3, orden: 1,  recomendacion: 'Implementar una política de contraseñas seguras en toda la empresa.' },
+    { campo: 'dobleAutenticacion',    texto: '¿Al iniciar sesión piden una segunda confirmación como un código al celular?',                   categoria: 'acceso',    peso: 2, orden: 2,  recomendacion: 'Activar la verificación en dos pasos en todos los sistemas críticos.' },
+    { campo: 'equiposActualizados',   texto: '¿Los equipos y sistemas de la empresa están actualizados?',                                      categoria: 'sistemas',  peso: 2, orden: 3,  recomendacion: 'Mantener todos los equipos y sistemas operativos actualizados.' },
+    { campo: 'softwareLicenciado',    texto: '¿Todo el software que usan tiene licencias vigentes y legales?',                                 categoria: 'sistemas',  peso: 1, orden: 4,  recomendacion: 'Usar únicamente software con licencias vigentes y legales.' },
+    { campo: 'copiasSeguridad',       texto: '¿Hacen copias de seguridad de la información importante regularmente?',                          categoria: 'datos',     peso: 3, orden: 5,  recomendacion: 'Establecer copias de seguridad periódicas de toda la información crítica.' },
+    { campo: 'copiasEnLugarSeguro',   texto: '¿Las copias de seguridad están guardadas en un lugar externo o en la nube?',                    categoria: 'datos',     peso: 2, orden: 6,  recomendacion: 'Almacenar las copias de seguridad en un lugar externo o en la nube.' },
+    { campo: 'capacitacionEmpleados', texto: '¿Los empleados han recibido capacitación en seguridad informática?',                             categoria: 'personas',  peso: 1, orden: 7,  recomendacion: 'Capacitar a todos los empleados en buenas prácticas de seguridad.' },
+    { campo: 'identificaPhishing',    texto: '¿Sus empleados saben reconocer correos falsos que intentan robar información?',                  categoria: 'personas',  peso: 1, orden: 8,  recomendacion: 'Enseñar a los empleados a reconocer correos falsos que roban información.' },
+    { campo: 'firewallActivo',        texto: '¿Tienen algún programa que proteja su red de accesos no autorizados?',                           categoria: 'red',       peso: 3, orden: 9,  recomendacion: 'Instalar y activar un firewall que proteja la red de accesos no autorizados.' },
+    { campo: 'redProtegida',          texto: '¿La red WiFi de la empresa tiene contraseña segura y acceso restringido?',                       categoria: 'red',       peso: 2, orden: 10, recomendacion: 'Proteger la red WiFi con contraseña segura y acceso restringido.' },
+    { campo: 'ley1581',               texto: '¿Su empresa cumple con la Ley 1581 de protección de datos personales (Habeas Data)?',            categoria: 'normativa', peso: 2, orden: 11, recomendacion: 'Implementar una política de tratamiento de datos personales conforme a la Ley 1581 de 2012.' }
+  ];
+
+  await Pregunta.insertMany(preguntas);
+  console.log('Preguntas de autoevaluación inicializadas (' + preguntas.length + ')');
+};
+
 mongoose.connect(process.env.MONGODB_URI)
   .then(() => {
     console.log('Conectado a MongoDB');
     // El índice TTL de TokenBlacklist limpia tokens expirados automáticamente
     require('./models/TokenBlacklist');
     console.log('TokenBlacklist TTL index activo');
+    seedPreguntas();
     server.listen(process.env.PORT || 3000, () => {
       console.log(`Servidor corriendo en puerto ${process.env.PORT || 3000}`);
     });
