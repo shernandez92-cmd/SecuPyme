@@ -6,14 +6,12 @@ const checkPlan = require('../middleware/checkPlan');
 const rateLimit = require('express-rate-limit');
 
 const iaLimiter = rateLimit({
-  windowMs: 60 * 1000, // 1 minuto
+  windowMs: 60 * 1000,
   max: 10,
-  keyGenerator: (req) => req.user?.id || req.ip,
   message: { error: 'Demasiadas solicitudes a IA. Espera un momento.' },
   standardHeaders: true,
   legacyHeaders: false,
 });
-
 
 router.post('/explicar', verificarToken, iaLimiter, checkPlan('ia'), explicarEvento);
 router.post('/analizar-risk', verificarToken, iaLimiter, checkPlan('ia'), analizarRisk);
