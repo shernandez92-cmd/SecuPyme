@@ -49,6 +49,8 @@ const iaRoutes = require("./routes/iaRoutes");
 app.use("/api/ia", iaRoutes);
 const uploadRoutes = require("./routes/uploadRoutes");
 app.use("/api/upload", uploadRoutes);
+const auditRoutes = require("./routes/auditRoutes");
+app.use("/api/audit", auditRoutes);
 
 app.use((req, res) => {
   const path = require('path');

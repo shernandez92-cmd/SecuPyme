@@ -88,14 +88,56 @@ const obtenerRiskEmpresa = async (req, res) => {
 const desbloquearEmpresa = async (req, res) => {
   try {
     const { empresaId } = req.params;
+    const { registrarAudit } = require('./auditController');
+
+    const target = await require('../models/Usuario').findById(empresaId).select('nombre email');
+
     await RiskScore.findOneAndUpdate(
       { empresaId },
       { bloqueado: false, bloqueoHasta: null, score: 50 }
     );
+
+    await registrarAudit({
+      adminId:     req.usuario.id,
+      adminNombre: req.usuario.nombre || req.usuario.id,
+      accion:      'desbloqueo_manual',
+      targetUserId: empresaId,
+      targetNombre: target ? target.nombre : empresaId,
+      detalle:     `Empresa desbloqueada manualmente. Score reseteado a 50.`
+    });
+
     res.json({ mensaje: 'Empresa desbloqueada' });
   } catch (error) {
     res.status(500).json({ mensaje: 'Error', error });
   }
 };
 
-module.exports = { actualizarRisk, obtenerRiskScores, obtenerRiskEmpresa, desbloquearEmpresa };
+const bloquearEmpresa = async (req, res) => {
+  try {
+    const { empresaId } = req.params;
+    const { registrarAudit } = require('./auditController');
+
+    const target = await require('../models/Usuario').findById(empresaId).select('nombre email');
+
+    await RiskScore.findOneAndUpdate(
+      { empresaId },
+      { bloqueado: true, bloqueoHasta: new Date(Date.now() + 24 * 60 * 60 * 1000) },
+      { upsert: true }
+    );
+
+    await registrarAudit({
+      adminId:     req.usuario.id,
+      adminNombre: req.usuario.nombre || req.usuario.id,
+      accion:      'bloqueo_manual',
+      targetUserId: empresaId,
+      targetNombre: target ? target.nombre : empresaId,
+      detalle:     `Empresa bloqueada manualmente por 24 horas.`
+    });
+
+    res.json({ mensaje: 'Empresa bloqueada' });
+  } catch (error) {
+    res.status(500).json({ mensaje: 'Error', error });
+  }
+};
+
+module.exports = { actualizarRisk, obtenerRiskScores, obtenerRiskEmpresa, desbloquearEmpresa, bloquearEmpresa };

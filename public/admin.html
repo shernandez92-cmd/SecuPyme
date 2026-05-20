@@ -37,6 +37,39 @@
         </tbody>
         </table>
       </div>
+    
+      <!-- ═══ PANEL AUDITORÍA ═══ -->
+      <div class="form-card" style="margin-top:32px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
+          <h3>LOGS DE AUDITORÍA</h3>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <select id="filtroAccion" onchange="cargarAudit()" style="background:#1a0a2e;border:1px solid #7c3aed44;color:#e2d9f3;font-family:'Share Tech Mono',monospace;font-size:11px;padding:6px 10px;border-radius:4px;">
+              <option value="">TODAS LAS ACCIONES</option>
+              <option value="cambio_plan">CAMBIO PLAN</option>
+              <option value="cambio_rol">CAMBIO ROL</option>
+              <option value="eliminar_usuario">ELIMINAR USUARIO</option>
+              <option value="bloqueo_manual">BLOQUEO MANUAL</option>
+              <option value="desbloqueo_manual">DESBLOQUEO MANUAL</option>
+            </select>
+          </div>
+        </div>
+        <table class="tabla-reportes">
+          <thead>
+            <tr>
+              <th>FECHA</th>
+              <th>ADMIN</th>
+              <th>ACCIÓN</th>
+              <th>OBJETIVO</th>
+              <th>DETALLE</th>
+            </tr>
+          </thead>
+          <tbody id="tablaAudit">
+            <tr><td colspan="5" style="text-align:center;color:#6b5a8a;padding:24px;">Cargando logs...</td></tr>
+          </tbody>
+        </table>
+        <div id="auditPaginacion" style="display:flex;gap:8px;justify-content:center;margin-top:16px;"></div>
+      </div>
+
     </main>
   </div>
 
@@ -98,6 +131,7 @@
         body: JSON.stringify({ plan })
       });
       cargarUsuarios();
+    cargarAudit();
     }
 
     async function cambiarRol(userId, rol) {
@@ -107,6 +141,7 @@
         body: JSON.stringify({ rol })
       });
       cargarUsuarios();
+    cargarAudit();
     }
 
     async function eliminarUsuario(userId, rol, nombre) {
@@ -121,6 +156,7 @@
       });
       if (res.ok) {
         cargarUsuarios();
+    cargarAudit();
       } else {
         const data = await res.json();
         alert(data.mensaje || 'Error al eliminar usuario');
@@ -128,8 +164,63 @@
     }
 
     cargarUsuarios();
+    cargarAudit();
   </script>
   
-  <script src="/inactividad.js"></script>
+  <script src="/inactividad.js">
+    const AUDIT_BADGE = {
+      cambio_plan:      { color: '#a855f7', bg: '#7c3aed22', label: 'PLAN' },
+      cambio_rol:       { color: '#f59e0b', bg: '#f59e0b22', label: 'ROL' },
+      eliminar_usuario: { color: '#ef4444', bg: '#ef444422', label: 'ELIMINAR' },
+      bloqueo_manual:   { color: '#ef4444', bg: '#ef444422', label: 'BLOQUEO' },
+      desbloqueo_manual:{ color: '#4ade80', bg: '#4ade8022', label: 'DESBLOQUEO' }
+    };
+
+    let auditPaginaActual = 1;
+
+    async function cargarAudit(page = 1) {
+      auditPaginaActual = page;
+      const accion = document.getElementById('filtroAccion').value;
+      const params = new URLSearchParams({ limit: 10, page });
+      if (accion) params.append('accion', accion);
+
+      try {
+        const res = await fetch(`/api/audit?${params}`, { headers: { 'authorization': token } });
+        const data = await res.json();
+        const tbody = document.getElementById('tablaAudit');
+        tbody.innerHTML = '';
+
+        if (!data.logs || data.logs.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:#6b5a8a;padding:24px;">Sin registros</td></tr>';
+          document.getElementById('auditPaginacion').innerHTML = '';
+          return;
+        }
+
+        data.logs.forEach(log => {
+          const badge = AUDIT_BADGE[log.accion] || { color: '#94a3b8', bg: '#94a3b822', label: log.accion };
+          const fecha = new Date(log.timestamp).toLocaleString('es-CO');
+          tbody.innerHTML += `
+            <tr>
+              <td style="font-size:11px;color:#6b5a8a;">${fecha}</td>
+              <td style="font-size:12px;">${log.adminNombre || '—'}</td>
+              <td><span style="background:${badge.bg};color:${badge.color};border:1px solid ${badge.color}44;padding:3px 8px;border-radius:3px;font-size:10px;letter-spacing:1px;">${badge.label}</span></td>
+              <td style="font-size:12px;">${log.targetNombre || '—'}</td>
+              <td style="font-size:11px;color:#94a3b8;">${log.detalle || '—'}</td>
+            </tr>
+          `;
+        });
+
+        // Paginación
+        const pag = document.getElementById('auditPaginacion');
+        pag.innerHTML = '';
+        for (let i = 1; i <= data.pages; i++) {
+          pag.innerHTML += `<button onclick="cargarAudit(${i})" style="background:${i === page ? '#7c3aed' : '#1a0a2e'};border:1px solid #7c3aed44;color:#e2d9f3;font-family:'Share Tech Mono',monospace;font-size:10px;padding:6px 12px;cursor:pointer;border-radius:3px;">${i}</button>`;
+        }
+      } catch (e) {
+        console.error('Error cargando audit:', e);
+      }
+    }
+
+  </script>
 </body>
 </html>
