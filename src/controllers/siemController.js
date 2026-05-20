@@ -1,11 +1,56 @@
 const SecurityEvent = require('../models/SecurityEvent');
+const { actualizarRisk } = require('./riskController');
 
 const registrarEvento = async (type, description, severity, userId, ip) => {
   try {
-    await new SecurityEvent({ type, description, severity, userId, ip }).save();
+    await new SecurityEvent({ type, description, severity, userId, ip, source: 'internal' }).save();
     console.log(`[SIEM] ${severity.toUpperCase()} — ${type}: ${description}`);
   } catch (e) {
     console.log('Error SIEM:', e.message);
+  }
+};
+
+const recibirEventoExterno = async (req, res) => {
+  try {
+    const { type, description, severity, ip, timestamp } = req.body;
+
+    if (!description || !severity) {
+      return res.status(400).json({ mensaje: 'description y severity son requeridos' });
+    }
+
+    const severidadesValidas = ['low', 'medium', 'high'];
+    if (!severidadesValidas.includes(severity)) {
+      return res.status(400).json({ mensaje: 'severity debe ser low, medium o high' });
+    }
+
+    const evento = await SecurityEvent.create({
+      type: 'external',
+      description,
+      severity,
+      userId: req.usuario.id,
+      ip: ip || req.ip,
+      source: 'external',
+      timestamp: timestamp ? new Date(timestamp) : new Date()
+    });
+
+    // Conectar al recálculo del risk score según severidad
+    const tipoRisk = severity === 'high'
+      ? 'nuevo_reporte_malware'
+      : severity === 'medium'
+      ? 'nuevo_reporte_phishing'
+      : null;
+
+    if (tipoRisk) {
+      await actualizarRisk(req.usuario.id.toString(), tipoRisk);
+    }
+
+    res.status(201).json({
+      mensaje: 'Evento registrado correctamente',
+      id: evento._id,
+      timestamp: evento.timestamp
+    });
+  } catch (error) {
+    res.status(500).json({ mensaje: 'Error registrando evento', error: error.message });
   }
 };
 
@@ -27,7 +72,6 @@ const obtenerEventos = async (req, res) => {
   }
 };
 
-
 const obtenerEstadisticas = async (req, res) => {
   try {
     const total = await SecurityEvent.countDocuments();
@@ -44,4 +88,4 @@ const obtenerEstadisticas = async (req, res) => {
   }
 };
 
-module.exports = { registrarEvento, obtenerEventos, obtenerEstadisticas };
+module.exports = { registrarEvento, recibirEventoExterno, obtenerEventos, obtenerEstadisticas };

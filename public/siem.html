@@ -82,6 +82,7 @@
               <option value="nuevo_reporte">NUEVO REPORTE</option>
               <option value="cambio_rol">CAMBIO DE ROL</option>
               <option value="bloqueo_automatico">BLOQUEO AUTOMÁTICO</option>
+              <option value="external">EXTERNO</option>
             </select>
           </div>
           <div class="form-group">
@@ -299,8 +300,11 @@
         const badgeClass = e.severity === 'high' ? 'badge-abierto' : e.severity === 'medium' ? 'badge-proceso' : 'badge-resuelto';
         const usuario = e.userId ? e.userId.nombre : '—';
         tbody.innerHTML += `
-          <tr>
-            <td data-label="TIPO" style="font-family: 'Share Tech Mono', monospace; color: var(--acento); font-size: 11px;">${e.type.toUpperCase()}</td>
+          <tr style="${e.source === 'external' ? 'border-left: 2px solid #f97316;' : ''}">
+            <td data-label="TIPO" style="font-family: 'Share Tech Mono', monospace; color: var(--acento); font-size: 11px;">
+              ${e.type.toUpperCase()}
+              ${e.source === 'external' ? '<span style="margin-left:6px;font-size:9px;background:#f9731622;color:#f97316;border:1px solid #f97316;border-radius:3px;padding:1px 5px;letter-spacing:1px;">EXT</span>' : ''}
+            </td>
             <td data-label="DESCRIPCIÓN" style="font-size: 12px;">${e.description}</td>
             <td data-label="USUARIO" style="font-size: 11px; color: var(--texto-suave);">${usuario}</td>
             <td data-label="SEVERIDAD"><span class="badge ${badgeClass}">${e.severity.toUpperCase()}</span></td>
