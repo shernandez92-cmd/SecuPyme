@@ -26,6 +26,8 @@ const io = new Server(server, {
 });
 
 app.use(helmet({ contentSecurityPolicy: false }));
+
+app.get('/', (req, res) => res.redirect('/landing.html'));
 app.use(express.static('public'));
 app.use(require('./middleware/httpLogger'));
 app.use(express.json());
