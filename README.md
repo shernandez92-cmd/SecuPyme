@@ -1,32 +1,38 @@
 # SecuPyme
 
-Plataforma de ciberseguridad diseñada para pequeñas y medianas empresas (PYMES) colombianas. Permite reportar incidentes de seguridad, realizar autoevaluaciones, monitorear el nivel de riesgo en tiempo real y recibir asistencia especializada con inteligencia artificial.
+Plataforma de ciberseguridad diseñada para pequeñas y medianas empresas (PYMES) colombianas. Permite reportar incidentes de seguridad, realizar autoevaluaciones de riesgo, monitorear el nivel de amenaza en tiempo real y recibir asistencia especializada con inteligencia artificial.
 
 **Proyecto Productivo — Análisis y Desarrollo de Software, SENA 2026**  
-**Deploy:** https://secupyme.onrender.com
+**Deploy:** https://secupyme.onrender.com  
+**Repo:** https://github.com/shernandez92-cmd/SecuPyme
 
 ---
 
 ## Funcionalidades
 
 ### Para empresas clientes
-- Registro e inicio de sesión con JWT y autenticación de doble factor (2FA)
-- Reporte de incidentes de seguridad con seguimiento de estado
-- Autoevaluación de seguridad con puntaje automático y recomendaciones
+- Registro e inicio de sesión con JWT y autenticación de doble factor (2FA con TOTP)
+- 10 códigos de respaldo (backup codes) para recuperar acceso sin 2FA
+- Recuperación de contraseña por correo con token de un solo uso (30 min)
+- Reporte de incidentes de seguridad con seguimiento de estado y prioridad
+- Autoevaluación de seguridad dinámica — preguntas cargadas desde BD, puntaje 0–20
 - Historial de evaluaciones para visualizar evolución en el tiempo
-- Dashboard con score de riesgo en tiempo real
-- Chat en tiempo real con el equipo de seguridad
-- Descarga de reportes en PDF
+- Dashboard con risk score en tiempo real y desglose narrativo de eventos
+- Chat en tiempo real con el equipo de seguridad (Socket.IO)
+- Descarga de reportes individuales y consolidados en PDF
 - Centro de notificaciones por categorías
+- Generación de API key para conectar sistemas externos al SIEM
 
 ### Para administradores
-- Panel de gestión de usuarios (cambiar plan, rol, eliminar)
-- Panel SIEM con eventos de seguridad en tiempo real
-- Monitor de risk scores de todas las empresas
-- Bloqueo y desbloqueo manual de empresas
-- Chat con cada empresa de forma independiente
-- Integración con Shodan y VirusTotal
-- Resumen semanal generado con IA
+- Panel de gestión de usuarios: cambiar plan, rol, eliminar
+- Gestión dinámica de preguntas de autoevaluación (crear, activar/desactivar)
+- Panel SIEM con eventos de seguridad en tiempo real, filtros y paginación
+- Monitor de risk scores de todas las empresas con bloqueo/desbloqueo manual
+- Logs de auditoría completos: cada acción admin queda registrada
+- Chat independiente con cada empresa
+- Integración con Shodan (escaneo de IPs) y VirusTotal (análisis de hashes)
+- Monitoreo automático de IPs vía cron diario (3 AM Bogotá)
+- Resumen semanal de seguridad generado con IA
 
 ---
 
@@ -34,17 +40,20 @@ Plataforma de ciberseguridad diseñada para pequeñas y medianas empresas (PYMES
 
 | Capa | Tecnología |
 |------|------------|
-| Backend | Node.js + Express |
+| Backend | Node.js 18+ + Express |
 | Base de datos | MongoDB Atlas + Mongoose |
-| Autenticación | JWT + bcryptjs + speakeasy (2FA) |
+| Autenticación | JWT (sin Bearer) + bcryptjs + speakeasy (2FA) |
+| Validación | Zod + middleware validate |
 | Frontend | HTML5 + CSS3 + Vanilla JS |
 | Tiempo real | Socket.IO |
 | IA | Groq (llama-3.3-70b-versatile) |
-| Archivos | Cloudinary (imágenes y PDFs) |
+| Archivos | Cloudinary |
 | PDF | PDFKit |
 | Correos | Nodemailer + Gmail |
 | Seguridad | Helmet + express-rate-limit |
-| Deploy | Render.com |
+| Logs | Winston (JSON en prod, colorizado en dev) |
+| Tests | Jest + Supertest + mongodb-memory-server |
+| Deploy | Render.com (auto-deploy desde main) |
 
 ---
 
@@ -53,48 +62,80 @@ Plataforma de ciberseguridad diseñada para pequeñas y medianas empresas (PYMES
 ```
 secupyme/
 ├── src/
-│   ├── index.js                    # Entrada del servidor + Socket.IO
-│   ├── controllers/                # Lógica de negocio
-│   │   ├── authController.js       # Registro, login, usuarios
-│   │   ├── riskController.js       # Cálculo y gestión de risk score
-│   │   ├── siemController.js       # Registro de eventos de seguridad
-│   │   ├── iaController.js         # Integración con Groq
-│   │   ├── autoevaluacionController.js
+│   ├── index.js                        # Entrada + Socket.IO + seed de preguntas
+│   ├── controllers/
+│   │   ├── authController.js           # Auth, usuarios, API keys
+│   │   ├── riskController.js           # Risk score
+│   │   ├── siemController.js           # Eventos de seguridad
+│   │   ├── iaController.js             # Groq + normativa colombiana
+│   │   ├── autoevaluacionController.js # Evaluaciones dinámicas
 │   │   ├── reporteController.js
 │   │   ├── chatController.js
-│   │   ├── uploadController.js     # Cloudinary
-│   │   ├── pdfController.js        # Generación de PDFs
-│   │   ├── twoFactorController.js  # 2FA con speakeasy
-│   │   └── integracionController.js
-│   ├── models/                     # Schemas de MongoDB
-│   │   ├── Usuario.js
+│   │   ├── auditController.js          # Logs de auditoría
+│   │   ├── uploadController.js
+│   │   ├── pdfController.js
+│   │   ├── twoFactorController.js
+│   │   └── integracionController.js    # Shodan + VirusTotal
+│   ├── models/
+│   │   ├── Usuario.js                  # Con ipsMonitoreadas y apiKey (hash)
 │   │   ├── Reporte.js
-│   │   ├── Autoevaluacion.js
+│   │   ├── Autoevaluacion.js           # respuestas: Map<String, Boolean>
 │   │   ├── RiskScore.js
 │   │   ├── SecurityEvent.js
+│   │   ├── AuditLog.js
+│   │   ├── TokenBlacklist.js           # TTL index para logout
+│   │   ├── Pregunta.js                 # Preguntas dinámicas de autoevaluación
 │   │   ├── ChatGeneral.js
 │   │   └── Conversation.js
-│   ├── routes/                     # Endpoints de la API
-│   └── middleware/
-│       ├── auth.js                 # verificarToken, verificarAdmin
-│       └── checkPlan.js            # Límites por plan
-├── public/                         # Frontend
-│   ├── index.html                  # Landing / login
-│   ├── dashboard.html              # Dashboard cliente
-│   ├── admin.html                  # Panel administrador
-│   ├── siem.html                   # Panel SIEM
+│   ├── routes/                         # Un archivo por recurso
+│   ├── middleware/
+│   │   ├── auth.js                     # verificarToken, verificarAdmin
+│   │   ├── checkPlan.js                # Límites por plan
+│   │   ├── validate.js                 # Zod middleware
+│   │   ├── apiKey.js                   # Autenticación por API key (SHA-256)
+│   │   ├── errorHandler.js             # AppError + handler centralizado
+│   │   └── httpLogger.js               # Log de requests HTTP
+│   ├── validators/
+│   │   └── schemas.js                  # Schemas Zod para todos los endpoints
+│   ├── utils/
+│   │   └── logger.js                   # Winston
+│   └── jobs/
+│       └── monitoreoIPs.js             # Cron de Shodan
+├── public/
+│   ├── landing.html                    # Primera página (GET / redirige aquí)
+│   ├── login.html                      # Login
+│   ├── registro.html
+│   ├── dashboard.html
+│   ├── admin.html                      # Panel admin + preguntas + auditoría
+│   ├── siem.html                       # SIEM + integración externa
 │   ├── autoevaluacion.html
 │   ├── reportes.html
 │   ├── historial.html
-│   ├── sidebar.js                  # Sidebar compartido + Socket.IO
-│   ├── chat.js                     # Chat en tiempo real
-│   ├── notifications.js            # Centro de notificaciones
+│   ├── membresias.html
+│   ├── forgot-password.html
+│   ├── reset-password.html
+│   ├── reporte-detalle.html
+│   ├── utils.js                        # apiFetch global + helpers de fecha
+│   ├── sidebar.js
+│   ├── chat.js
+│   ├── notifications.js
+│   ├── toast.js
+│   ├── inactividad.js
 │   └── styles.css
-├── seed.js                         # Script de datos demo
+├── tests/
+│   ├── auth.test.js                    # 12 tests
+│   ├── health.test.js                  # 1 test
+│   ├── validation.test.js              # 10 tests
+│   ├── reportes.test.js                # 6 tests
+│   ├── autoevaluaciones.test.js        # 8 tests
+│   ├── siem.test.js                    # 8 tests
+│   └── apikeys.test.js                 # 6 tests
+├── src/scripts/
+│   └── seedUser.js                     # Genera usuarios con contraseñas seguras
+├── .env.example
 ├── package.json
-├── .env                            # Variables de entorno (no commitear)
-├── TECHNICAL-DOCS.md
-└── DEPLOYMENT-RENDER.md
+├── DEPLOYMENT-RENDER.md
+└── TECHNICAL-DOCS.md
 ```
 
 ---
@@ -105,120 +146,133 @@ secupyme/
 - Node.js 18 o superior
 - Cuenta en MongoDB Atlas
 - Cuenta en Cloudinary
-- Cuenta en Groq (para IA)
+- Cuenta en Groq
 - Gmail con contraseña de aplicación
 
-### Pasos
-
 ```bash
-# 1. Clonar el repositorio
 git clone https://github.com/shernandez92-cmd/SecuPyme.git
 cd SecuPyme
-
-# 2. Instalar dependencias
 npm install
-
-# 3. Crear archivo .env con las variables necesarias
-
-# 4. Iniciar el servidor
-npm start
-
-# 5. Opcional: poblar con datos demo
-node seed.js
+cp .env.example .env   # completar variables
+npm start              # http://localhost:3000
 ```
 
-El servidor queda disponible en http://localhost:3000
+Para correr los tests:
+```bash
+npm test
+```
 
 ---
 
 ## Variables de entorno
 
-Crear un archivo `.env` en la raíz con:
+Ver `.env.example` para la lista completa documentada. Variables requeridas:
 
 ```
-PORT=3000
-MONGODB_URI=mongodb+srv://usuario:password@cluster.mongodb.net/secupyme
-JWT_SECRET=clave_secreta_minimo_32_caracteres
-EMAIL_USER=tucorreo@gmail.com
-EMAIL_PASS=contraseña_de_aplicacion_gmail
-CLOUDINARY_CLOUD_NAME=tu_cloud_name
-CLOUDINARY_API_KEY=tu_api_key
-CLOUDINARY_API_SECRET=tu_api_secret
-GROQ_API_KEY=tu_groq_api_key
-SHODAN_KEY=tu_shodan_key
-VIRUSTOTAL_KEY=tu_virustotal_key
-CLIENT_URL=https://secupyme.onrender.com
+PORT, MONGODB_URI, JWT_SECRET,
+EMAIL_USER, EMAIL_PASS,
+FRONTEND_URL, CLIENT_URL,
+CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET,
+GROQ_API_KEY, SHODAN_KEY, VIRUSTOTAL_KEY,
+CRON_SECRET, LOG_LEVEL (opcional)
 ```
 
 ---
 
-## API — Endpoints principales
+## API — Endpoints
 
-### Autenticación
+### Autenticación (`/api/auth`)
 ```
-POST   /api/auth/registro              Registrar usuario
-POST   /api/auth/login                 Iniciar sesión
-POST   /api/auth/2fa/setup             Configurar 2FA
-POST   /api/auth/2fa/verify            Verificar y activar 2FA
-POST   /api/auth/2fa/login             Login con código 2FA
-GET    /api/auth/usuarios              Listar usuarios (admin)
-PUT    /api/auth/usuarios/:id/plan     Cambiar plan (admin)
-PUT    /api/auth/usuarios/:id/rol      Cambiar rol (admin)
-DELETE /api/auth/usuarios/:id          Eliminar usuario (admin)
-```
-
-### Reportes
-```
-POST   /api/reportes                   Crear reporte
-GET    /api/reportes                   Listar reportes
-GET    /api/reportes/:id               Ver reporte
-PUT    /api/reportes/:id               Actualizar reporte (admin)
-PUT    /api/reportes/:id/estado        Cambiar estado (admin)
-DELETE /api/reportes/:id               Eliminar reporte
+POST   /registro                   Registrar usuario
+POST   /login                      Iniciar sesión
+POST   /logout                     Revocar token (JWT blacklist)
+POST   /forgot-password            Solicitar reset de contraseña
+POST   /reset-password             Establecer nueva contraseña
+POST   /2fa/setup                  Configurar 2FA
+POST   /2fa/verify                 Activar 2FA
+POST   /2fa/login                  Login con código TOTP
+GET    /usuarios                   Listar usuarios (admin)
+PUT    /usuarios/:id/plan          Cambiar plan (admin)
+PUT    /usuarios/:id/rol           Cambiar rol (admin)
+DELETE /usuarios/:id               Eliminar usuario (admin)
+POST   /apikey                     Generar API key (devuelta una sola vez)
+DELETE /apikey                     Revocar API key
+GET    /apikey/status              Estado de API key + IPs monitoreadas
 ```
 
-### Risk Score
+### Reportes (`/api/reportes`)
 ```
-GET    /api/risk                       Ver todos los scores (admin)
-GET    /api/risk/mi-score              Ver score propio
-PUT    /api/risk/desbloquear/:id       Desbloquear empresa (admin)
-```
-
-### SIEM
-```
-GET    /api/siem/events                Ver eventos de seguridad (admin)
-GET    /api/siem/estadisticas          Estadísticas SIEM (admin)
-PUT    /api/siem/bloquear/:id          Bloquear empresa (admin)
-PUT    /api/siem/desbloquear/:id       Desbloquear empresa (admin)
+POST   /                           Crear reporte
+GET    /                           Listar (paginado: ?page=1&limit=20)
+GET    /:id                        Ver reporte
+PUT    /:id                        Actualizar (admin)
+PUT    /:id/estado                 Cambiar estado (admin)
+DELETE /:id                        Eliminar
 ```
 
-### Inteligencia Artificial
+### Autoevaluaciones (`/api/autoevaluaciones`)
 ```
-POST   /api/ia/explicar                Explicar evento de seguridad
-POST   /api/ia/analizar-risk           Analizar risk score
-POST   /api/ia/asistente               Asistente de ciberseguridad
-GET    /api/ia/resumen-semanal         Resumen semanal automático
+POST   /                           Enviar autoevaluación
+GET    /                           Historial (paginado)
+GET    /preguntas                  Preguntas activas para el formulario
+GET    /preguntas/todas            Todas las preguntas (admin)
+POST   /preguntas                  Crear pregunta (admin)
+PUT    /preguntas/:id/toggle       Activar/desactivar pregunta (admin)
+```
+
+### SIEM (`/api/siem`)
+```
+GET    /events                     Eventos (admin, paginado)
+GET    /estadisticas               Estadísticas (admin)
+POST   /external/events            Recibir evento externo (x-api-key)
+PUT    /bloquear/:empresaId        Bloquear empresa (admin)
+PUT    /desbloquear/:empresaId     Desbloquear empresa (admin)
+POST   /cron/monitoreo             Trigger cron Shodan (x-cron-secret)
+```
+
+### IA (`/api/ia`) — plan básico o premium
+```
+POST   /explicar                   Explicar evento de seguridad
+POST   /analizar-risk              Analizar risk score
+POST   /asistente                  Asistente de ciberseguridad
+GET    /resumen-semanal            Resumen semanal automático
 ```
 
 ### Otros
 ```
-POST   /api/autoevaluaciones           Enviar autoevaluación
-GET    /api/autoevaluaciones           Ver historial
-GET    /api/chat                       Obtener mensajes
-POST   /api/chat                       Enviar mensaje
-POST   /api/upload                     Subir archivo (Cloudinary)
-GET    /api/upload/descargar           Proxy de descarga PDF
-GET    /api/pdf/reportes               Exportar PDF consolidado
-GET    /api/pdf/reportes/:id           Exportar reporte individual
-GET    /api/integraciones/shodan/:ip   Consultar Shodan
-GET    /api/integraciones/virustotal/:hash  Consultar VirusTotal
+GET    /api/health                 Health check
+GET    /api/risk/mi-score          Risk score propio
+GET    /api/risk                   Todos los scores (admin)
+GET    /api/integraciones/shodan/:ip        Consultar IP en Shodan
+GET    /api/integraciones/virustotal/:hash  Analizar hash en VirusTotal
+POST   /api/chat                   Enviar mensaje
+GET    /api/chat                   Obtener mensajes
+GET    /api/pdf/reportes           PDF consolidado
+GET    /api/pdf/reportes/:id       PDF individual
+GET    /api/audit                  Logs de auditoría (admin, paginado)
 ```
+
+---
+
+## Seguridad implementada
+
+- Contraseñas hasheadas con bcryptjs (salt 10)
+- API keys hasheadas con SHA-256 — BD solo guarda el hash
+- JWT sin prefijo Bearer, expiración 8h, revocación por blacklist con TTL
+- 2FA con TOTP (speakeasy) + 10 backup codes hasheados
+- Rate limiting: 500 req/15min general, 5 req/15min en login, 10 req/min en IA
+- Helmet para headers HTTP de seguridad
+- Validación de inputs con Zod en todas las rutas que reciben body
+- Bloqueo automático de empresa con risk score > 80
+- Logs de auditoría para todas las acciones de administradores
+- Sin stack traces expuestos en producción
+- Cron de monitoreo autenticado con CRON_SECRET
 
 ---
 
 ## Modelo de riesgo
 
-El risk score (0-100) se calcula automáticamente según eventos:
+El risk score (0–100) se recalcula automáticamente por eventos:
 
 | Evento | Impacto |
 |--------|---------|
@@ -226,52 +280,79 @@ El risk score (0-100) se calcula automáticamente según eventos:
 | Reporte de fuga de datos | +30 |
 | Archivo malicioso (VirusTotal) | +40 |
 | Reporte de malware | +25 |
-| Reporte de phishing | +20 |
+| Puerto crítico detectado (Shodan) | +20 |
 | Autoevaluación nivel alto | +30 |
-| Login exitoso | -2 |
-| Autoevaluación nivel bajo | -10 |
+| Login exitoso | −2 |
+| Autoevaluación nivel bajo | −10 |
 
 | Rango | Nivel |
 |-------|-------|
-| 0 – 30 | Normal |
-| 31 – 60 | Monitoreo |
-| 61 – 80 | Alerta |
-| 81 – 100 | Crítico (bloqueo automático) |
+| 0–30 | Normal |
+| 31–60 | Monitoreo |
+| 61–80 | Alerta |
+| 81–100 | Crítico — bloqueo automático |
 
 ---
 
-## Datos demo
+## Planes
 
-Para poblar la base de datos con 6 empresas ficticias colombianas realistas:
+| Plan | Reportes | Autoevaluaciones | IA |
+|------|----------|------------------|----|
+| Free | 3 | 1 | No |
+| Básico | 20 | 10 | Sí |
+| Premium | Ilimitado | Ilimitado | Sí |
+
+---
+
+## Integración externa — SIEM exógeno
+
+Cualquier sistema externo puede enviar eventos al SIEM de SecuPyme:
 
 ```bash
-node seed.js
+POST https://secupyme.onrender.com/api/siem/external/events
+x-api-key: <tu_api_key>
+Content-Type: application/json
+
+{
+  "description": "Intento de acceso no autorizado detectado",
+  "severity": "high",
+  "ip": "192.168.1.50",
+  "type": "alerta_siem"
+}
 ```
 
-Crea usuarios, reportes, autoevaluaciones, risk scores, eventos SIEM y conversaciones de chat con fechas distribuidas en los últimos 60 días.
+La API key se genera desde el panel SIEM → Integración Externa.  
+`severity` acepta: `low`, `medium`, `high`.
 
 ---
 
-## Seguridad implementada
+## Normativa colombiana
 
-- Contraseñas hasheadas con bcryptjs (salt 10)
-- Autenticación JWT con expiración de 8 horas
-- Doble factor de autenticación (TOTP con speakeasy)
-- Rate limiting: 500 req/15min general, 5 req/15min en login
-- Helmet para headers de seguridad HTTP
-- Bloqueo automático por score de riesgo mayor a 80
-- Verificación de rol en todos los endpoints protegidos
-- Límites de uso por plan (free: 3 reportes, básico: 20, premium: ilimitado)
+La IA referencia las siguientes normas en sus análisis y recomendaciones:
+
+- **Ley 1581 de 2012** — Protección de datos personales (Habeas Data)
+- **Ley 1273 de 2009** — Delitos informáticos
+- **CONPES 3995 de 2020** — Política Nacional de Confianza y Seguridad Digital
 
 ---
 
-## Planes disponibles
+## Tests
 
-| Plan | Reportes | Funcionalidades |
-|------|----------|-----------------|
-| Free | 3 | Básico |
-| Básico | 20 | + Historial, Chat |
-| Premium | Ilimitado | + SIEM, IA, Integraciones |
+```bash
+npm test                          # Todos los tests (--runInBand)
+npx jest auth --runInBand         # Solo auth
+npx jest siem --runInBand         # Solo SIEM
+```
+
+| Suite | Tests | Cubre |
+|-------|-------|-------|
+| auth | 12 | Registro, login, logout, 2FA, reset password |
+| health | 1 | Health check |
+| validation | 10 | Schemas Zod |
+| reportes | 6 | CRUD, paginación, límites de plan |
+| autoevaluaciones | 8 | Preguntas, evaluaciones, límites de plan |
+| siem | 8 | Eventos, estadísticas, integración externa |
+| apikeys | 6 | Generación, revocación, estado |
 
 ---
 
@@ -279,7 +360,7 @@ Crea usuarios, reportes, autoevaluaciones, risk scores, eventos SIEM y conversac
 
 Ver [DEPLOYMENT-RENDER.md](./DEPLOYMENT-RENDER.md) para instrucciones detalladas.
 
-**URL de producción:** https://secupyme.onrender.com
+Auto-deploy activo desde rama `main` en Render.com.
 
 ---
 
@@ -287,8 +368,7 @@ Ver [DEPLOYMENT-RENDER.md](./DEPLOYMENT-RENDER.md) para instrucciones detalladas
 
 **Sebastián Hernández Erazo**  
 Tecnólogo en Análisis y Desarrollo de Software  
-SENA
-Bogotá, Colombia · 2026
+SENA · Bogotá, Colombia · 2026
 
 ---
 
