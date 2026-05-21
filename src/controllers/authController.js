@@ -171,7 +171,6 @@ const resetPassword = async (req, res, next) => {
 };
 
 
-const crypto = require('crypto');
 
 const generateApiKey = async (req, res, next) => {
   try {

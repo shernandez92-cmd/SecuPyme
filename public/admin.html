@@ -250,6 +250,7 @@
 
     async function cargarAudit(page = 1) {
       auditPaginaActual = page;
+      document.querySelectorAll('.skeleton-tabla').forEach(r => r.remove());
       const accion = document.getElementById('filtroAccion').value;
       const params = new URLSearchParams({ limit: 10, page });
       if (accion) params.append('accion', accion);
