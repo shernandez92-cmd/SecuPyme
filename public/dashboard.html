@@ -29,35 +29,35 @@
       <div id="contenido-stats" style="display:none;">
       <div class="stats-grid">
         <div class="stat-card" style="cursor:pointer;" onclick="window.location.href='/reportes.html'">
-          <div class="stat-icon">⚠</div>
+          <div class="stat-icon"><svg width="26" height="26" viewBox="0 0 26 26" fill="none"><path d="M13 3l2.2 4.8 5.3.7-3.8 3.7.9 5.3L13 15l-4.6 2.5.9-5.3-3.8-3.7 5.3-.7L13 3z" stroke="#9d86c8" stroke-width="1.2" stroke-linejoin="round"/></svg></div>
           <div class="stat-info">
             <h3 id="totalReportes">0</h3>
             <p>REPORTES TOTALES</p>
           </div>
         </div>
         <div class="stat-card" style="cursor:pointer;" onclick="window.location.href='/reportes.html?estado=abierto'">
-          <div class="stat-icon">🔴</div>
+          <div class="stat-icon"><svg width="26" height="26" viewBox="0 0 26 26" fill="none"><circle cx="13" cy="13" r="8" stroke="#ef4444" stroke-width="1.2"/><path d="M13 9v5" stroke="#ef4444" stroke-width="1.2" stroke-linecap="round"/><circle cx="13" cy="17" r="1" fill="#ef4444"/></svg></div>
           <div class="stat-info">
             <h3 id="reportesAbiertos">0</h3>
             <p>ABIERTOS</p>
           </div>
         </div>
         <div class="stat-card" style="cursor:pointer;" onclick="window.location.href='/reportes.html?estado=en+proceso'">
-          <div class="stat-icon">🟡</div>
+          <div class="stat-icon"><svg width="26" height="26" viewBox="0 0 26 26" fill="none"><circle cx="13" cy="13" r="8" stroke="#eab308" stroke-width="1.2"/><path d="M13 9v4l2.5 2.5" stroke="#eab308" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
           <div class="stat-info">
             <h3 id="reportesEnProceso">0</h3>
             <p>EN PROCESO</p>
           </div>
         </div>
         <div class="stat-card" style="cursor:pointer;" onclick="window.location.href='/reportes.html?estado=resuelto'">
-          <div class="stat-icon">🟢</div>
+          <div class="stat-icon"><svg width="26" height="26" viewBox="0 0 26 26" fill="none"><circle cx="13" cy="13" r="8" stroke="#22c55e" stroke-width="1.2"/><path d="M9 13l3 3 5-5" stroke="#22c55e" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
           <div class="stat-info">
             <h3 id="reportesResueltos">0</h3>
             <p>RESUELTOS</p>
           </div>
         </div>
         <div class="stat-card" id="riskScoreCard" style="cursor:pointer;" onclick="abrirModalRisk()">
-          <div class="stat-icon" id="riskIcono">🛡</div>
+          <div class="stat-icon" id="riskIcono"><svg width="26" height="26" viewBox="0 0 26 26" fill="none"><path d="M13 3L5 7v5c0 5 3.5 9.7 8 11 4.5-1.3 8-6 8-11V7L13 3z" stroke="#7c3aed" stroke-width="1.2" stroke-linejoin="round"/><path d="M9 13l3 3 5-5" stroke="#7c3aed" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
           <div class="stat-info">
             <h3 id="riskScoreValor">--</h3>
             <p id="riskScoreNivel">RISK SCORE</p>
@@ -120,8 +120,8 @@
         const nivel = data.nivel ?? 'normal';
         document.getElementById('riskScoreValor').textContent = score + '/100';
         document.getElementById('riskScoreNivel').textContent = 'RISK SCORE · ' + nivel.toUpperCase();
-        const iconos = { normal: '🟢', monitoreo: '🟡', alerta: '🟠', critico: '🔴' };
-        document.getElementById('riskIcono').textContent = iconos[nivel] || '🛡';
+        const iconos = { normal: '', monitoreo: '', alerta: '', critico: '' };
+        // icono SVG fijo — color se aplica via borderColor de la card
         const colores = { normal: '#22c55e', monitoreo: '#eab308', alerta: '#f97316', critico: '#ef4444' };
         document.getElementById('riskScoreCard').style.borderColor = colores[nivel] || '#7c3aed';
         const nivelPrevio = localStorage.getItem('secupyme_risk_nivel');
@@ -241,7 +241,7 @@
   ═══════════════════════════════════════════════════════════ -->
   <div id="modal2FA" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.92);z-index:99998;align-items:center;justify-content:center;padding:24px;">
     <div style="background:#0d0618;border:1px solid #7c3aed;border-radius:10px;padding:40px;max-width:480px;width:100%;position:relative;max-height:90vh;overflow-y:auto;">
-      <button onclick="cerrarModal2FA()" style="position:absolute;top:16px;right:16px;background:none;border:none;color:#94a3b8;font-size:20px;cursor:pointer;">✕</button>
+      <button onclick="cerrarModal2FA()" style="position:absolute;top:16px;right:16px;background:none;border:none;color:#94a3b8;cursor:pointer;padding:4px;"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="display:inline-block;vertical-align:middle"><path d="M2 2l10 10M12 2L2 12" stroke="#9d86c8" stroke-width="1.2" stroke-linecap="round"/></svg></button>
 
       <!-- PASO 1: intro -->
       <div id="paso2fa-1">
@@ -296,12 +296,12 @@
         <h3 style="color:#e2d9f3;font-size:1.1rem;margin-bottom:12px;">Guarda tus códigos de respaldo</h3>
         <div style="background:#7f1d1d22;border:1px solid #dc2626;border-radius:6px;padding:12px;margin-bottom:20px;">
           <p style="color:#fca5a5;font-size:12px;line-height:1.6;">
-            ⚠ <strong>Estos códigos solo se muestran una vez.</strong> Guárdalos en un lugar seguro. Cada uno sirve para iniciar sesión una sola vez si pierdes tu autenticador.
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style="display:inline-block;vertical-align:middle"><path d="M8 2L1.5 13h13L8 2z" stroke="#f59e0b" stroke-width="1.1" stroke-linejoin="round"/><path d="M8 6v4" stroke="#f59e0b" stroke-width="1.1" stroke-linecap="round"/><circle cx="8" cy="11.5" r="0.7" fill="#f59e0b"/></svg> <strong>Estos códigos solo se muestran una vez.</strong> Guárdalos en un lugar seguro. Cada uno sirve para iniciar sesión una sola vez si pierdes tu autenticador.
           </p>
         </div>
         <div id="listaCodigos" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:20px;"></div>
         <button onclick="copiarCodigos()" style="width:100%;padding:12px;background:#1a0a2e;border:1px solid #7c3aed;color:#7c3aed;font-family:'Share Tech Mono',monospace;font-size:11px;letter-spacing:2px;cursor:pointer;border-radius:4px;margin-bottom:10px;">
-          📋 COPIAR TODOS
+          COPIAR TODOS
         </button>
         <button onclick="cerrarModal2FA()" style="width:100%;padding:14px;background:#7c3aed;border:none;color:#fff;font-family:'Share Tech Mono',monospace;font-size:12px;letter-spacing:3px;cursor:pointer;border-radius:4px;">
           LISTO, LOS GUARDÉ
@@ -424,7 +424,7 @@
       navigator.clipboard.writeText(texto).then(() => {
         const btn = event.target;
         btn.textContent = '✓ COPIADOS';
-        setTimeout(() => { btn.textContent = '📋 COPIAR TODOS'; }, 2000);
+        setTimeout(() => { btn.textContent = 'COPIAR TODOS'; }, 2000);
       });
     }
 
@@ -443,7 +443,7 @@
   <!-- MODAL RISK SCORE DESGLOSE -->
   <div id="modalRisk" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.92);z-index:99997;align-items:center;justify-content:center;padding:24px;">
     <div style="background:#0d0618;border:1px solid #7c3aed;border-radius:10px;padding:40px;max-width:520px;width:100%;position:relative;max-height:85vh;overflow-y:auto;">
-      <button onclick="cerrarModalRisk()" style="position:absolute;top:16px;right:16px;background:none;border:none;color:#94a3b8;font-size:20px;cursor:pointer;">✕</button>
+      <button onclick="cerrarModalRisk()" style="position:absolute;top:16px;right:16px;background:none;border:none;color:#94a3b8;cursor:pointer;padding:4px;"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="display:inline-block;vertical-align:middle"><path d="M2 2l10 10M12 2L2 12" stroke="#9d86c8" stroke-width="1.2" stroke-linecap="round"/></svg></button>
 
       <p style="font-family:'Share Tech Mono',monospace;font-size:10px;color:#a855f7;letter-spacing:4px;margin-bottom:16px;">DESGLOSE</p>
       <h3 style="color:#e2d9f3;font-size:1.2rem;margin-bottom:4px;">Risk Score</h3>

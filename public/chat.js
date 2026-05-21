@@ -22,8 +22,8 @@ function inicializarChat() {
             <p id="chat-empresa-nombre" style="font-size: 10px; color: #6b5a8a; margin-top: 2px;">${rol === 'admin' ? 'Selecciona una empresa' : 'En línea'}</p>
           </div>
           <div style="display: flex; gap: 8px;">
-            <button onclick="borrarChat()" style="background: none; border: none; color: #6b5a8a; cursor: pointer; font-size: 14px;">🗑</button>
-            <button onclick="toggleChat()" style="background: none; border: none; color: #6b5a8a; cursor: pointer; font-size: 16px;">✕</button>
+            <button onclick="borrarChat()" style="background: none; border: none; color: #6b5a8a; cursor: pointer; padding:4px;" title="Borrar chat"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" style="display:inline-block;vertical-align:middle"><path d="M3 4h10M6 4V3h4v1M5 4l.6 9h4.8L11 4" stroke="#9d86c8" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"/><path d="M6.5 6.5v5M9.5 6.5v5" stroke="#9d86c8" stroke-width="1.1" stroke-linecap="round"/></svg></button>
+            <button onclick="toggleChat()" style="background: none; border: none; color: #6b5a8a; cursor: pointer; padding:4px;"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="display:inline-block;vertical-align:middle"><path d="M2 2l10 10M12 2L2 12" stroke="#9d86c8" stroke-width="1.2" stroke-linecap="round"/></svg></button>
           </div>
         </div>
         ${panelConversaciones}
@@ -34,14 +34,14 @@ function inicializarChat() {
           </select>
           <div style="display: flex; gap: 8px;">
             <input type="file" id="chat-archivo" accept="image/*,.pdf" style="display:none" onchange="subirArchivoChatFn()">
-            <button onclick="document.getElementById('chat-archivo').click()" style="background: none; border: 1px solid var(--borde); color: var(--texto-suave); padding: 8px 10px; cursor: pointer; border-radius: 2px; font-size: 14px;">📎</button>
+            <button onclick="document.getElementById('chat-archivo').click()" style="background: none; border: 1px solid var(--borde); color: var(--texto-suave); padding: 8px 10px; cursor: pointer; border-radius: 2px;" title="Adjuntar"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" style="display:inline-block;vertical-align:middle"><path d="M13 7.5l-5.5 5.5a3.5 3.5 0 01-5-5L8 2.5a2 2 0 013 3L5.5 11a.5.5 0 01-.7-.7L10 5" stroke="#9d86c8" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
             <input type="text" id="chat-texto" placeholder="Escribe un mensaje..." style="flex: 1; font-size: 12px;" onkeypress="if(event.key==='Enter') enviarChatMensaje()">
             <button onclick="enviarChatMensaje()" style="background: #7c3aed; border: none; color: white; padding: 8px 14px; cursor: pointer; font-family: 'Share Tech Mono', monospace; font-size: 11px; border-radius: 2px;">→</button>
           </div>
         </div>
       </div>
-      <button onclick="toggleChat()" style="width: 52px; height: 52px; background: #7c3aed; border: none; border-radius: 50%; color: white; font-size: 22px; cursor: pointer; box-shadow: 0 0 20px rgba(124,58,237,0.4); position: relative;">
-        💬
+      <button onclick="toggleChat()" style="width: 52px; height: 52px; background: #7c3aed; border: none; border-radius: 50%; color: white; cursor: pointer; box-shadow: 0 0 20px rgba(124,58,237,0.4); position: relative; display:flex; align-items:center; justify-content:center;">
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="none" style="display:inline-block;vertical-align:middle"><path d="M3 4h16v11H3z" stroke="white" stroke-width="1.3" stroke-linejoin="round"/><path d="M7 19l4-4h4" stroke="white" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/><path d="M7 8h8M7 11h5" stroke="white" stroke-width="1.1" stroke-linecap="round"/></svg>
         <span id="badge-noLeidos" style="display:none; position: absolute; top: -4px; right: -4px; background: #ef4444; color: white; border-radius: 50%; width: 18px; height: 18px; font-size: 10px; line-height: 18px; text-align: center;"></span>
       </button>
     </div>

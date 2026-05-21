@@ -19,21 +19,21 @@
 
       <div class="stats-grid" style="grid-template-columns: repeat(3, 1fr);">
         <div class="stat-card">
-          <div class="stat-icon">📋</div>
+          <div class="stat-icon"><svg width="28" height="28" viewBox="0 0 28 28" fill="none"><rect x="7" y="7" width="14" height="17" rx="1" stroke="#9d86c8" stroke-width="1.2"/><rect x="10" y="5" width="8" height="3" rx="1" stroke="#9d86c8" stroke-width="1.2"/><path d="M10 13h8M10 17h6" stroke="#9d86c8" stroke-width="1.2" stroke-linecap="round"/></svg></div>
           <div class="stat-info">
             <h3 id="totalEvaluaciones">0</h3>
             <p>EVALUACIONES TOTALES</p>
           </div>
         </div>
         <div class="stat-card">
-          <div class="stat-icon">📈</div>
+          <div class="stat-icon"><svg width="28" height="28" viewBox="0 0 28 28" fill="none"><path d="M5 22L10 15l5 3 5-8 3 5" stroke="#9d86c8" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" fill="none"/><path d="M5 22h18" stroke="#9d86c8" stroke-width="1.2" stroke-linecap="round"/></svg></div>
           <div class="stat-info">
             <h3 id="mejorPuntaje">0</h3>
             <p>MEJOR PUNTAJE</p>
           </div>
         </div>
         <div class="stat-card">
-          <div class="stat-icon">🎯</div>
+          <div class="stat-icon"><svg width="28" height="28" viewBox="0 0 28 28" fill="none"><circle cx="14" cy="14" r="9" stroke="#9d86c8" stroke-width="1.2"/><circle cx="14" cy="14" r="5" stroke="#9d86c8" stroke-width="1.2"/><circle cx="14" cy="14" r="1.5" fill="#c4834a"/></svg></div>
           <div class="stat-info">
             <h3 id="ultimoNivel">—</h3>
             <p>ÚLTIMO NIVEL</p>
@@ -42,7 +42,7 @@
       </div>
 
       <div class="form-card" style="margin-top: 24px;">
-        <h3>EVALUACIONES ANTERIORES <a href="#" onclick="descargarPDF()" style="float: right; font-family: 'Share Tech Mono', monospace; font-size: 11px; color: var(--acento); letter-spacing: 2px; text-decoration: none;">↓ EXPORTAR PDF</a> <a href="#" onclick="verResumenSemanal()" style="float: right; font-family: 'Share Tech Mono', monospace; font-size: 11px; color: #10b981; letter-spacing: 2px; text-decoration: none; margin-right: 16px;">🤖 RESUMEN IA</a></h3>
+        <h3>EVALUACIONES ANTERIORES <a href="#" onclick="descargarPDF()" style="float: right; font-family: 'Share Tech Mono', monospace; font-size: 11px; color: var(--acento); letter-spacing: 2px; text-decoration: none;">↓ EXPORTAR PDF</a> <a href="#" onclick="verResumenSemanal()" style="float: right; font-family: 'Share Tech Mono', monospace; font-size: 11px; color: #10b981; letter-spacing: 2px; text-decoration: none; margin-right: 16px;"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" style="display:inline-block;vertical-align:middle"><rect x="3" y="6" width="10" height="7" rx="1" stroke="#9d86c8" stroke-width="1.1"/><rect x="5" y="9" width="2" height="2" rx="0.3" fill="#9d86c8"/><rect x="9" y="9" width="2" height="2" rx="0.3" fill="#9d86c8"/><path d="M8 4V6M6 4h4" stroke="#9d86c8" stroke-width="1.1" stroke-linecap="round"/><path d="M1 9h2M13 9h2" stroke="#9d86c8" stroke-width="1.1" stroke-linecap="round"/></svg> RESUMEN IA</a></h3>
         <table class="tabla-reportes">
           <thead>
             <tr>
@@ -93,7 +93,7 @@
       tbody.innerHTML = '';
       document.querySelectorAll('.skeleton-tabla').forEach(r => r.remove());
 if (evaluaciones.length === 0) {
-  tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; padding: 48px; color: var(--texto-suave); font-family: 'Share Tech Mono', monospace; font-size: 12px; letter-spacing: 2px;"><div style="font-size: 32px; margin-bottom: 12px;">📋</div>SIN EVALUACIONES AÚN</td></tr>`;
+  tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; padding: 48px; color: var(--texto-suave); font-family: 'Share Tech Mono', monospace; font-size: 12px; letter-spacing: 2px;"><div style="margin-bottom: 12px;"><svg width="28" height="28" viewBox="0 0 28 28" fill="none"><rect x="7" y="7" width="14" height="17" rx="1" stroke="#9d86c8" stroke-width="1.2"/><rect x="10" y="5" width="8" height="3" rx="1" stroke="#9d86c8" stroke-width="1.2"/><path d="M10 13h8M10 17h6" stroke="#9d86c8" stroke-width="1.2" stroke-linecap="round"/></svg></div>SIN EVALUACIONES AÚN</td></tr>`;
   return;
 }
 evaluaciones.reverse().forEach(e => {

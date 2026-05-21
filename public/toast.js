@@ -1,8 +1,8 @@
 function mostrarToast(mensaje, tipo = 'info', duracion = 3000) {
   const colores = {
     success: { bg: 'rgba(16,185,129,0.15)', border: '#10b981', color: '#10b981', icono: '✓' },
-    error: { bg: 'rgba(239,68,68,0.15)', border: '#ef4444', color: '#ef4444', icono: '✕' },
-    warning: { bg: 'rgba(245,158,11,0.15)', border: '#f59e0b', color: '#f59e0b', icono: '⚠' },
+    error: { bg: 'rgba(239,68,68,0.15)', border: '#ef4444', color: '#ef4444', icono: '<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 2l8 8M10 2L2 10" stroke="#ef4444" stroke-width="1.2" stroke-linecap="round"/></svg>' },
+    warning: { bg: 'rgba(245,158,11,0.15)', border: '#f59e0b', color: '#f59e0b', icono: '<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1L0.8 10h10.4L6 1z" stroke="#f59e0b" stroke-width="1" stroke-linejoin="round"/><path d="M6 5v2.5" stroke="#f59e0b" stroke-width="1" stroke-linecap="round"/><circle cx="6" cy="9" r="0.6" fill="#f59e0b"/></svg>' },
     info: { bg: 'rgba(168,85,247,0.15)', border: '#a855f7', color: '#a855f7', icono: 'ℹ' }
   };
 

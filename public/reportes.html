@@ -235,7 +235,7 @@
         const badgeClass = r.estado === 'abierto' ? 'badge-abierto' : r.estado === 'en proceso' ? 'badge-proceso' : 'badge-resuelto';
         const puedeEliminar = rol === 'admin' || r.usuario === JSON.parse(atob(token.split('.')[1])).id;
         const btnEliminar = puedeEliminar
-          ? `<td><button onclick="event.stopPropagation(); eliminarReporte('${r._id}')" style="background:none; border:1px solid #ef4444; color:#ef4444; padding:4px 10px; cursor:pointer; font-family:Share Tech Mono,monospace; font-size:10px;">✕</button></td>`
+          ? `<td><button onclick="event.stopPropagation(); eliminarReporte('${r._id}')" style="background:none; border:1px solid #ef4444; color:#ef4444; padding:4px 10px; cursor:pointer; font-family:Share Tech Mono,monospace; font-size:10px;">DEL</button></td>`
           : '<td></td>';
         tbody.innerHTML += `
           <tr style="cursor:pointer;" onclick="window.location.href='/reporte-detalle.html?id=${r._id}'">

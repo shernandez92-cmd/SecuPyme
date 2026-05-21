@@ -4,10 +4,10 @@ const Notificaciones = (() => {
   const MAX_NOTIFS = 50;
 
   const CATEGORIAS = {
-    seguridad: { label: 'SEGURIDAD', icono: '🔐', color: '#ef4444' },
-    riesgo:    { label: 'RIESGO',    icono: '⚠️',  color: '#f97316' },
-    sistema:   { label: 'SISTEMA',   icono: '⚙️',  color: '#6b5a8a' },
-    chat:      { label: 'CHAT',      icono: '💬',  color: '#7c3aed' },
+    seguridad: { label: 'SEGURIDAD', icono: '<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1L1 3.5v3c0 2.5 1.8 4.8 5 5.5 3.2-.7 5-3 5-5.5v-3L6 1z" stroke="#ef4444" stroke-width="1"/></svg>', color: '#ef4444' },
+    riesgo:    { label: 'RIESGO',    icono: '<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1L0.8 10h10.4L6 1z" stroke="#f97316" stroke-width="1" stroke-linejoin="round"/><path d="M6 5v3" stroke="#f97316" stroke-width="1" stroke-linecap="round"/><circle cx="6" cy="9" r="0.6" fill="#f97316"/></svg>', color: '#f97316' },
+    sistema:   { label: 'SISTEMA',   icono: '<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="2" stroke="#6b5a8a" stroke-width="1"/><path d="M6 1v1.5M6 9.5V11M1 6h1.5M9.5 6H11M2.5 2.5l1 1M8.5 8.5l1 1M2.5 9.5l1-1M8.5 3.5l1-1" stroke="#6b5a8a" stroke-width="0.9" stroke-linecap="round"/></svg>', color: '#6b5a8a' },
+    chat:      { label: 'CHAT',      icono: '<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M1 2h10v7H1z" stroke="#7c3aed" stroke-width="1" stroke-linejoin="round"/><path d="M4 11l2-2h3" stroke="#7c3aed" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/></svg>', color: '#7c3aed' },
   };
 
   function _leer() {
@@ -107,11 +107,11 @@ const Notificaciones = (() => {
         <div id="notif-panel" style="position:fixed;top:0;right:0;width:340px;height:100vh;background:#0d0618;border-left:1px solid rgba(124,58,237,0.3);z-index:9997;display:flex;flex-direction:column;box-shadow:-8px 0 40px rgba(0,0,0,0.6);transform:translateX(100%);transition:transform 0.25s ease;">
           <div style="padding:18px 16px 12px;border-bottom:1px solid rgba(124,58,237,0.2);flex-shrink:0;">
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
-              <span style="font-family:'Share Tech Mono',monospace;font-size:12px;color:#a855f7;letter-spacing:2px;">🔔 NOTIFICACIONES</span>
+              <span style="font-family:'Share Tech Mono',monospace;font-size:12px;color:#a855f7;letter-spacing:2px;display:flex;align-items:center;gap:6px;"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" style="display:inline-block;vertical-align:middle"><path d="M8 2C5.8 2 4 3.8 4 6v3L2.5 11h11L12 9V6c0-2.2-1.8-4-4-4z" stroke="#9d86c8" stroke-width="1.1" stroke-linejoin="round"/><path d="M6.5 11v.5a1.5 1.5 0 003 0V11" stroke="#9d86c8" stroke-width="1.1"/></svg> NOTIFICACIONES</span>
               <div style="display:flex;gap:8px;align-items:center;">
                 <button onclick="Notificaciones.marcarTodasLeidas()" style="background:none;border:none;color:#6b5a8a;cursor:pointer;font-size:11px;font-family:'Share Tech Mono',monospace;">✓ TODO</button>
-                <button onclick="Notificaciones.limpiar()" style="background:none;border:none;color:#6b5a8a;cursor:pointer;font-size:14px;">🗑</button>
-                <button onclick="Notificaciones.cerrarPanel()" style="background:none;border:none;color:#6b5a8a;cursor:pointer;font-size:16px;">✕</button>
+                <button onclick="Notificaciones.limpiar()" style="background:none;border:none;color:#6b5a8a;cursor:pointer;padding:4px;" title="Limpiar"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" style="display:inline-block;vertical-align:middle"><path d="M3 4h10M6 4V3h4v1M5 4l.6 9h4.8L11 4" stroke="#9d86c8" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"/><path d="M6.5 6.5v5M9.5 6.5v5" stroke="#9d86c8" stroke-width="1.1" stroke-linecap="round"/></svg></button>
+                <button onclick="Notificaciones.cerrarPanel()" style="background:none;border:none;color:#6b5a8a;cursor:pointer;padding:4px;"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="display:inline-block;vertical-align:middle"><path d="M2 2l10 10M12 2L2 12" stroke="#9d86c8" stroke-width="1.2" stroke-linecap="round"/></svg></button>
               </div>
             </div>
             <div style="display:flex;gap:6px;flex-wrap:wrap;">${filtrosHTML}</div>
