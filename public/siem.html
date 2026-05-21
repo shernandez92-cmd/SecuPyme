@@ -127,6 +127,39 @@
         </tbody>
         </table>
       </div>
+
+      <!-- Panel Integración Externa -->
+      <div class="form-card" style="margin-top:24px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
+          <h3>INTEGRACIÓN EXTERNA — API KEY</h3>
+          <div style="display:flex;gap:8px;">
+            <button onclick="generarApiKey()" id="btnGenerar" style="background:#7c3aed;border:none;color:#fff;font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:2px;padding:8px 16px;cursor:pointer;border-radius:4px;">GENERAR KEY</button>
+            <button onclick="revocarApiKey()" id="btnRevocar" style="display:none;background:#ef444422;border:1px solid #ef4444;color:#ef4444;font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:2px;padding:8px 16px;cursor:pointer;border-radius:4px;">REVOCAR KEY</button>
+          </div>
+        </div>
+
+        <div id="estadoKey" style="margin-bottom:16px;font-size:12px;color:#94a3b8;font-family:'Share Tech Mono',monospace;">Cargando...</div>
+
+        <div id="keyGenerada" style="display:none;background:#0d0618;border:1px solid #7c3aed;border-radius:6px;padding:16px;margin-bottom:20px;">
+          <p style="font-size:10px;color:#f97316;letter-spacing:1px;margin-bottom:8px;">⚠ COPIA ESTA KEY AHORA — NO SE MOSTRARÁ DE NUEVO</p>
+          <div style="display:flex;align-items:center;gap:12px;">
+            <code id="rawKey" style="font-family:'Share Tech Mono',monospace;font-size:12px;color:#4ade80;word-break:break-all;flex:1;"></code>
+            <button onclick="copiarKey()" style="background:#7c3aed22;border:1px solid #7c3aed;color:#a855f7;font-family:'Share Tech Mono',monospace;font-size:9px;padding:6px 12px;cursor:pointer;border-radius:3px;white-space:nowrap;">COPIAR</button>
+          </div>
+          <p style="font-size:10px;color:#64748b;margin-top:12px;letter-spacing:1px;">Usa esta key en el header <code style="color:#9d86c8;">x-api-key</code> al enviar eventos a:</p>
+          <code style="font-size:11px;color:#7c3aed;display:block;margin-top:4px;">POST https://secupyme.onrender.com/api/siem/external/events</code>
+        </div>
+
+        <div style="margin-top:8px;">
+          <p style="font-size:10px;color:#94a3b8;letter-spacing:1px;margin-bottom:12px;">IPS MONITOREADAS</p>
+          <div style="display:flex;gap:8px;margin-bottom:12px;">
+            <input id="inputIP" type="text" placeholder="192.168.1.1" style="flex:1;background:#0d0618;border:1px solid #7c3aed44;color:#e2d9f3;font-family:'Share Tech Mono',monospace;font-size:12px;padding:8px;border-radius:4px;" />
+            <button onclick="agregarIP()" style="background:#7c3aed;border:none;color:#fff;font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:2px;padding:8px 16px;cursor:pointer;border-radius:4px;">+ AGREGAR</button>
+          </div>
+          <div id="listaIPs" style="display:flex;flex-wrap:wrap;gap:8px;"></div>
+        </div>
+      </div>
+
     </main>
   </div>
 
@@ -365,6 +398,93 @@
         m.onclick = (e) => { if (e.target === m) m.remove(); };
       } catch(e) { mostrarToast("Error IA", "error"); }
     }
+
+    // ── API KEY & IPs ──────────────────────────────────────────
+    async function cargarEstadoKey() {
+      try {
+        const token = localStorage.getItem('token');
+        const res = await apiFetch('/api/auth/apikey/status', { headers: { 'authorization': token } });
+        const data = await res.json();
+        const estadoEl = document.getElementById('estadoKey');
+        const btnRevocar = document.getElementById('btnRevocar');
+        const btnGenerar = document.getElementById('btnGenerar');
+        if (data.tieneKey) {
+          estadoEl.innerHTML = '<span style="color:#4ade80;">● KEY ACTIVA</span> — usa el header <code style="color:#9d86c8;">x-api-key</code> para enviar eventos externos.';
+          btnRevocar.style.display = 'block';
+          btnGenerar.style.display = 'none';
+        } else {
+          estadoEl.innerHTML = '<span style="color:#ef4444;">○ SIN KEY</span> — genera una para conectar sistemas externos.';
+          btnRevocar.style.display = 'none';
+          btnGenerar.style.display = 'block';
+        }
+        renderIPs(data.ipsMonitoreadas || []);
+      } catch(e) { console.error('Error estado key:', e); }
+    }
+
+    async function generarApiKey() {
+      if (!confirm('¿Generar nueva API key? Si ya tenías una, quedará reemplazada.')) return;
+      try {
+        const token = localStorage.getItem('token');
+        const res = await apiFetch('/api/auth/apikey', { method: 'POST', headers: { 'authorization': token } });
+        const data = await res.json();
+        if (res.ok) {
+          document.getElementById('rawKey').textContent = data.apiKey;
+          document.getElementById('keyGenerada').style.display = 'block';
+          cargarEstadoKey();
+        } else { showToast(data.mensaje || 'Error al generar key', 'error'); }
+      } catch(e) { showToast('Error de conexión', 'error'); }
+    }
+
+    async function revocarApiKey() {
+      if (!confirm('¿Revocar API key? Los sistemas que la usen dejarán de funcionar.')) return;
+      try {
+        const token = localStorage.getItem('token');
+        const res = await apiFetch('/api/auth/apikey', { method: 'DELETE', headers: { 'authorization': token } });
+        const data = await res.json();
+        if (res.ok) {
+          document.getElementById('keyGenerada').style.display = 'none';
+          showToast('API key revocada', 'info');
+          cargarEstadoKey();
+        } else { showToast(data.mensaje || 'Error al revocar', 'error'); }
+      } catch(e) { showToast('Error de conexión', 'error'); }
+    }
+
+    function copiarKey() {
+      const key = document.getElementById('rawKey').textContent;
+      navigator.clipboard.writeText(key).then(() => showToast('Key copiada', 'success'));
+    }
+
+    async function agregarIP() {
+      const ip = document.getElementById('inputIP').value.trim();
+      if (!ip) return;
+      try {
+        const res = await apiFetch(`/api/integraciones/shodan/${ip}`, {
+          headers: { 'authorization': localStorage.getItem('token') }
+        });
+        if (res.ok) {
+          document.getElementById('inputIP').value = '';
+          showToast('IP agregada y consultada en Shodan', 'success');
+          cargarEstadoKey();
+        } else {
+          const d = await res.json();
+          showToast(d.mensaje || 'Error al agregar IP', 'error');
+        }
+      } catch(e) { showToast('Error de conexión', 'error'); }
+    }
+
+    function renderIPs(ips) {
+      const el = document.getElementById('listaIPs');
+      if (!ips.length) {
+        el.innerHTML = '<span style="font-size:11px;color:#6b5a8a;font-family:Share Tech Mono,monospace;">Sin IPs registradas</span>';
+        return;
+      }
+      el.innerHTML = ips.map(ip => `
+        <span style="background:#7c3aed22;border:1px solid #7c3aed44;color:#a855f7;font-family:'Share Tech Mono',monospace;font-size:11px;padding:4px 10px;border-radius:3px;">${ip}</span>
+      `).join('');
+    }
+
+    cargarEstadoKey();
+
   </script>
   <script src="/inactividad.js"></script>
 </body>

@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { registro, login, obtenerUsuarios, forgotPassword, resetPassword } = require('../controllers/authController');
+const { registro, login, obtenerUsuarios, forgotPassword, resetPassword, generateApiKey, revokeApiKey, apiKeyStatus } = require('../controllers/authController');
 const { setup2FA, verify2FA, loginCon2FA } = require('../controllers/twoFactorController');
 const { verificarToken, verificarAdmin, revocarToken } = require('../middleware/auth');
 const { registrarAudit } = require('../controllers/auditController');
@@ -91,5 +91,9 @@ router.delete('/usuarios/:id', verificarToken, verificarAdmin, async (req, res, 
     res.json({ mensaje: 'Usuario eliminado' });
   } catch (e) { next(e); }
 });
+
+router.post('/apikey', verificarToken, generateApiKey);
+router.delete('/apikey', verificarToken, revokeApiKey);
+router.get('/apikey/status', verificarToken, apiKeyStatus);
 
 module.exports = router;

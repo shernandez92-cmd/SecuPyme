@@ -170,4 +170,33 @@ const resetPassword = async (req, res, next) => {
   }
 };
 
-module.exports = { registro, login, obtenerUsuarios, forgotPassword, resetPassword };
+
+const crypto = require('crypto');
+
+const generateApiKey = async (req, res, next) => {
+  try {
+    const rawKey = crypto.randomBytes(32).toString('hex');
+    const hash = crypto.createHash('sha256').update(rawKey).digest('hex');
+    await Usuario.findByIdAndUpdate(req.usuario.id, { apiKey: hash });
+    res.json({ apiKey: rawKey, mensaje: 'Guarda esta key — no se mostrará de nuevo.' });
+  } catch (error) { next(error); }
+};
+
+const revokeApiKey = async (req, res, next) => {
+  try {
+    await Usuario.findByIdAndUpdate(req.usuario.id, { apiKey: null });
+    res.json({ mensaje: 'API key revocada.' });
+  } catch (error) { next(error); }
+};
+
+const apiKeyStatus = async (req, res, next) => {
+  try {
+    const usuario = await Usuario.findById(req.usuario.id).select('apiKey ipsMonitoreadas');
+    res.json({
+      tieneKey: !!usuario.apiKey,
+      ipsMonitoreadas: usuario.ipsMonitoreadas || []
+    });
+  } catch (error) { next(error); }
+};
+
+module.exports = { registro, login, obtenerUsuarios, forgotPassword, resetPassword, generateApiKey, revokeApiKey, apiKeyStatus };
