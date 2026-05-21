@@ -58,9 +58,39 @@ const cambiarRol = z.object({
   rol: z.enum(['cliente', 'admin']),
 });
 
+
+const eventoExterno = z.object({
+  type:        z.string().max(100).optional(),
+  description: z.string().min(1).max(1000),
+  severity:    z.enum(['low', 'medium', 'high']),
+  ip:          z.string().max(45).optional(),
+  timestamp:   z.string().optional(),
+});
+
+const explicarEvento = z.object({
+  tipo:        z.string().min(1).max(100),
+  descripcion: z.string().min(1).max(1000),
+  severidad:   z.enum(['low', 'medium', 'high']),
+});
+
+const analizarRisk = z.object({
+  score:    z.number().min(0).max(100),
+  nivel:    z.string().min(1).max(50),
+  historial: z.array(z.any()).optional(),
+});
+
+const asistente = z.object({
+  mensaje: z.string().min(1).max(2000),
+});
+
+const enviarMensaje = z.object({
+  texto: z.string().min(1).max(2000),
+});
+
 module.exports = {
   registro, login, forgotPassword, resetPassword,
   crearReporte, actualizarReporte, actualizarEstado,
   crearPregunta, respuestas,
   cambiarPlan, cambiarRol,
+  eventoExterno, explicarEvento, analizarRisk, asistente, enviarMensaje,
 };
