@@ -28,6 +28,48 @@
         <button class="btn-primary" style="width: auto; padding: 12px 32px; margin-top: 32px;" onclick="enviarEvaluacion()">EVALUAR SEGURIDAD</button>
       </div>
 
+      <!-- Panel admin: gestión de preguntas -->
+      <div id="adminPanel" style="display:none;">
+        <div class="form-card" style="margin-top:24px;">
+          <h3>GESTIÓN DE PREGUNTAS</h3>
+          <div id="adminPreguntasSkeleton">
+            <div class="skeleton skeleton-row" style="height:48px;margin-bottom:8px;border-radius:4px;"></div>
+            <div class="skeleton skeleton-row" style="height:48px;margin-bottom:8px;border-radius:4px;"></div>
+          </div>
+          <div id="adminPreguntasContainer"></div>
+
+          <div style="margin-top:32px;border-top:1px solid var(--borde);padding-top:24px;">
+            <h4 style="font-family:'Share Tech Mono',monospace;font-size:11px;letter-spacing:3px;color:var(--texto-suave);margin-bottom:16px;">NUEVA PREGUNTA</h4>
+            <div style="display:grid;gap:12px;">
+              <input id="np-texto"         class="form-input" placeholder="Texto de la pregunta *">
+              <input id="np-campo"         class="form-input" placeholder="Campo único (snake_case) *">
+              <input id="np-categoria"     class="form-input" placeholder="Categoría">
+              <input id="np-recomendacion" class="form-input" placeholder="Recomendación si responde NO">
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                <input id="np-peso"  class="form-input" type="number" min="1" max="10" placeholder="Peso (1-10) *">
+                <input id="np-orden" class="form-input" type="number" min="0" placeholder="Orden">
+              </div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                <select id="np-tipo" class="form-input" style="font-family:'Share Tech Mono',monospace;font-size:13px;">
+                  <option value="boolean">Sí / No (boolean)</option>
+                  <option value="texto">Respuesta abierta (texto)</option>
+                </select>
+                <input id="np-condicion-campo" class="form-input" placeholder="Condición: campo (opcional)">
+              </div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                <select id="np-condicion-valor" class="form-input" style="font-family:'Share Tech Mono',monospace;font-size:13px;">
+                  <option value="">Sin condición</option>
+                  <option value="true">Si el campo es SÍ</option>
+                  <option value="false">Si el campo es NO</option>
+                </select>
+                <div></div>
+              </div>
+              <button class="btn-primary" style="width:auto;padding:10px 28px;" onclick="crearPreguntaAdmin()">AGREGAR PREGUNTA</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div class="resultado-card" id="resultado">
         <div class="resultado-nivel" id="nivelTexto"></div>
         <div class="resultado-puntaje" id="puntajeTexto"></div>
@@ -49,38 +91,96 @@
     function inicializarChat() {}
     cargarSidebar('autoevaluacion');
     cargarPreguntas();
+    inicializarAdmin();
 
     var respuestas = {};
     var totalPreguntas = 0;
+
+    var preguntasData = [];
 
     async function cargarPreguntas() {
       try {
         const res = await fetch('/api/autoevaluaciones/preguntas', {
           headers: { 'authorization': token }
         });
-        const preguntas = await res.json();
-        totalPreguntas = preguntas.length;
+        preguntasData = await res.json();
 
         const container = document.getElementById('preguntasContainer');
         container.innerHTML = '';
 
-        preguntas.forEach(p => {
-          container.innerHTML += `
-            <div class="pregunta-item" data-campo="${p.campo}">
+        preguntasData.forEach(p => {
+          const wrapper = document.createElement('div');
+          wrapper.className = 'pregunta-item';
+          wrapper.dataset.campo = p.campo;
+          wrapper.dataset.condicionCampo  = p.condicionCampo  || '';
+          wrapper.dataset.condicionValor  = p.condicionValor  !== null && p.condicionValor !== undefined
+                                            ? String(p.condicionValor) : '';
+
+          if (p.tipo === 'texto') {
+            wrapper.innerHTML = `
+              <p>${p.texto}</p>
+              <textarea
+                class="form-input"
+                rows="2"
+                style="width:100%;resize:vertical;font-family:'Share Tech Mono',monospace;font-size:13px;"
+                placeholder="Escribe tu respuesta..."
+                oninput="respuestas['${p.campo}'] = this.value.trim() || undefined"
+              ></textarea>
+            `;
+          } else {
+            wrapper.innerHTML = `
               <p>${p.texto}</p>
               <div class="toggle-group">
                 <button class="toggle-btn" onclick="seleccionar(this, '${p.campo}', true)">SÍ</button>
                 <button class="toggle-btn" onclick="seleccionar(this, '${p.campo}', false)">NO</button>
               </div>
-            </div>
-          `;
+            `;
+          }
+
+          container.appendChild(wrapper);
         });
+
+        actualizarVisibilidad();
+        recalcularTotal();
 
         document.getElementById('preguntasSkeleton').style.display = 'none';
         container.style.display = 'block';
       } catch (e) {
         mostrarToast('Error cargando preguntas', 'error');
       }
+    }
+
+    function actualizarVisibilidad() {
+      document.querySelectorAll('#preguntasContainer .pregunta-item').forEach(el => {
+        const cc = el.dataset.condicionCampo;
+        const cv = el.dataset.condicionValor;
+        if (!cc) { el.style.display = ''; return; }
+
+        const valorActual = respuestas[cc];
+        const valorEsperado = cv === 'true' ? true : cv === 'false' ? false : cv;
+        const visible = valorActual === valorEsperado;
+
+        el.style.display = visible ? '' : 'none';
+
+        // Limpiar respuesta si se oculta
+        if (!visible && respuestas[el.dataset.campo] !== undefined) {
+          delete respuestas[el.dataset.campo];
+          // Resetear botones si es boolean
+          el.querySelectorAll('.toggle-btn').forEach(b =>
+            b.classList.remove('selected-si', 'selected-no')
+          );
+        }
+      });
+      recalcularTotal();
+    }
+
+    function recalcularTotal() {
+      totalPreguntas = preguntasData.filter(p => {
+        if (!p.condicionCampo) return true;
+        const valorActual = respuestas[p.condicionCampo];
+        const cv = p.condicionValor;
+        return valorActual === cv;
+      }).length;
     }
 
     function seleccionar(btn, campo, valor) {
@@ -90,6 +190,186 @@
       });
       btn.classList.add(valor ? 'selected-si' : 'selected-no');
       respuestas[campo] = valor;
+      actualizarVisibilidad();
+    }
+
+
+    // ── Admin panel ──────────────────────────────────────────────────────────
+    async function inicializarAdmin() {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      if (payload.rol !== 'admin') return;
+      document.getElementById('adminPanel').style.display = 'block';
+      await cargarPreguntasAdmin();
+    }
+
+    async function cargarPreguntasAdmin() {
+      try {
+        const res = await fetch('/api/autoevaluaciones/preguntas/todas', {
+          headers: { 'authorization': token }
+        });
+        const preguntas = await res.json();
+        renderPreguntasAdmin(preguntas);
+      } catch (e) {
+        mostrarToast('Error cargando preguntas (admin)', 'error');
+      } finally {
+        document.getElementById('adminPreguntasSkeleton').style.display = 'none';
+      }
+    }
+
+    function renderPreguntasAdmin(preguntas) {
+      const container = document.getElementById('adminPreguntasContainer');
+      container.innerHTML = '';
+      preguntas.forEach(p => container.appendChild(filaLectura(p)));
+    }
+
+    function filaLectura(p) {
+      const fila = document.createElement('div');
+      fila.id = 'fila-' + p._id;
+      fila.style.cssText = 'display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:center;padding:10px 0;border-bottom:1px solid var(--borde);';
+      fila.innerHTML = `
+        <div>
+          <span style="font-size:13px;">${p.texto}</span>
+          <span style="font-size:11px;color:var(--texto-suave);margin-left:8px;">[${p.campo}] · peso:${p.peso} · orden:${p.orden}</span>
+        </div>
+        <button onclick="activarEdicion('${p._id}', ${JSON.stringify(p).replace(/"/g, '&quot;')})"
+          style="font-family:'Share Tech Mono',monospace;font-size:11px;padding:4px 12px;border:1px solid var(--acento);color:var(--acento);background:transparent;cursor:pointer;border-radius:2px;">
+          EDITAR
+        </button>
+        <button onclick="togglePreguntaAdmin('${p._id}', this)"
+          style="font-family:'Share Tech Mono',monospace;font-size:11px;padding:4px 12px;border:1px solid var(--borde);color:${p.activa ? '#4caf50' : 'var(--texto-suave)'};background:transparent;cursor:pointer;border-radius:2px;">
+          ${p.activa ? 'ACTIVA' : 'INACTIVA'}
+        </button>
+      `;
+      return fila;
+    }
+
+    function activarEdicion(id, p) {
+      const fila = document.getElementById('fila-' + id);
+      fila.innerHTML = `
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+          <input class="form-input" id="e-texto-${id}"         value="${p.texto}"         placeholder="Texto *" style="font-size:12px;padding:6px 10px;">
+          <input class="form-input" id="e-categoria-${id}"     value="${p.categoria||''}" placeholder="Categoría" style="font-size:12px;padding:6px 10px;">
+          <input class="form-input" id="e-recomendacion-${id}" value="${p.recomendacion||''}" placeholder="Recomendación" style="font-size:12px;padding:6px 10px;">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+            <input class="form-input" id="e-peso-${id}"  type="number" min="1" max="10" value="${p.peso}"  placeholder="Peso" style="font-size:12px;padding:6px 10px;">
+            <input class="form-input" id="e-orden-${id}" type="number" min="0"          value="${p.orden}" placeholder="Orden" style="font-size:12px;padding:6px 10px;">
+          </div>
+          <select class="form-input" id="e-tipo-${id}" style="font-size:12px;padding:6px 10px;">
+            <option value="boolean" ${p.tipo !== 'texto' ? 'selected' : ''}>Sí / No (boolean)</option>
+            <option value="texto"   ${p.tipo === 'texto' ? 'selected' : ''}>Respuesta abierta</option>
+          </select>
+          <input class="form-input" id="e-condicion-campo-${id}" value="${p.condicionCampo||''}" placeholder="Condición: campo" style="font-size:12px;padding:6px 10px;">
+          <select class="form-input" id="e-condicion-valor-${id}" style="font-size:12px;padding:6px 10px;">
+            <option value=""      ${!p.condicionValor && p.condicionValor !== false ? 'selected':''}>Sin condición</option>
+            <option value="true"  ${p.condicionValor === true  ? 'selected':''}>Si el campo es SÍ</option>
+            <option value="false" ${p.condicionValor === false ? 'selected':''}>Si el campo es NO</option>
+          </select>
+        </div>
+        <button onclick="guardarEdicion('${id}')"
+          style="font-family:'Share Tech Mono',monospace;font-size:11px;padding:4px 12px;background:var(--acento);color:#fff;border:none;cursor:pointer;border-radius:2px;">
+          GUARDAR
+        </button>
+        <button onclick="cargarPreguntasAdmin()"
+          style="font-family:'Share Tech Mono',monospace;font-size:11px;padding:4px 12px;border:1px solid var(--borde);color:var(--texto-suave);background:transparent;cursor:pointer;border-radius:2px;">
+          CANCELAR
+        </button>
+      `;
+    }
+
+    async function guardarEdicion(id) {
+      const eCampoCond = document.getElementById('e-condicion-campo-' + id)?.value.trim();
+      const eValorCond  = document.getElementById('e-condicion-valor-' + id)?.value;
+      const body = {
+        texto:          document.getElementById('e-texto-' + id)?.value.trim(),
+        categoria:      document.getElementById('e-categoria-' + id)?.value.trim() || undefined,
+        recomendacion:  document.getElementById('e-recomendacion-' + id)?.value.trim() || undefined,
+        peso:           parseInt(document.getElementById('e-peso-' + id)?.value),
+        orden:          parseInt(document.getElementById('e-orden-' + id)?.value) || 0,
+        tipo:           document.getElementById('e-tipo-' + id)?.value,
+        condicionCampo: eCampoCond || undefined,
+        condicionValor: eCampoCond && eValorCond !== ''
+                        ? (eValorCond === 'true' ? true : eValorCond === 'false' ? false : eValorCond)
+                        : undefined,
+      };
+
+      if (!body.texto || isNaN(body.peso)) {
+        mostrarToast('Texto y peso son obligatorios', 'warning');
+        return;
+      }
+
+      try {
+        const res = await fetch('/api/autoevaluaciones/preguntas/' + id, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json', 'authorization': token },
+          body: JSON.stringify(body)
+        });
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}));
+          mostrarToast(err.mensaje || 'Error al guardar', 'error');
+          return;
+        }
+        mostrarToast('Pregunta actualizada', 'success');
+        await cargarPreguntasAdmin();
+      } catch (e) {
+        mostrarToast('Error de red', 'error');
+      }
+    }
+
+    async function togglePreguntaAdmin(id, btn) {
+      try {
+        const res = await fetch('/api/autoevaluaciones/preguntas/' + id + '/toggle', {
+          method: 'PUT',
+          headers: { 'authorization': token }
+        });
+        const data = await res.json();
+        const activa = data.pregunta.activa;
+        btn.textContent = activa ? 'ACTIVA' : 'INACTIVA';
+        btn.style.color = activa ? '#4caf50' : 'var(--texto-suave)';
+        mostrarToast(`Pregunta ${activa ? 'activada' : 'desactivada'}`, 'success');
+      } catch (e) {
+        mostrarToast('Error al cambiar estado', 'error');
+      }
+    }
+
+    async function crearPreguntaAdmin() {
+      const condCampo = document.getElementById('np-condicion-campo').value.trim();
+      const condValorRaw = document.getElementById('np-condicion-valor').value;
+      const body = {
+        texto:          document.getElementById('np-texto').value.trim(),
+        campo:          document.getElementById('np-campo').value.trim(),
+        categoria:      document.getElementById('np-categoria').value.trim() || undefined,
+        recomendacion:  document.getElementById('np-recomendacion').value.trim() || undefined,
+        peso:           parseInt(document.getElementById('np-peso').value),
+        orden:          parseInt(document.getElementById('np-orden').value) || 0,
+        tipo:           document.getElementById('np-tipo').value,
+        condicionCampo: condCampo || undefined,
+        condicionValor: condCampo && condValorRaw !== ''
+                        ? (condValorRaw === 'true' ? true : condValorRaw === 'false' ? false : condValorRaw)
+                        : undefined,
+      };
+
+      if (!body.texto || !body.campo || isNaN(body.peso)) {
+        mostrarToast('Texto, campo y peso son obligatorios', 'warning');
+        return;
+      }
+
+      try {
+        const res = await fetch('/api/autoevaluaciones/preguntas', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'authorization': token },
+          body: JSON.stringify(body)
+        });
+        const data = await res.json();
+        if (!res.ok) { mostrarToast(data.mensaje || 'Error', 'error'); return; }
+        mostrarToast('Pregunta creada', 'success');
+        ['np-texto','np-campo','np-categoria','np-recomendacion','np-peso','np-orden','np-condicion-campo']
+          .forEach(id => document.getElementById(id).value = '');
+        document.getElementById('np-tipo').value = 'boolean';
+        document.getElementById('np-condicion-valor').value = '';
+        await cargarPreguntasAdmin();
+      } catch (e) {
+        mostrarToast('Error de red', 'error');
+      }
     }
 
     async function enviarEvaluacion() {

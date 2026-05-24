@@ -38,16 +38,19 @@ const actualizarEstado = z.object({
 });
 
 const crearPregunta = z.object({
-  texto:         z.string().min(5).max(500),
-  campo:         z.string().min(1).max(100).regex(/^[a-zA-Z0-9_]+$/, 'Solo letras, números y guiones bajos'),
-  categoria:     z.string().max(100).optional(),
-  peso:          z.number().int().min(1).max(10),
-  recomendacion: z.string().max(500).optional(),
-  orden:         z.number().int().min(0).optional(),
+  texto:          z.string().min(5).max(500),
+  campo:          z.string().min(1).max(100).regex(/^[a-zA-Z0-9_]+$/, 'Solo letras, números y guiones bajos'),
+  categoria:      z.string().max(100).optional(),
+  peso:           z.number().int().min(1).max(10),
+  recomendacion:  z.string().max(500).optional(),
+  orden:          z.number().int().min(0).optional(),
+  tipo:           z.enum(['boolean', 'texto']).optional(),
+  condicionCampo: z.string().max(100).optional(),
+  condicionValor: z.union([z.boolean(), z.string()]).optional(),
 });
 
 const respuestas = z.object({
-  respuestas: z.record(z.boolean()),
+  respuestas: z.record(z.union([z.boolean(), z.string().min(1).max(1000)])),
 });
 
 const cambiarPlan = z.object({
@@ -87,7 +90,20 @@ const enviarMensaje = z.object({
   texto: z.string().min(1).max(2000),
 });
 
+
+const editarPregunta = z.object({
+  texto:          z.string().min(5).optional(),
+  categoria:      z.string().optional(),
+  peso:           z.number().int().min(1).max(10).optional(),
+  recomendacion:  z.string().optional(),
+  orden:          z.number().int().min(0).optional(),
+  tipo:           z.enum(['boolean', 'texto']).optional(),
+  condicionCampo: z.string().max(100).optional(),
+  condicionValor: z.union([z.boolean(), z.string()]).optional(),
+}).refine(data => Object.keys(data).length > 0, { message: 'Debe enviar al menos un campo a editar' });
+
 module.exports = {
+  editarPregunta,
   registro, login, forgotPassword, resetPassword,
   crearReporte, actualizarReporte, actualizarEstado,
   crearPregunta, respuestas,

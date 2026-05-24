@@ -4,6 +4,7 @@ const {
   obtenerPreguntas,
   obtenerTodasPreguntas,
   crearPregunta,
+  editarPregunta,
   togglePregunta,
   crearAutoevaluacion,
   obtenerAutoevaluaciones
@@ -16,6 +17,7 @@ const s = require('../validators/schemas');
 router.get('/preguntas',              verificarToken, obtenerPreguntas);
 router.get('/preguntas/todas',        verificarToken, verificarAdmin, obtenerTodasPreguntas);
 router.post('/preguntas',             verificarToken, verificarAdmin, validate(s.crearPregunta), crearPregunta);
+router.put('/preguntas/:id',        verificarToken, verificarAdmin, validate(s.editarPregunta), editarPregunta);
 router.put('/preguntas/:id/toggle',   verificarToken, verificarAdmin, togglePregunta);
 router.post('/',                      verificarToken, checkPlan('autoevaluaciones'), validate(s.respuestas), crearAutoevaluacion);
 router.get('/',                       verificarToken, obtenerAutoevaluaciones);

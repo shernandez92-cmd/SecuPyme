@@ -16,6 +16,7 @@ const calcularPuntaje = (respuestas, preguntas) => {
   const recomendaciones = [];
 
   preguntas.forEach(p => {
+    if (p.tipo === 'texto') return; // preguntas abiertas no afectan el score
     puntajeMaximo += p.peso;
     if (respuestas[p.campo] === true) {
       puntaje += p.peso;
@@ -74,6 +75,30 @@ const crearPregunta = async (req, res, next) => {
   }
 };
 
+
+// ─── PUT editar pregunta (admin) ──────────────────────────────────────────────
+const editarPregunta = async (req, res, next) => {
+  try {
+    const { texto, categoria, peso, recomendacion, orden, tipo, condicionCampo, condicionValor } = req.body;
+    const pregunta = await Pregunta.findById(req.params.id);
+    if (!pregunta) return res.status(404).json({ mensaje: 'Pregunta no encontrada' });
+
+    if (texto          !== undefined) pregunta.texto          = texto;
+    if (categoria      !== undefined) pregunta.categoria      = categoria;
+    if (peso           !== undefined) pregunta.peso           = peso;
+    if (recomendacion  !== undefined) pregunta.recomendacion  = recomendacion;
+    if (orden          !== undefined) pregunta.orden          = orden;
+    if (tipo           !== undefined) pregunta.tipo           = tipo;
+    if (condicionCampo !== undefined) pregunta.condicionCampo = condicionCampo;
+    if (condicionValor !== undefined) pregunta.condicionValor = condicionValor;
+
+    await pregunta.save();
+    res.json({ mensaje: 'Pregunta actualizada', pregunta });
+  } catch (error) {
+    next(error);
+  }
+};
+
 // ─── PUT activar/desactivar pregunta (admin) ─────────────────────────────────
 const togglePregunta = async (req, res, next) => {
   try {
@@ -97,13 +122,17 @@ const crearAutoevaluacion = async (req, res, next) => {
       return res.status(400).json({ mensaje: 'No hay preguntas activas configuradas' });
     }
 
-    const totalPreguntas = preguntas.length;
-    const respondidas = preguntas.filter(p => respuestas[p.campo] !== undefined).length;
+    const preguntasVisibles = preguntas.filter(p => {
+      if (!p.condicionCampo) return true;
+      return respuestas[p.condicionCampo] === p.condicionValor;
+    });
+    const totalPreguntas = preguntasVisibles.length;
+    const respondidas = preguntasVisibles.filter(p => respuestas[p.campo] !== undefined).length;
     if (respondidas < totalPreguntas) {
       return res.status(400).json({ mensaje: `Por favor responde todas las preguntas (${respondidas}/${totalPreguntas})` });
     }
 
-    const { puntaje, nivelRiesgo, recomendaciones } = calcularPuntaje(respuestas, preguntas);
+    const { puntaje, nivelRiesgo, recomendaciones } = calcularPuntaje(respuestas, preguntasVisibles);
 
     const autoevaluacion = new Autoevaluacion({
       usuario: req.usuario.id,
@@ -156,6 +185,7 @@ const obtenerAutoevaluaciones = async (req, res, next) => {
 
 module.exports = {
   obtenerPreguntas,
+  editarPregunta,
   obtenerTodasPreguntas,
   crearPregunta,
   togglePregunta,
