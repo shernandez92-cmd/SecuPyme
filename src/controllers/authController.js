@@ -176,7 +176,12 @@ const generateApiKey = async (req, res, next) => {
   try {
     const rawKey = crypto.randomBytes(32).toString('hex');
     const hash = crypto.createHash('sha256').update(rawKey).digest('hex');
-    await Usuario.findByIdAndUpdate(req.usuario.id, { apiKey: hash });
+    const updated = await Usuario.findByIdAndUpdate(
+      req.usuario.id,
+      { apiKey: hash },
+      { new: true, runValidators: false }
+    );
+    if (!updated) return res.status(404).json({ mensaje: 'Usuario no encontrado' });
     res.json({ apiKey: rawKey, mensaje: 'Guarda esta key — no se mostrará de nuevo.' });
   } catch (error) { next(error); }
 };

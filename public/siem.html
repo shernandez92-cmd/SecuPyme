@@ -355,7 +355,7 @@
     // Socket para alertas en tiempo real
     document.addEventListener('DOMContentLoaded', () => {
       if (typeof io !== 'undefined') {
-        const s = io();
+        const s = io({ auth: { token: localStorage.getItem('token') } });
         s.on('alertaCritica', (data) => {
           const container = document.getElementById('alertasContainer');
           const alerta = document.createElement('div');

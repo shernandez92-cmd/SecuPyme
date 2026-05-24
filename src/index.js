@@ -83,91 +83,116 @@ app.use((req, res) => {
 });
 
 // Socket.IO
-const usuariosConectados = {};
+const Usuario = require('./models/Usuario');
+const ChatGeneral = require('./models/ChatGeneral');
+const jwt = require('jsonwebtoken');
 
-io.on('connection', (socket) => {
-  logger.info('Usuario conectado:', socket.id);
+// Map<socketId, { userId, rol, empresaId }> — se limpia en disconnect
+const usuariosConectados = new Map();
 
-  socket.on('identificar', async (data) => {
-    usuariosConectados[socket.id] = data;
-    socket.join(data.empresaId || data.userId);
-    
-    // Unirse a rooms de conversaciones
-    try {
-      if (data.rol === 'admin') {
-        // Admin: unirse a TODAS sus conversaciones
-        const conversations = await Conversation.find({ adminId: data.userId });
-        conversations.forEach(conv => {
-          socket.join(`conv:${conv._id}`);
-        });
-      } else {
-        const empresaId = data.empresaId || data.userId;
-        let conversation = await Conversation.findOne({ empresaId });
-        if (!conversation) {
-          const Usuario = require("./models/Usuario");
-          const admin = await Usuario.findOne({ rol: "admin" });
-          if (admin) {
-            try {
-              conversation = await Conversation.findOneAndUpdate(
-                { adminId: admin._id, empresaId },
-                { ultimaActividad: new Date() },
-                { upsert: true, new: true }
-              );
-              logger.info("Conversacion creada para empresa:", empresaId);
-              const adminSockets = Object.entries(usuariosConectados)
-                .filter(([, u]) => u.userId === admin._id.toString())
-                .map(([socketId]) => socketId);
-              adminSockets.forEach(sid => {
-                const s = io.sockets.sockets.get(sid);
-                if (s) s.join("conv:" + conversation._id);
-              });
-            } catch (e) {
-              if (e.code !== 11000) logger.info("Error creando conversacion:", e.message);
-              conversation = await Conversation.findOne({ empresaId });
+/**
+ * Verifica el token JWT enviado en el handshake.
+ * Si falla, desconecta el socket antes de que llegue a ningún handler.
+ */
+io.use((socket, next) => {
+  const token = socket.handshake.auth?.token;
+  if (!token) return next(new Error('AUTH_REQUIRED'));
+  try {
+    const payload = jwt.verify(token, process.env.JWT_SECRET);
+    socket.usuario = { userId: payload.id, rol: payload.rol, empresaId: payload.empresa || payload.id };
+    next();
+  } catch {
+    next(new Error('AUTH_INVALID'));
+  }
+});
+
+io.on('connection', async (socket) => {
+  const { userId, rol, empresaId } = socket.usuario;
+  logger.info('Socket autenticado:', { socketId: socket.id, userId, rol });
+
+  usuariosConectados.set(socket.id, socket.usuario);
+  socket.join(empresaId);
+  if (rol === 'admin') socket.join('admin');
+
+  // Unirse a rooms de conversaciones
+  try {
+    if (rol === 'admin') {
+      // Solo las últimas 50 conversaciones activas para evitar joins masivos
+      const conversations = await Conversation.find({ adminId: userId })
+        .sort({ ultimaActividad: -1 })
+        .limit(50)
+        .select('_id');
+      conversations.forEach(conv => socket.join(`conv:${conv._id}`));
+    } else {
+      let conversation = await Conversation.findOne({ empresaId });
+      if (!conversation) {
+        const admin = await Usuario.findOne({ rol: 'admin' }).select('_id');
+        if (admin) {
+          try {
+            conversation = await Conversation.findOneAndUpdate(
+              { adminId: admin._id, empresaId },
+              { ultimaActividad: new Date() },
+              { upsert: true, new: true }
+            );
+            // Notificar al admin si está conectado
+            for (const [sid, u] of usuariosConectados) {
+              if (u.userId === admin._id.toString()) {
+                const adminSocket = io.sockets.sockets.get(sid);
+                if (adminSocket) adminSocket.join(`conv:${conversation._id}`);
+              }
             }
+          } catch (e) {
+            if (e.code !== 11000) logger.error('Error creando conversacion:', { message: e.message });
+            conversation = await Conversation.findOne({ empresaId });
           }
         }
-        if (conversation) {
-          socket.join("conv:" + conversation._id);
-        }
       }
-    } catch (e) {
-      logger.info('Error al unir a rooms de conversación:', e.message);
+      if (conversation) socket.join(`conv:${conversation._id}`);
     }
-    
-    io.emit('usuariosOnline', Object.values(usuariosConectados).length);
-  });
+  } catch (e) {
+    logger.error('Error al unir socket a rooms:', { message: e.message });
+  }
+
+  // Broadcast conteo — solo a admins para no saturar
+  io.to('admin').emit('usuariosOnline', usuariosConectados.size);
 
   socket.on('mensajeChat', async (data) => {
-    const ChatGeneral = require('./models/ChatGeneral');
+    // userId y empresaId vienen del token, no del cliente
+    const texto = typeof data?.texto === 'string' ? data.texto.slice(0, 2000).trim() : null;
+    const conversationId = typeof data?.conversationId === 'string' ? data.conversationId : null;
+    const reporteRelacionado = typeof data?.reporteRelacionado === 'string' ? data.reporteRelacionado : null;
+
+    if (!texto) return socket.emit('error', { message: 'Texto inválido' });
+
     try {
       const mensaje = new ChatGeneral({
-        usuario: data.userId,
-        empresaId: data.empresaId,
-        texto: data.texto,
-        conversationId: data.conversationId || null,
-        reporteRelacionado: data.reporteRelacionado || null
+        usuario: userId,
+        empresaId,
+        texto,
+        conversationId: conversationId || null,
+        reporteRelacionado: reporteRelacionado || null
       });
       await mensaje.save();
+
       const populado = await ChatGeneral.findById(mensaje._id)
         .populate('usuario', 'nombre rol')
         .populate('reporteRelacionado', 'empresa tipoVulnerabilidad');
-      
-      // Emitir SOLO a la room de la conversación si existe
-      if (data.conversationId) {
-        io.to(`conv:${data.conversationId}`).emit('nuevoMensaje', populado);
+
+      if (conversationId) {
+        io.to(`conv:${conversationId}`).emit('nuevoMensaje', populado);
       } else {
-        // Sin conversationId, mantener compatibilidad: emit global
-        io.emit('nuevoMensaje', populado);
+        socket.emit('nuevoMensaje', populado);
       }
     } catch (e) {
-      logger.info('Error socket mensaje:', e.message);
+      logger.error('Error socket mensajeChat:', { message: e.message });
+      socket.emit('error', { message: 'Error al enviar mensaje' });
     }
   });
 
-  socket.on('disconnect', () => {
-    delete usuariosConectados[socket.id];
-    io.emit('usuariosOnline', Object.values(usuariosConectados).length);
+  socket.on('disconnect', (reason) => {
+    usuariosConectados.delete(socket.id);
+    logger.info('Socket desconectado:', { socketId: socket.id, userId, reason });
+    io.to('admin').emit('usuariosOnline', usuariosConectados.size);
   });
 });
 
@@ -197,6 +222,7 @@ const seedPreguntas = async () => {
   await Pregunta.insertMany(preguntas);
   logger.info('Preguntas de autoevaluación inicializadas (' + preguntas.length + ')');
 };
+
 
 mongoose.connect(process.env.MONGODB_URI)
   .then(() => {

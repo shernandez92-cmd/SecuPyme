@@ -199,16 +199,14 @@ function inicializarSocket() {
     const payload = JSON.parse(atob(token.split('.')[1]));
     empresaIdActual = payload.id;
 
-    socket = io();
+    socket = io({ auth: { token } });
 
     socket.on('connect', () => {
       console.log('Socket conectado:', socket.id);
-      socket.emit('identificar', {
-        userId: payload.id,
-        empresaId: payload.id,
-        nombre: localStorage.getItem('nombre'),
-        rol: localStorage.getItem('rol')
-      });
+    });
+
+    socket.on('connect_error', (err) => {
+      console.warn('Socket auth error:', err.message);
     });
 
     socket.on('nuevoMensaje', (mensaje) => {
