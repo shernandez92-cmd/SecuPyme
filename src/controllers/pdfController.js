@@ -254,4 +254,196 @@ const exportarAutoevaluaciones = async (req, res, next) => {
   }
 };
 
-module.exports = { exportarReportes, exportarReporteIndividual, exportarAutoevaluaciones };
+
+const exportarReporteEjecutivo = async (req, res, next) => {
+  try {
+    const Autoevaluacion = require('../models/Autoevaluacion');
+    const RiskScore      = require('../models/RiskScore');
+    const Usuario        = require('../models/Usuario');
+
+    const usuarioId = req.usuario.id || req.usuario._id;
+    const usuario   = await Usuario.findById(usuarioId).lean();
+    if (!usuario) return res.status(404).json({ mensaje: 'Usuario no encontrado' });
+
+    const [evaluaciones, reportes, riskScore] = await Promise.all([
+      Autoevaluacion.find({ usuario: usuarioId }).sort({ fecha: -1 }).limit(5).lean(),
+      Reporte.find({ usuario: usuarioId }).sort({ fecha: -1 }).lean(),
+      RiskScore.findOne({ empresaId: usuarioId }).lean(),
+    ]);
+
+    const doc = new PDFDocument({ margin: 50, size: 'A4', bufferPages: false });
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition',
+      `attachment; filename=reporte-ejecutivo-${usuario.empresa.replace(/\s+/g, '-')}-${Date.now()}.pdf`);
+    doc.pipe(res);
+
+    // ── Encabezado ────────────────────────────────────────────────────────────
+    doc.strokeColor(colors.moradoClaro).lineWidth(3)
+       .moveTo(50, 45).lineTo(545, 45).stroke();
+
+    doc.fontSize(22).fillColor(colors.moradoClaro).font('Helvetica-Bold')
+       .text('SECUPYME', { align: 'center' });
+    doc.fontSize(12).fillColor(colors.textoSuave).font('Helvetica')
+       .text('Reporte Ejecutivo de Ciberseguridad', { align: 'center' });
+    doc.fontSize(9).fillColor(colors.textoSuave)
+       .text(`Generado: ${new Date().toLocaleDateString('es-CO', { year:'numeric', month:'long', day:'numeric' })}`, { align: 'center' });
+
+    doc.strokeColor(colors.moradoClaro).lineWidth(1)
+       .moveTo(50, doc.y + 8).lineTo(545, doc.y + 8).stroke();
+    doc.moveDown(2);
+
+    // ── Datos de la empresa ───────────────────────────────────────────────────
+    crearSeccion(doc, '1. IDENTIFICACIÓN DE LA EMPRESA');
+
+    const datosEmpresa = [
+      ['Empresa',    usuario.empresa],
+      ['Responsable', usuario.nombre],
+      ['Correo',     usuario.email],
+      ['Plan',       usuario.plan.toUpperCase()],
+    ];
+    datosEmpresa.forEach(([label, valor]) => {
+      const y = doc.y;
+      doc.fontSize(9).font('Helvetica-Bold').fillColor(colors.moradoClaro)
+         .text(label, 50, y, { width: 140 });
+      doc.fontSize(9).font('Helvetica').fillColor(colors.texto)
+         .text(valor, 200, y, { width: 300 });
+      doc.moveDown(0.6);
+    });
+
+    doc.moveDown(0.5);
+
+    // ── Nivel de riesgo global ────────────────────────────────────────────────
+    crearSeccion(doc, '2. ESTADO DE RIESGO GLOBAL');
+
+    const ultimaEval   = evaluaciones[0];
+    const nivelRiesgo  = ultimaEval?.nivelRiesgo || 'sin datos';
+    const puntaje      = ultimaEval?.puntaje ?? '—';
+    const colorNivel   = nivelRiesgo === 'alto' ? colors.rojo
+                       : nivelRiesgo === 'medio' ? colors.amarillo
+                       : nivelRiesgo === 'bajo'  ? colors.verde
+                       : colors.textoSuave;
+
+    const scoreRisk = riskScore?.score ?? '—';
+    const nivelRisk = riskScore?.nivel ?? '—';
+
+    // Caja de nivel
+    const cajaY = doc.y;
+    doc.roundedRect(50, cajaY, 490, 64, 6).stroke(colors.borde);
+
+    doc.fontSize(11).font('Helvetica-Bold').fillColor(colors.moradoClaro)
+       .text('Nivel de riesgo (última autoevaluación)', 65, cajaY + 10);
+    doc.fontSize(22).font('Helvetica-Bold').fillColor(colorNivel)
+       .text(nivelRiesgo.toUpperCase(), 65, cajaY + 26);
+    doc.fontSize(10).font('Helvetica').fillColor(colors.textoSuave)
+       .text(`Puntaje: ${puntaje}/20`, 65, cajaY + 50);
+
+    doc.fontSize(11).font('Helvetica-Bold').fillColor(colors.moradoClaro)
+       .text('Risk Score', 320, cajaY + 10);
+    doc.fontSize(22).font('Helvetica-Bold').fillColor(colorNivel)
+       .text(`${scoreRisk}`, 320, cajaY + 26);
+    doc.fontSize(10).font('Helvetica').fillColor(colors.textoSuave)
+       .text(`Nivel: ${nivelRisk}`, 320, cajaY + 50);
+
+    doc.y = cajaY + 80;
+    doc.moveDown(0.5);
+
+    // ── Resumen de incidentes ─────────────────────────────────────────────────
+    crearSeccion(doc, '3. RESUMEN DE INCIDENTES');
+
+    const abiertos    = reportes.filter(r => r.estado === 'abierto').length;
+    const enProceso   = reportes.filter(r => r.estado === 'en proceso').length;
+    const resueltos   = reportes.filter(r => r.estado === 'resuelto').length;
+    const criticos    = reportes.filter(r => r.prioridad === 'alta').length;
+
+    const metricas = [
+      ['Total de reportes',    reportes.length,  colors.texto],
+      ['Abiertos',             abiertos,          colors.rojo],
+      ['En proceso',           enProceso,         colors.amarillo],
+      ['Resueltos',            resueltos,         colors.verde],
+      ['Prioridad alta',       criticos,          colors.rojo],
+    ];
+
+    const colW = 95;
+    const startX = 50;
+    const metY = doc.y;
+
+    metricas.forEach(([label, valor, color], i) => {
+      const x = startX + i * colW;
+      doc.roundedRect(x, metY, colW - 8, 52, 4).stroke(colors.borde);
+      doc.fontSize(18).font('Helvetica-Bold').fillColor(color)
+         .text(String(valor), x, metY + 8, { width: colW - 8, align: 'center' });
+      doc.fontSize(8).font('Helvetica').fillColor(colors.textoSuave)
+         .text(label, x, metY + 34, { width: colW - 8, align: 'center' });
+    });
+
+    doc.y = metY + 66;
+    doc.moveDown(0.5);
+
+    // ── Últimos incidentes ────────────────────────────────────────────────────
+    if (reportes.length > 0) {
+      crearSeccion(doc, '4. INCIDENTES RECIENTES');
+      const recientes = reportes.slice(0, 5);
+      recientes.forEach((r, i) => {
+        const colorEstado = r.estado === 'abierto' ? colors.rojo
+                          : r.estado === 'en proceso' ? colors.amarillo : colors.verde;
+        const y = doc.y;
+        doc.fontSize(9).font('Helvetica-Bold').fillColor(colors.texto)
+           .text(`${i + 1}. ${r.tipoVulnerabilidad}`, 50, y, { width: 280 });
+        doc.fontSize(9).font('Helvetica').fillColor(colorEstado)
+           .text(r.estado.toUpperCase(), 340, y, { width: 100 });
+        doc.fontSize(9).fillColor(colors.textoSuave)
+           .text(new Date(r.fecha).toLocaleDateString('es-CO'), 450, y, { width: 90 });
+        doc.fontSize(8).font('Helvetica').fillColor(colors.textoSuave)
+           .text(r.descripcion.substring(0, 80) + (r.descripcion.length > 80 ? '...' : ''), 50, doc.y, { width: 490 });
+        doc.moveDown(0.8);
+      });
+      doc.moveDown(0.3);
+    }
+
+    // ── Recomendaciones ───────────────────────────────────────────────────────
+    if (ultimaEval?.recomendaciones?.length > 0) {
+      crearSeccion(doc, '5. PLAN DE ACCIÓN RECOMENDADO');
+      ultimaEval.recomendaciones.slice(0, 6).forEach((r, i) => {
+        doc.fontSize(9).font('Helvetica').fillColor(colors.texto)
+           .text(`${i + 1}.  ${r}`, 50, doc.y, { width: 490 });
+        doc.moveDown(0.5);
+      });
+      doc.moveDown(0.3);
+    }
+
+    // ── Tendencia de autoevaluaciones ─────────────────────────────────────────
+    if (evaluaciones.length > 1) {
+      crearSeccion(doc, '6. TENDENCIA DE PUNTAJES');
+      evaluaciones.slice().reverse().forEach(e => {
+        const barW = Math.round((e.puntaje / 20) * 300);
+        const barColor = e.nivelRiesgo === 'alto' ? colors.rojo
+                       : e.nivelRiesgo === 'medio' ? colors.amarillo : colors.verde;
+        const y = doc.y;
+        doc.fontSize(8).font('Helvetica').fillColor(colors.textoSuave)
+           .text(new Date(e.fecha).toLocaleDateString('es-CO'), 50, y, { width: 80 });
+        doc.rect(140, y + 1, barW, 10).fill(barColor);
+        doc.fontSize(8).fillColor(colors.texto)
+           .text(`${e.puntaje}/20`, 450, y, { width: 60 });
+        doc.moveDown(0.9);
+      });
+      doc.moveDown(0.3);
+    }
+
+    // ── Footer ────────────────────────────────────────────────────────────────
+    doc.moveDown(1);
+    doc.strokeColor(colors.moradoClaro).lineWidth(1)
+       .moveTo(50, doc.y).lineTo(545, doc.y).stroke();
+    doc.moveDown(0.5);
+    doc.fontSize(8).fillColor(colors.textoSuave).font('Helvetica')
+       .text('Secupyme © 2026 — Plataforma de Ciberseguridad para PYMEs Colombianas', { align: 'center' });
+    doc.fontSize(7).fillColor(colors.borde)
+       .text('Documento confidencial — Generado automáticamente', { align: 'center' });
+
+    doc.end();
+  } catch (error) {
+    logger.error('Error en exportarReporteEjecutivo:', error);
+    if (!res.headersSent) next(error);
+  }
+};
+
+module.exports = { exportarReportes, exportarReporteIndividual, exportarAutoevaluaciones, exportarReporteEjecutivo };

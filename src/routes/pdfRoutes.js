@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
-const { exportarReportes, exportarReporteIndividual, exportarAutoevaluaciones } = require('../controllers/pdfController');
+const { exportarReportes, exportarReporteIndividual, exportarAutoevaluaciones, exportarReporteEjecutivo } = require('../controllers/pdfController');
 
 const verificarTokenPDF = (req, res, next) => {
   const token = req.query.token;
@@ -17,5 +17,6 @@ const verificarTokenPDF = (req, res, next) => {
 router.get('/reportes', verificarTokenPDF, exportarReportes);
 router.get('/reportes/:id', verificarTokenPDF, exportarReporteIndividual);
 router.get('/autoevaluaciones', verificarTokenPDF, exportarAutoevaluaciones);
+router.get('/ejecutivo', verificarTokenPDF, exportarReporteEjecutivo);
 
 module.exports = router;

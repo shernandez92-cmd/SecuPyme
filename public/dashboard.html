@@ -66,6 +66,17 @@
       </div>
 
       </div><!-- /contenido-stats -->
+      <!-- Reporte ejecutivo -->
+      <div style="display:flex;justify-content:flex-end;margin-top:16px;">
+        <button onclick="descargarEjecutivo()"
+          style="font-family:'Share Tech Mono',monospace;font-size:11px;letter-spacing:2px;padding:10px 24px;background:transparent;border:1px solid #7c3aed;color:#7c3aed;cursor:pointer;border-radius:3px;transition:all .2s;"
+          onmouseover="this.style.background='#7c3aed';this.style.color='#fff'"
+          onmouseout="this.style.background='transparent';this.style.color='#7c3aed'">
+          ↓ REPORTE EJECUTIVO PDF
+        </button>
+      </div>
+
+
 
       <div class="form-card" style="margin-top: 24px;">
         <h3>REPORTES ÚLTIMAS 72 HORAS</h3>
@@ -105,6 +116,12 @@
     const token = localStorage.getItem('token');
     if (!token) window.location.href = '/';
     cargarSidebar('dashboard');
+
+    function descargarEjecutivo() {
+      const token = localStorage.getItem('token');
+      window.open('/api/pdf/ejecutivo?token=' + token, '_blank');
+    }
+
     if (!sessionStorage.getItem('notif_login_done')) {
       const nombre = localStorage.getItem('nombre') || 'Usuario';
       Notificaciones.agregar('sistema', 'Sesión iniciada', 'Bienvenido, ' + nombre);
