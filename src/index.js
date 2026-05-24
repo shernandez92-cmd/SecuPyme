@@ -32,15 +32,35 @@ app.use(express.static('public'));
 app.use(require('./middleware/httpLogger'));
 app.use(express.json());
 
+app.set('trust proxy', 1); // Render/proxies
+
 const limiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 500 });
 const loginLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 5, message: { mensaje: 'Demasiados intentos' } });
 app.use(limiter);
+
+const forgotLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000, // 1 hora
+  max: 5,
+  message: { mensaje: 'Demasiados intentos de recuperación, intenta en 1 hora' },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+const registroLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000, // 1 hora
+  max: 10,
+  message: { mensaje: 'Demasiados registros desde esta IP' },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
 
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
 app.use('/api/auth/login', loginLimiter);
+app.use('/api/auth/forgot-password', forgotLimiter);
+app.use('/api/auth/register', registroLimiter);
 
 const authRoutes = require('./routes/authRoutes');
 const reporteRoutes = require('./routes/reporteRoutes');
