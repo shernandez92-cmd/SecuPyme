@@ -16,16 +16,19 @@ Plataforma de ciberseguridad diseñada para pequeñas y medianas empresas (PYMES
 - Recuperación de contraseña por correo con token de un solo uso (30 min)
 - Reporte de incidentes de seguridad con seguimiento de estado y prioridad
 - Autoevaluación de seguridad dinámica — preguntas cargadas desde BD, puntaje 0–20
+- Soporte para preguntas abiertas (texto libre) y preguntas condicionales (visibilidad según respuesta anterior)
 - Historial de evaluaciones para visualizar evolución en el tiempo
 - Dashboard con risk score en tiempo real y desglose narrativo de eventos
 - Chat en tiempo real con el equipo de seguridad (Socket.IO)
 - Descarga de reportes individuales y consolidados en PDF
+- Reporte ejecutivo PDF con resumen gerencial: nivel de riesgo global, métricas de incidentes, plan de acción recomendado y tendencia histórica de puntajes
 - Centro de notificaciones por categorías
 - Generación de API key para conectar sistemas externos al SIEM
 
 ### Para administradores
 - Panel de gestión de usuarios: cambiar plan, rol, eliminar
-- Gestión dinámica de preguntas de autoevaluación (crear, activar/desactivar)
+- Gestión dinámica de preguntas de autoevaluación (crear, editar inline, activar/desactivar)
+- Soporte para preguntas tipo boolean (Sí/No) y abiertas (texto), con lógica condicional entre preguntas
 - Panel SIEM con eventos de seguridad en tiempo real, filtros y paginación
 - Monitor de risk scores de todas las empresas con bloqueo/desbloqueo manual
 - Logs de auditoría completos: cada acción admin queda registrada
@@ -35,6 +38,19 @@ Plataforma de ciberseguridad diseñada para pequeñas y medianas empresas (PYMES
 - Resumen semanal de seguridad generado con IA
 
 ---
+
+
+## Capturas de pantalla
+
+> Las siguientes pantallas muestran el flujo principal de la plataforma.
+
+| Dashboard | Autoevaluación | SIEM |
+|-----------|---------------|------|
+| Risk score en tiempo real, últimos incidentes y acceso al reporte ejecutivo PDF | Cuestionario dinámico con preguntas condicionales y resultado inmediato | Eventos de seguridad en tiempo real con filtros por severidad |
+
+| Reporte ejecutivo PDF | Panel admin |
+|-----------------------|-------------|
+| Consolidado gerencial: nivel de riesgo, métricas de incidentes, plan de acción y tendencia histórica | Gestión de usuarios, preguntas de autoevaluación, logs de auditoría e integración Shodan/VirusTotal |
 
 ## Stack tecnológico
 
@@ -73,13 +89,15 @@ secupyme/
 │   │   ├── chatController.js
 │   │   ├── auditController.js          # Logs de auditoría
 │   │   ├── uploadController.js
+│   │   ├── conversationController.js   # getConversaciones, getConversacionActual, crearConversacion
 │   │   ├── pdfController.js
 │   │   ├── twoFactorController.js
+│   │   ├── pdfController.js            # Reportes individuales, consolidados y reporte ejecutivo
 │   │   └── integracionController.js    # Shodan + VirusTotal
 │   ├── models/
 │   │   ├── Usuario.js                  # Con ipsMonitoreadas y apiKey (hash)
 │   │   ├── Reporte.js
-│   │   ├── Autoevaluacion.js           # respuestas: Map<String, Boolean>
+│   │   ├── Autoevaluacion.js           # respuestas: Map<String, Mixed> (Boolean | String)
 │   │   ├── RiskScore.js
 │   │   ├── SecurityEvent.js
 │   │   ├── AuditLog.js
@@ -217,6 +235,7 @@ GET    /                           Historial (paginado)
 GET    /preguntas                  Preguntas activas para el formulario
 GET    /preguntas/todas            Todas las preguntas (admin)
 POST   /preguntas                  Crear pregunta (admin)
+PUT    /preguntas/:id              Editar pregunta (admin)
 PUT    /preguntas/:id/toggle       Activar/desactivar pregunta (admin)
 ```
 
@@ -249,6 +268,8 @@ POST   /api/chat                   Enviar mensaje
 GET    /api/chat                   Obtener mensajes
 GET    /api/pdf/reportes           PDF consolidado
 GET    /api/pdf/reportes/:id       PDF individual
+GET    /api/pdf/autoevaluaciones    PDF historial de autoevaluaciones
+GET    /api/pdf/ejecutivo           Reporte ejecutivo gerencial (empresa + riesgo + incidentes + plan de acción)
 GET    /api/audit                  Logs de auditoría (admin, paginado)
 ```
 
