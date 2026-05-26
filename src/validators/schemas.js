@@ -83,7 +83,8 @@ const analizarRisk = z.object({
 });
 
 const asistente = z.object({
-  mensaje: z.string().min(1).max(2000),
+  pregunta: z.string().min(1).max(2000),
+  contexto: z.string().max(500).optional(),
 });
 
 const enviarMensaje = z.object({
