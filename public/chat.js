@@ -215,6 +215,20 @@ async function enviarChatMensaje() {
     body.paraId = empresaSeleccionada;
   }
 
+  const nombre = localStorage.getItem('nombre') || 'Tú';
+  const contenedor = document.getElementById('chat-mensajes');
+  if (contenedor) {
+    contenedor.innerHTML += `
+      <div style="margin-bottom: 10px; text-align: right;">
+        <span style="font-size: 9px; color: #6b5a8a;">${nombre} · ${formatHora(new Date())}</span>
+        <div style="display: inline-block; background: rgba(124,58,237,0.2); border: 1px solid #7c3aed; padding: 6px 12px; border-radius: 2px; margin-top: 2px; font-size: 12px; max-width: 85%; word-break: break-word;">
+          ${renderTextoMensaje(texto)}
+        </div>
+      </div>
+    `;
+    contenedor.scrollTop = contenedor.scrollHeight;
+  }
+
   await apiFetch('/api/chat', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'authorization': token },
@@ -238,6 +252,8 @@ function recibirMensajeSocket(mensaje) {
       Notificaciones.agregar('chat', 'Nuevo mensaje de ' + mensaje.usuario.nombre, mensaje.texto.substring(0, 60));
     }
   }
+
+  if (esYo) return;
 
   const contenedor = document.getElementById('chat-mensajes');
   if (contenedor && chatAbierto) {
