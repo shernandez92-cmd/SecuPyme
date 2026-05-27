@@ -732,6 +732,26 @@ body.light textarea {
     color: #1a0a2e;
   }
 }
+
+body.dark {
+  --negro: #050508;
+  --morado-oscuro: #0d0618;
+  --morado: #4a1a8a;
+  --morado-claro: #7c3aed;
+  --acento: #a855f7;
+  --acento-brillante: #d946ef;
+  --texto: #e2d9f3;
+  --texto-suave: #6b5a8a;
+  --borde: #1a0a2e;
+  background-color: var(--negro);
+}
+body.dark select,
+body.dark input,
+body.dark textarea {
+  background: var(--morado-oscuro);
+  border-color: var(--borde);
+  color: var(--texto);
+}
 /* =================== RESPONSIVE =================== */
 
 /* Tablet y móvil grande */

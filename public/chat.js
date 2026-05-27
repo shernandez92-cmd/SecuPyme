@@ -1,6 +1,7 @@
 let mensajesPendientes = [];
 let conversationIdActual = null;
 let empresaSeleccionada = null;
+const _mensajesRendered = new Set();
 
 function inicializarChat() {
   if (document.getElementById('chat-flotante')) return;
@@ -254,6 +255,8 @@ function recibirMensajeSocket(mensaje) {
   }
 
   if (esYo) return;
+  if (_mensajesRendered.has(mensaje._id)) return;
+  _mensajesRendered.add(mensaje._id);
 
   const contenedor = document.getElementById('chat-mensajes');
   if (contenedor && chatAbierto) {

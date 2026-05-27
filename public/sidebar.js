@@ -152,8 +152,15 @@ function cerrarHamburguesa() {
 
 // =================== MODO ===================
 function inicializarModo() {
-  const modo = localStorage.getItem('modo') || 'dark';
-  if (modo === 'light') document.body.classList.add('light');
+  const modo = localStorage.getItem('modo') || 'system';
+  if (modo === 'light') {
+    document.body.classList.add('light');
+    document.body.classList.remove('dark');
+  } else if (modo === 'dark') {
+    document.body.classList.add('dark');
+    document.body.classList.remove('light');
+  }
+  // si es 'system', no agrega ninguna clase — prefers-color-scheme decide
 }
 
 function toggleModo() {
@@ -163,12 +170,14 @@ function toggleModo() {
   const label = document.getElementById('toggleLabel');
   if (esLight) {
     document.body.classList.remove('light');
+    document.body.classList.add('dark');
     localStorage.setItem('modo', 'dark');
     if (indicador) indicador.style.left = '2px';
     if (icono) icono.innerHTML = '<svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="display:inline-block;vertical-align:middle"><path d="M11.5 9A5 5 0 015 2.5a5 5 0 100 9 5 5 0 006.5-2.5z" stroke="#9d86c8" stroke-width="1.1" stroke-linejoin="round"/></svg>';
     if (label) label.textContent = 'DARK';
   } else {
     document.body.classList.add('light');
+    document.body.classList.remove('dark');
     localStorage.setItem('modo', 'light');
     if (indicador) indicador.style.left = '22px';
     if (icono) icono.innerHTML = '<svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="display:inline-block;vertical-align:middle"><circle cx="7" cy="7" r="2.5" stroke="#eab308" stroke-width="1.1"/><path d="M7 1v1.5M7 11.5V13M1 7h1.5M11.5 7H13M2.5 2.5l1 1M10.5 10.5l1 1M2.5 11.5l1-1M10.5 3.5l1-1" stroke="#eab308" stroke-width="1" stroke-linecap="round"/></svg>';
