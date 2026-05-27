@@ -1,5 +1,6 @@
 const logger = require('../utils/logger');
 const Conversation = require('../models/Conversation');
+const Usuario = require('../models/Usuario');
 
 const getConversaciones = async (req, res, next) => {
   try {
@@ -34,8 +35,10 @@ const getConversacionActual = async (req, res, next) => {
 
       if (!conversation) {
         try {
+          const admin = await Usuario.findOne({ rol: 'admin' }).select('_id').lean();
+          const adminId = admin ? admin._id : userId;
           conversation = new Conversation({
-            adminId: userId,
+            adminId: adminId,
             empresaId: userId,
             ultimoMensaje: null,
             ultimaActividad: new Date(),
