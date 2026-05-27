@@ -55,8 +55,6 @@ const enviarMensaje = async (req, res, next) => {
     if (io) {
       if (conversation) {
         io.to(`conv:${conversation._id}`).emit('nuevoMensaje', populado);
-      } else {
-        io.emit('nuevoMensaje', populado);
       }
     }
 

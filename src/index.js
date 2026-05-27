@@ -137,8 +137,8 @@ io.on('connection', async (socket) => {
   // Unirse a rooms de conversaciones
   try {
     if (rol === 'admin') {
-      // Solo las últimas 50 conversaciones activas para evitar joins masivos
-      const conversations = await Conversation.find({ adminId: userId })
+      // Unirse a todas las conversaciones recientes (sin filtrar por adminId para cubrir datos legacy)
+      const conversations = await Conversation.find({})
         .sort({ ultimaActividad: -1 })
         .limit(50)
         .select('_id');
