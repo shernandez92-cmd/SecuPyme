@@ -119,7 +119,7 @@ io.use((socket, next) => {
   if (!token) return next(new Error('AUTH_REQUIRED'));
   try {
     const payload = jwt.verify(token, process.env.JWT_SECRET);
-    socket.usuario = { userId: payload.id, rol: payload.rol, empresaId: payload.empresa || payload.id };
+    socket.usuario = { userId: payload.id, rol: payload.rol, empresaId: payload.id };
     next();
   } catch {
     next(new Error('AUTH_INVALID'));
