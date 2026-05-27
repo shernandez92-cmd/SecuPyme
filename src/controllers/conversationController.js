@@ -8,7 +8,7 @@ const getConversaciones = async (req, res, next) => {
 
     let conversations;
     if (rol === 'admin') {
-      conversations = await Conversation.find({ adminId: userId })
+      conversations = await Conversation.find({ adminId: userId, empresaId: { $ne: null } })
         .populate('empresaId', 'nombre empresa rol')
         .sort({ ultimaActividad: -1 });
     } else {
