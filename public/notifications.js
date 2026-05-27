@@ -74,7 +74,7 @@ const Notificaciones = (() => {
     const filtradas = _filtroActivo === 'todas' ? todas : todas.filter(n => n.categoria === _filtroActivo);
 
     if (filtradas.length === 0) {
-      lista.innerHTML = `<div style="padding:32px 16px;text-align:center;color:#6b5a8a;font-family:'Share Tech Mono',monospace;font-size:11px;letter-spacing:1px;">SIN NOTIFICACIONES</div>`;
+      lista.innerHTML = `<div style="padding:32px 16px;text-align:center;color:var(--texto-suave);font-family:'Share Tech Mono',monospace;font-size:11px;letter-spacing:1px;">SIN NOTIFICACIONES</div>`;
       return;
     }
 
@@ -83,15 +83,15 @@ const Notificaciones = (() => {
       const diff = Math.floor((new Date() - new Date(n.fecha)) / 1000);
       const fecha = diff < 60 ? 'Ahora' : diff < 3600 ? `Hace ${Math.floor(diff/60)} min` : diff < 86400 ? `Hace ${Math.floor(diff/3600)} h` : formatFecha(n.fecha);
       return `
-        <div onclick="Notificaciones.marcarLeida(${n.id})" style="padding:12px 16px;border-bottom:1px solid rgba(107,90,138,0.15);cursor:pointer;background:${n.leida ? 'transparent' : 'rgba(124,58,237,0.07)'};">
+        <div onclick="Notificaciones.marcarLeida(${n.id})" style="padding:12px 16px;border-bottom:1px solid var(--borde);cursor:pointer;background:${n.leida ? 'transparent' : 'rgba(124,58,237,0.1)'};">
           <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
             <span style="font-size:13px;">${cat.icono}</span>
             <span style="font-family:'Share Tech Mono',monospace;font-size:9px;color:${cat.color};letter-spacing:1px;">${cat.label}</span>
             ${!n.leida ? '<span style="width:6px;height:6px;background:#7c3aed;border-radius:50%;display:inline-block;margin-left:auto;"></span>' : ''}
           </div>
-          <p style="font-size:12px;color:#e2d9f3;margin:0 0 3px 0;">${n.titulo}</p>
-          ${n.detalle ? `<p style="font-size:11px;color:#6b5a8a;margin:0;">${n.detalle}</p>` : ''}
-          <p style="font-size:10px;color:#4a3a6a;margin:4px 0 0 0;font-family:'Share Tech Mono',monospace;">${fecha}</p>
+          <p style="font-size:12px;color:var(--texto);margin:0 0 3px 0;">${n.titulo}</p>
+          ${n.detalle ? `<p style="font-size:11px;color:var(--texto-suave);margin:0;">${n.detalle}</p>` : ''}
+          <p style="font-size:10px;color:var(--texto-suave);margin:4px 0 0 0;opacity:0.7;font-family:'Share Tech Mono',monospace;">${fecha}</p>
         </div>`;
     }).join('');
   }
@@ -104,7 +104,7 @@ const Notificaciones = (() => {
 
       document.body.insertAdjacentHTML('beforeend', `
         <div id="notif-overlay" style="position:fixed;inset:0;z-index:9996;" onclick="Notificaciones.cerrarPanel()"></div>
-        <div id="notif-panel" style="position:fixed;top:0;right:0;width:340px;height:100vh;background:#0d0618;border-left:1px solid rgba(124,58,237,0.3);z-index:9997;display:flex;flex-direction:column;box-shadow:-8px 0 40px rgba(0,0,0,0.6);transform:translateX(100%);transition:transform 0.25s ease;">
+        <div id="notif-panel" style="position:fixed;top:0;right:0;width:340px;height:100vh;background:var(--morado-oscuro);border-left:1px solid var(--borde);z-index:9997;display:flex;flex-direction:column;box-shadow:-8px 0 40px rgba(0,0,0,0.6);transform:translateX(100%);transition:transform 0.25s ease;">
           <div style="padding:18px 16px 12px;border-bottom:1px solid rgba(124,58,237,0.2);flex-shrink:0;">
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
               <span style="font-family:'Share Tech Mono',monospace;font-size:12px;color:#a855f7;letter-spacing:2px;display:flex;align-items:center;gap:6px;"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" style="display:inline-block;vertical-align:middle"><path d="M8 2C5.8 2 4 3.8 4 6v3L2.5 11h11L12 9V6c0-2.2-1.8-4-4-4z" stroke="#9d86c8" stroke-width="1.1" stroke-linejoin="round"/><path d="M6.5 11v.5a1.5 1.5 0 003 0V11" stroke="#9d86c8" stroke-width="1.1"/></svg> NOTIFICACIONES</span>
