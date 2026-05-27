@@ -109,6 +109,9 @@ async function cargarConversacionesAdmin() {
 async function seleccionarConversacion(conv) {
   conversationIdActual = conv._id;
   fetch(`/api/chat/leido/${conv._id}`, { method: "PUT", headers: { "authorization": localStorage.getItem("token") } });
+  if (typeof socket !== 'undefined' && socket && socket.connected) {
+    socket.emit('joinConversacion', conv._id);
+  }
   empresaSeleccionada = (conv.empresaId?._id || conv.empresaId)?.toString();
   const nombre = conv.empresaId?.empresa || conv.empresaId?.nombre || 'Empresa';
   const subtitulo = document.getElementById('chat-empresa-nombre');

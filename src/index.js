@@ -209,6 +209,12 @@ io.on('connection', async (socket) => {
     }
   });
 
+  socket.on('joinConversacion', (convId) => {
+    if (typeof convId === 'string' && convId.match(/^[a-f0-9]{24}$/i)) {
+      socket.join(`conv:${convId}`);
+    }
+  });
+
   socket.on('disconnect', (reason) => {
     usuariosConectados.delete(socket.id);
     logger.info('Socket desconectado:', { socketId: socket.id, userId, reason });
