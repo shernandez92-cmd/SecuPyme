@@ -703,6 +703,34 @@ body.light textarea {
   border-color: #e8e0f5;
   color: #1a0a2e;
 }
+
+@media (prefers-color-scheme: light) {
+  body:not(.dark) {
+    --negro: #f8f7ff;
+    --morado-oscuro: #f0ebff;
+    --morado: #7c3aed;
+    --morado-claro: #7c3aed;
+    --acento: #6d28d9;
+    --acento-brillante: #7c3aed;
+    --texto: #1a0a2e;
+    --texto-suave: #6b5a8a;
+    --borde: #e8e0f5;
+    background-color: var(--negro);
+  }
+  body:not(.dark) .login-box,
+  body:not(.dark) .form-card,
+  body:not(.dark) .stat-card {
+    background: #ffffff;
+    border-color: #e8e0f5;
+  }
+  body:not(.dark) select,
+  body:not(.dark) input,
+  body:not(.dark) textarea {
+    background: #ffffff;
+    border-color: #e8e0f5;
+    color: #1a0a2e;
+  }
+}
 /* =================== RESPONSIVE =================== */
 
 /* Tablet y móvil grande */
