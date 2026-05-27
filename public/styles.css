@@ -700,7 +700,7 @@ body.light .tabla-reportes td {
 body.light select,
 body.light input,
 body.light textarea {
-  background: #ffffff;
+  background: var(--morado-oscuro);
   border-color: #e8e0f5;
   color: #1a0a2e;
 }
@@ -727,7 +727,7 @@ body.light textarea {
   body:not(.dark) select,
   body:not(.dark) input,
   body:not(.dark) textarea {
-    background: #ffffff;
+    background: var(--morado-oscuro);
     border-color: #e8e0f5;
     color: #1a0a2e;
   }
