@@ -50,19 +50,19 @@
         </div>
 
         <!-- Formulario nueva pregunta -->
-        <div id="formNuevaPregunta" style="display:none;background:#1a0a2e;border:1px solid #7c3aed33;border-radius:6px;padding:20px;margin-bottom:20px;">
+        <div id="formNuevaPregunta" style="display:none;background:var(--morado-oscuro);border:1px solid #7c3aed33;border-radius:6px;padding:20px;margin-bottom:20px;">
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
             <div style="grid-column:1/-1;">
               <label style="font-size:10px;color:#94a3b8;letter-spacing:1px;">TEXTO DE LA PREGUNTA</label>
-              <input id="npTexto" type="text" placeholder="¿Su empresa...?" style="width:100%;background:#0d0618;border:1px solid #7c3aed44;color:#e2d9f3;font-family:'Share Tech Mono',monospace;font-size:12px;padding:8px;border-radius:4px;margin-top:4px;" />
+              <input id="npTexto" type="text" placeholder="¿Su empresa...?" style="width:100%;background:var(--morado-oscuro);border:1px solid #7c3aed44;color:var(--texto);font-family:'Share Tech Mono',monospace;font-size:12px;padding:8px;border-radius:4px;margin-top:4px;" />
             </div>
             <div>
               <label style="font-size:10px;color:#94a3b8;letter-spacing:1px;">CAMPO (clave única)</label>
-              <input id="npCampo" type="text" placeholder="miCampoNuevo" style="width:100%;background:#0d0618;border:1px solid #7c3aed44;color:#e2d9f3;font-family:'Share Tech Mono',monospace;font-size:12px;padding:8px;border-radius:4px;margin-top:4px;" />
+              <input id="npCampo" type="text" placeholder="miCampoNuevo" style="width:100%;background:var(--morado-oscuro);border:1px solid #7c3aed44;color:var(--texto);font-family:'Share Tech Mono',monospace;font-size:12px;padding:8px;border-radius:4px;margin-top:4px;" />
             </div>
             <div>
               <label style="font-size:10px;color:#94a3b8;letter-spacing:1px;">CATEGORÍA</label>
-              <select id="npCategoria" style="width:100%;background:#0d0618;border:1px solid #7c3aed44;color:#e2d9f3;font-family:'Share Tech Mono',monospace;font-size:12px;padding:8px;border-radius:4px;margin-top:4px;">
+              <select id="npCategoria" style="width:100%;background:var(--morado-oscuro);border:1px solid #7c3aed44;color:var(--texto);font-family:'Share Tech Mono',monospace;font-size:12px;padding:8px;border-radius:4px;margin-top:4px;">
                 <option value="general">General</option>
                 <option value="acceso">Acceso</option>
                 <option value="datos">Datos</option>
@@ -74,11 +74,11 @@
             </div>
             <div>
               <label style="font-size:10px;color:#94a3b8;letter-spacing:1px;">PESO (puntos)</label>
-              <input id="npPeso" type="number" min="1" max="10" value="2" style="width:100%;background:#0d0618;border:1px solid #7c3aed44;color:#e2d9f3;font-family:'Share Tech Mono',monospace;font-size:12px;padding:8px;border-radius:4px;margin-top:4px;" />
+              <input id="npPeso" type="number" min="1" max="10" value="2" style="width:100%;background:var(--morado-oscuro);border:1px solid #7c3aed44;color:var(--texto);font-family:'Share Tech Mono',monospace;font-size:12px;padding:8px;border-radius:4px;margin-top:4px;" />
             </div>
             <div style="grid-column:1/-1;">
               <label style="font-size:10px;color:#94a3b8;letter-spacing:1px;">RECOMENDACIÓN SI RESPONDE NO</label>
-              <input id="npRecomendacion" type="text" placeholder="Implementar..." style="width:100%;background:#0d0618;border:1px solid #7c3aed44;color:#e2d9f3;font-family:'Share Tech Mono',monospace;font-size:12px;padding:8px;border-radius:4px;margin-top:4px;" />
+              <input id="npRecomendacion" type="text" placeholder="Implementar..." style="width:100%;background:var(--morado-oscuro);border:1px solid #7c3aed44;color:var(--texto);font-family:'Share Tech Mono',monospace;font-size:12px;padding:8px;border-radius:4px;margin-top:4px;" />
             </div>
           </div>
           <button onclick="crearPregunta()" style="background:#7c3aed;border:none;color:#fff;font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:2px;padding:10px 20px;cursor:pointer;border-radius:4px;">
@@ -108,7 +108,7 @@
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
           <h3>LOGS DE AUDITORÍA</h3>
           <div style="display:flex;gap:8px;flex-wrap:wrap;">
-            <select id="filtroAccion" onchange="cargarAudit()" style="background:#1a0a2e;border:1px solid #7c3aed44;color:#e2d9f3;font-family:'Share Tech Mono',monospace;font-size:11px;padding:6px 10px;border-radius:4px;">
+            <select id="filtroAccion" onchange="cargarAudit()" style="background:var(--morado-oscuro);border:1px solid #7c3aed44;color:var(--texto);font-family:'Share Tech Mono',monospace;font-size:11px;padding:6px 10px;border-radius:4px;">
               <option value="">TODAS LAS ACCIONES</option>
               <option value="cambio_plan">CAMBIO PLAN</option>
               <option value="cambio_rol">CAMBIO ROL</option>
@@ -149,6 +149,9 @@
     if (!token) window.location.href = '/';
     if (rol !== 'admin') window.location.href = '/dashboard.html';
     cargarSidebar('admin');
+    cargarUsuarios();
+    cargarAudit();
+    cargarPreguntas();
     if (!sessionStorage.getItem('notif_login_done')) {
       const nombre = localStorage.getItem('nombre') || 'Admin';
       Notificaciones.agregar('sistema', 'Sesión iniciada', 'Bienvenido, ' + nombre);
@@ -197,8 +200,8 @@
         body: JSON.stringify({ plan })
       });
       cargarUsuarios();
-    cargarAudit();
-    cargarPreguntas();
+      cargarAudit();
+      cargarPreguntas();
     }
 
     async function cambiarRol(userId, rol) {
@@ -208,8 +211,8 @@
         body: JSON.stringify({ rol })
       });
       cargarUsuarios();
-    cargarAudit();
-    cargarPreguntas();
+      cargarAudit();
+      cargarPreguntas();
     }
 
     async function eliminarUsuario(userId, rol, nombre) {
@@ -285,7 +288,7 @@
         const pag = document.getElementById('auditPaginacion');
         pag.innerHTML = '';
         for (let i = 1; i <= data.pages; i++) {
-          pag.innerHTML += `<button onclick="cargarAudit(${i})" style="background:${i === page ? '#7c3aed' : '#1a0a2e'};border:1px solid #7c3aed44;color:#e2d9f3;font-family:'Share Tech Mono',monospace;font-size:10px;padding:6px 12px;cursor:pointer;border-radius:3px;">${i}</button>`;
+          pag.innerHTML += `<button onclick="cargarAudit(${i})" style="background:${i === page ? '#7c3aed' : 'var(--morado-oscuro)'};border:1px solid #7c3aed44;color:var(--texto);font-family:'Share Tech Mono',monospace;font-size:10px;padding:6px 12px;cursor:pointer;border-radius:3px;">${i}</button>`;
         }
       } catch (e) {
         console.error('Error cargando audit:', e);

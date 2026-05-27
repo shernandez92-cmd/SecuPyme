@@ -42,7 +42,7 @@
             <h4 style="font-family:'Share Tech Mono',monospace;font-size:11px;letter-spacing:3px;color:var(--texto-suave);margin-bottom:16px;">NUEVA PREGUNTA</h4>
             <div style="display:grid;gap:12px;">
               <input id="np-texto"         class="form-input" placeholder="Texto de la pregunta *">
-              <input id="np-campo"         class="form-input" placeholder="Campo único (snake_case) *">
+              <input id="np-campo"         class="form-input" placeholder="Identificador interno (ej: tiene_antivirus) *">
               <input id="np-categoria"     class="form-input" placeholder="Categoría">
               <input id="np-recomendacion" class="form-input" placeholder="Recomendación si responde NO">
               <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
@@ -51,7 +51,7 @@
               </div>
               <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
                 <select id="np-tipo" class="form-input" style="font-family:'Share Tech Mono',monospace;font-size:13px;">
-                  <option value="boolean">Sí / No (boolean)</option>
+                  <option value="boolean">Sí / No</option>
                   <option value="texto">Respuesta abierta (texto)</option>
                 </select>
                 <input id="np-condicion-campo" class="form-input" placeholder="Condición: campo (opcional)">
@@ -255,7 +255,7 @@
             <input class="form-input" id="e-orden-${id}" type="number" min="0"          value="${p.orden}" placeholder="Orden" style="font-size:12px;padding:6px 10px;">
           </div>
           <select class="form-input" id="e-tipo-${id}" style="font-size:12px;padding:6px 10px;">
-            <option value="boolean" ${p.tipo !== 'texto' ? 'selected' : ''}>Sí / No (boolean)</option>
+            <option value="boolean" ${p.tipo !== 'texto' ? 'selected' : ''}>Sí / No</option>
             <option value="texto"   ${p.tipo === 'texto' ? 'selected' : ''}>Respuesta abierta</option>
           </select>
           <input class="form-input" id="e-condicion-campo-${id}" value="${p.condicionCampo||''}" placeholder="Condición: campo" style="font-size:12px;padding:6px 10px;">
