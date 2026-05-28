@@ -597,6 +597,13 @@
       footer { flex-direction: column; gap: 16px; text-align: center; }
     }
   </style>
+  <script>
+    (function() {
+      const modo = localStorage.getItem('modo');
+      if (modo === 'light') document.body.classList.add('light');
+      else if (modo === 'dark') document.body.classList.add('dark');
+    })();
+  </script>
 </head>
 <body>
 
