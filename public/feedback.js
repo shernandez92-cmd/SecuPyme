@@ -7,7 +7,7 @@ function abrirFeedbackModal() {
   overlay.style.cssText = 'position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,0.7);display:flex;align-items:center;justify-content:center;padding:24px;backdrop-filter:blur(4px);';
 
   overlay.innerHTML = `
-    <div style="background:var(--morado-oscuro, #0d0618);border:1px solid rgba(124,58,237,0.4);border-radius:4px;padding:40px;width:100%;max-width:480px;box-shadow:0 0 60px rgba(124,58,237,0.15);">
+    <div style="background:var(--morado-oscuro, var(--negro, #0d0618));border:1px solid rgba(124,58,237,0.4);border-radius:4px;padding:40px;width:100%;max-width:480px;box-shadow:0 0 60px rgba(124,58,237,0.15);">
       <div style="border-bottom:1px solid rgba(124,58,237,0.2);padding-bottom:16px;margin-bottom:28px;display:flex;justify-content:space-between;align-items:center;">
         <span style="font-family:'Share Tech Mono',monospace;font-size:10px;color:#a855f7;letter-spacing:4px;">REPORTAR PROBLEMA</span>
         <button onclick="document.getElementById('feedback-modal').remove()" style="background:none;border:none;color:#6b5a8a;cursor:pointer;padding:4px;">
@@ -16,11 +16,11 @@ function abrirFeedbackModal() {
       </div>
       <div style="margin-bottom:16px;">
         <label style="font-family:'Share Tech Mono',monospace;font-size:10px;color:#6b5a8a;letter-spacing:2px;display:block;margin-bottom:8px;">EMAIL DE CONTACTO</label>
-        <input id="feedback-email" type="email" placeholder="correo@empresa.com" style="width:100%;background:var(--morado-oscuro,#0d0618);border:1px solid rgba(124,58,237,0.2);color:var(--texto,#e2d9f3);font-family:'Share Tech Mono',monospace;font-size:12px;padding:10px 12px;border-radius:2px;box-sizing:border-box;">
+        <input id="feedback-email" type="email" placeholder="correo@empresa.com" style="width:100%;background:var(--morado-oscuro,var(--negro,#0d0618));border:1px solid rgba(124,58,237,0.2);color:var(--texto,#e2d9f3);font-family:'Share Tech Mono',monospace;font-size:12px;padding:10px 12px;border-radius:2px;box-sizing:border-box;">
       </div>
       <div style="margin-bottom:24px;">
         <label style="font-family:'Share Tech Mono',monospace;font-size:10px;color:#6b5a8a;letter-spacing:2px;display:block;margin-bottom:8px;">DESCRIBE EL PROBLEMA *</label>
-        <textarea id="feedback-mensaje" placeholder="Cuéntanos qué ocurrió..." rows="5" style="width:100%;background:var(--morado-oscuro,#0d0618);border:1px solid rgba(124,58,237,0.2);color:var(--texto,#e2d9f3);font-family:'Share Tech Mono',monospace;font-size:12px;padding:10px 12px;border-radius:2px;resize:vertical;box-sizing:border-box;"></textarea>
+        <textarea id="feedback-mensaje" placeholder="Cuéntanos qué ocurrió..." rows="5" style="width:100%;background:var(--morado-oscuro,var(--negro,#0d0618));border:1px solid rgba(124,58,237,0.2);color:var(--texto,#e2d9f3);font-family:'Share Tech Mono',monospace;font-size:12px;padding:10px 12px;border-radius:2px;resize:vertical;box-sizing:border-box;"></textarea>
       </div>
       <div style="display:flex;gap:12px;">
         <button onclick="document.getElementById('feedback-modal').remove()" style="flex:1;padding:12px;background:transparent;border:1px solid rgba(124,58,237,0.3);color:#6b5a8a;font-family:'Share Tech Mono',monospace;font-size:11px;letter-spacing:2px;cursor:pointer;border-radius:2px;">CANCELAR</button>
