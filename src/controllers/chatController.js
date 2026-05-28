@@ -54,6 +54,7 @@ const enviarMensaje = async (req, res, next) => {
     const io = req.app.get('io');
     if (io) {
       if (conversation) {
+        console.log('EMIT nuevoMensaje a conv:', conversation._id.toString(), 'msg:', populado._id.toString());
         io.to(`conv:${conversation._id}`).emit('nuevoMensaje', populado);
       }
     }
