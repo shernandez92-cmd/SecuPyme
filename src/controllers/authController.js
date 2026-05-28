@@ -203,4 +203,40 @@ const apiKeyStatus = async (req, res, next) => {
   } catch (error) { next(error); }
 };
 
-module.exports = { registro, login, obtenerUsuarios, forgotPassword, resetPassword, generateApiKey, revokeApiKey, apiKeyStatus };
+
+const reportarFalla = async (req, res, next) => {
+  try {
+    const { email, mensaje, pagina } = req.body;
+    if (!mensaje || mensaje.trim().length < 5) {
+      return res.status(400).json({ mensaje: 'El mensaje es muy corto' });
+    }
+
+    await transporter.sendMail({
+      from: `"SecuPyme" <${process.env.EMAIL_USER}>`,
+      to: 'secupyme.notificaciones@gmail.com',
+      subject: '[SecuPyme] Reporte de falla',
+      html: `
+        <div style="font-family: 'Share Tech Mono', monospace; background: #0d0618; color: #e2d9f3; padding: 32px; max-width: 600px;">
+          <div style="border-bottom: 1px solid #7c3aed; padding-bottom: 16px; margin-bottom: 24px;">
+            <span style="font-size: 10px; color: #a855f7; letter-spacing: 4px;">SECUPYME — REPORTE DE FALLA</span>
+          </div>
+          <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
+            <tr><td style="color: #6b5a8a; padding: 8px 0; width: 120px;">EMAIL</td><td style="color: #e2d9f3;">${email || '—'}</td></tr>
+            <tr><td style="color: #6b5a8a; padding: 8px 0;">PÁGINA</td><td style="color: #e2d9f3;">${pagina || '—'}</td></tr>
+            <tr><td style="color: #6b5a8a; padding: 8px 0;">FECHA</td><td style="color: #e2d9f3;">${new Date().toLocaleString('es-CO')}</td></tr>
+          </table>
+          <div style="margin-top: 24px; background: #1a0a2e; border: 1px solid #4a1a8a; padding: 16px; font-size: 13px; line-height: 1.8;">
+            ${mensaje.replace(/\n/g, '<br>')}
+          </div>
+        </div>
+      `
+    });
+
+    res.json({ mensaje: 'Reporte enviado. Gracias por ayudarnos a mejorar.' });
+  } catch (error) {
+    next(error);
+  }
+};
+
+module.exports = {
+  reportarFalla, registro, login, obtenerUsuarios, forgotPassword, resetPassword, generateApiKey, revokeApiKey, apiKeyStatus };

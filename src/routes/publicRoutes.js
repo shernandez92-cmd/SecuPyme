@@ -1,4 +1,5 @@
 const express = require('express');
+const { reportarFalla } = require('../controllers/authController');
 const router = express.Router();
 const apiKeyAuth = require('../middleware/apiKey');
 const { verificarToken } = require('../middleware/auth');
@@ -69,5 +70,7 @@ router.get('/autoevaluaciones', apiKeyAuth, async (req, res, next) => {
     next(e);
   }
 });
+
+router.post('/feedback', reportarFalla);
 
 module.exports = router;

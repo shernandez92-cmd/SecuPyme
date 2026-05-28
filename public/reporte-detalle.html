@@ -64,7 +64,7 @@
     <input type="text" id="ipShodan" placeholder="IP a consultar..." style="flex: 1;">
     <button class="btn-primary" style="width: auto; padding: 10px 20px;" onclick="consultarShodan()">CONSULTAR</button>
   </div>
-  <div id="resultadoShodan" style="margin-top: 12px; display: none; padding: 16px; background: rgba(5,5,8,0.9); border: 1px solid var(--borde); border-radius: 2px;">
+  <div id="resultadoShodan" style="margin-top: 12px; display: none; padding: 16px; background: var(--morado-oscuro); border: 1px solid var(--borde); border-radius: 2px;">
     <div id="shodanData" style="font-family: 'Share Tech Mono', monospace; font-size: 12px; color: var(--texto-suave); line-height: 2;"></div>
   </div>
 </div>o
@@ -74,7 +74,7 @@
     <input type="text" id="hashVT" placeholder="Hash MD5/SHA256 del archivo..." style="flex: 1;">
     <button class="btn-primary" style="width: auto; padding: 10px 20px;" onclick="consultarVirusTotal()">CONSULTAR</button>
   </div>
-  <div id="resultadoVT" style="margin-top: 12px; display: none; padding: 16px; background: rgba(5,5,8,0.9); border: 1px solid var(--borde); border-radius: 2px;">
+  <div id="resultadoVT" style="margin-top: 12px; display: none; padding: 16px; background: var(--morado-oscuro); border: 1px solid var(--borde); border-radius: 2px;">
     <div id="vtData" style="font-family: 'Share Tech Mono', monospace; font-size: 12px; color: var(--texto-suave); line-height: 2;"></div>
   </div>
 </div>
@@ -116,7 +116,7 @@
 
       <div class="form-card" style="margin-top: 24px;">
         <h3>CHAT</h3>
-        <div id="mensajes" style="min-height: 200px; max-height: 300px; overflow-y: auto; margin-bottom: 16px; padding: 16px; background: rgba(5,5,8,0.9); border: 1px solid var(--borde); border-radius: 2px;"></div>
+        <div id="mensajes" style="min-height: 200px; max-height: 300px; overflow-y: auto; margin-bottom: 16px; padding: 16px; background: var(--morado-oscuro); border: 1px solid var(--borde); border-radius: 2px;"></div>
         <div style="display: flex; gap: 12px;">
           <input type="text" id="textoMensaje" placeholder="Escribe un mensaje..." style="flex: 1;">
           <button class="btn-primary" style="width: auto; padding: 12px 24px;" onclick="enviarMensaje()">ENVIAR</button>
@@ -259,7 +259,7 @@ async function archivarReporte() {
         contenedor.innerHTML += `
           <div style="margin-bottom: 12px; text-align: ${esYo ? 'right' : 'left'};">
             <span style="font-size: 10px; color: var(--texto-suave); letter-spacing: 1px;">${m.usuario.nombre} · ${fecha}</span>
-            <div style="display: inline-block; background: ${esYo ? 'rgba(124,58,237,0.2)' : 'rgba(255,255,255,0.05)'}; border: 1px solid ${esYo ? 'var(--morado-claro)' : 'var(--borde)'}; padding: 8px 14px; border-radius: 2px; margin-top: 4px; font-size: 13px; max-width: 80%;">
+            <div style="display: inline-block; background: ${esYo ? 'rgba(124,58,237,0.2)' : 'rgba(124,58,237,0.05)'}; border: 1px solid ${esYo ? 'var(--morado-claro)' : 'var(--borde)'}; padding: 8px 14px; border-radius: 2px; margin-top: 4px; font-size: 13px; max-width: 80%;">
               ${m.texto}
             </div>
           </div>
@@ -289,5 +289,6 @@ async function archivarReporte() {
     cargarMensajes();
     setInterval(cargarMensajes, 5000);
   </script>
+  <script src="/feedback.js"></script>
 </body>
 </html>
