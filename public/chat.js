@@ -2,6 +2,7 @@ let mensajesPendientes = [];
 let conversationIdActual = null;
 let empresaSeleccionada = null;
 const _mensajesRendered = new Set();
+let _enviando = false;
 
 function inicializarChat() {
   if (document.getElementById('chat-flotante')) return;
@@ -200,11 +201,13 @@ async function cargarChatMensajes() {
 }
 
 async function enviarChatMensaje() {
+  if (_enviando) return;
+  _enviando = true;
   const token = localStorage.getItem('token');
   const rol = localStorage.getItem('rol');
   const texto = document.getElementById('chat-texto').value.trim();
   const reporteRelacionado = document.getElementById('chat-reporte').value;
-  if (!texto) return;
+  if (!texto) { _enviando = false; return; }
 
   if (rol === 'admin' && !empresaSeleccionada) {
     mostrarToast('Selecciona una empresa primero', 'warning');
@@ -237,6 +240,7 @@ async function enviarChatMensaje() {
   });
 
   document.getElementById('chat-texto').value = '';
+  _enviando = false;
 }
 
 function recibirMensajeSocket(mensaje) {
