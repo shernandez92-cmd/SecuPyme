@@ -245,19 +245,17 @@ function recibirMensajeSocket(mensaje) {
   const myId = JSON.parse(atob(token.split('.')[1])).id;
   const esYo = mensaje.usuario._id === myId || mensaje.usuario.id === myId;
 
-  if (!esYo) {
-    mensajesNoLeidos++;
-    actualizarBadge();
-    reproducirSonido();
-    if (typeof Notificaciones !== 'undefined') {
-      Notificaciones.agregar('chat', 'Nuevo mensaje de ' + mensaje.usuario.nombre, mensaje.texto.substring(0, 60));
-    }
-  }
-
   if (esYo) return;
   const msgId = mensaje._id?.toString();
   if (_mensajesRendered.has(msgId)) return;
   _mensajesRendered.add(msgId);
+
+  mensajesNoLeidos++;
+  actualizarBadge();
+  reproducirSonido();
+  if (typeof Notificaciones !== 'undefined') {
+    Notificaciones.agregar('chat', 'Nuevo mensaje de ' + mensaje.usuario.nombre, mensaje.texto.substring(0, 60));
+  }
 
   const contenedor = document.getElementById('chat-mensajes');
   if (contenedor && chatAbierto) {
