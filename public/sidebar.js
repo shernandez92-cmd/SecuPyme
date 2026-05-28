@@ -51,6 +51,9 @@ function cargarSidebar(paginaActiva) {
         </button>
       </div>
       <div style="padding: 12px 24px; border-top: 1px solid var(--borde); display: flex; align-items: center; gap: 8px;">
+        <button onclick="if(typeof abrirFeedbackModal==='function')abrirFeedbackModal()" style="background:none;border:none;color:var(--texto-suave);cursor:pointer;padding:2px;display:flex;align-items:center;" title="Reportar problema">
+          <svg width="14" height="14" viewBox="0 0 18 18" fill="none"><circle cx="9" cy="9" r="7.5" stroke="currentColor" stroke-width="1.2"/><path d="M9 5.5v5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><circle cx="9" cy="13" r="0.8" fill="currentColor"/></svg>
+        </button>
         <span style="font-size: 10px; color: var(--texto-suave); font-family: 'Share Tech Mono', monospace;">MODO</span>
         <button onclick="toggleModo()" style="background: var(--morado-claro); border: none; border-radius: 12px; width: 40px; height: 20px; cursor: pointer; position: relative;">
           <span id="toggleIndicador" style="position: absolute; top: 2px; left: ${localStorage.getItem('modo') === 'light' ? '22px' : '2px'}; width: 16px; height: 16px; background: white; border-radius: 50%; transition: left 0.3s;"></span>

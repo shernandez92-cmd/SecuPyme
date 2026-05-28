@@ -1,6 +1,8 @@
 (function() {
   function crearFeedback() {
     if (document.getElementById('feedback-btn')) return;
+    // Si hay sidebar, no mostrar el botón flotante
+    if (document.getElementById('sidebar-container')) return;
 
     // Botón flotante
     const btn = document.createElement('button');
@@ -96,3 +98,7 @@
     crearFeedback();
   }
 })();
+
+window.abrirFeedbackModal = function() {
+  abrirModal();
+};
