@@ -211,7 +211,10 @@ io.on('connection', async (socket) => {
 
   socket.on('joinConversacion', (convId) => {
     if (typeof convId === 'string' && convId.match(/^[a-f0-9]{24}$/i)) {
-      socket.join(`conv:${convId}`);
+      const roomName = `conv:${convId}`;
+      if (!socket.rooms.has(roomName)) {
+        socket.join(roomName);
+      }
     }
   });
 
