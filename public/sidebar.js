@@ -208,7 +208,13 @@ function inicializarSocket() {
     const payload = JSON.parse(atob(token.split('.')[1]));
     empresaIdActual = payload.id;
 
-    socket = io({ auth: { token } });
+    socket = io({
+      auth: { token },
+      reconnectionDelay: 2000,
+      reconnectionDelayMax: 10000,
+      reconnectionAttempts: 5,
+      transports: ['websocket', 'polling']
+    });
 
     socket.on('connect', () => {
       console.log('Socket conectado:', socket.id);
