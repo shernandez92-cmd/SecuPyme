@@ -22,7 +22,10 @@ const Conversation = require('./models/Conversation');
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
-  cors: { origin: process.env.CLIENT_URL || '*' }
+  cors: { origin: process.env.CLIENT_URL || '*' },
+  pingTimeout: 60000,
+  pingInterval: 25000,
+  transports: ['websocket', 'polling']
 });
 
 app.use(helmet({ contentSecurityPolicy: false }));
