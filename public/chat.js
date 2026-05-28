@@ -255,8 +255,9 @@ function recibirMensajeSocket(mensaje) {
   }
 
   if (esYo) return;
-  if (_mensajesRendered.has(mensaje._id)) return;
-  _mensajesRendered.add(mensaje._id);
+  const msgId = mensaje._id?.toString();
+  if (_mensajesRendered.has(msgId)) return;
+  _mensajesRendered.add(msgId);
 
   const contenedor = document.getElementById('chat-mensajes');
   if (contenedor && chatAbierto) {

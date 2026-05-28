@@ -14,10 +14,10 @@ const enviarMensaje = async (req, res, next) => {
 
     if (rol === "admin") {
       if (paraId) {
-        conversation = await Conversation.findOne({ adminId: userId, empresaId: paraId });
+        conversation = await Conversation.findOne({ empresaId: paraId });
         empresaId = paraId;
       } else {
-        conversation = await Conversation.findOne({ adminId: userId }).sort({ ultimaActividad: -1 });
+        conversation = await Conversation.findOne({ empresaId: { $exists: true, $ne: null } }).sort({ ultimaActividad: -1 });
         if (conversation) empresaId = conversation.empresaId;
       }
     } else {
